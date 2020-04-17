@@ -38,6 +38,8 @@ int main(int argc, char** argv)
             break;
 
         // Main Loop.
+        d3d11.FrameStart(window);
+        d3d11.FrameEnd();
     }
 
     SDL_DestroyWindow(window);

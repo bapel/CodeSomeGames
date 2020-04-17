@@ -4,10 +4,9 @@
 #pragma comment(lib, "d3d11.lib")
 
 #include <SDL.h>
-#include <SDL_assert.h>
 #include <SDL_syswm.h>
 
-bool Direct3D11::Init(SDL_Window* window)
+void Direct3D11::Init(SDL_Window* window)
 {
     SDL_assert(nullptr != window);
 
@@ -49,7 +48,7 @@ bool Direct3D11::Init(SDL_Window* window)
     deviceCreateFlags = D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-    SDL_assert(S_OK == D3D11CreateDeviceAndSwapChain(
+    D3D_OK(D3D11CreateDeviceAndSwapChain(
         0, // Default adapter
         D3D_DRIVER_TYPE_HARDWARE,
         0,
@@ -58,10 +57,40 @@ bool Direct3D11::Init(SDL_Window* window)
         numFeatureLevels,
         D3D11_SDK_VERSION,
         &swapChainDesc,
-        _swapchain.GetAddressOf(),
+        _swapChain.GetAddressOf(),
         _device.GetAddressOf(),
         &_featureLevel,
         _context.GetAddressOf()));
 
-    return true;
+    ComPtr<ID3D11Texture2D> backBuffer;
+    D3D_OK(_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
+    D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
+}
+
+void Direct3D11::FrameStart(SDL_Window* window)
+{
+    SDL_assert(nullptr != window);
+
+    int windowWidth, windowHeight;
+    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+
+    FLOAT clearColor[] = { 1.0f, 0.75f, 0.5f, 1.0f };
+    _context->ClearRenderTargetView(_backBufferView.Get(), clearColor);
+    // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
+
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = windowWidth;
+    viewport.Height = windowHeight;
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
+    _context->RSSetViewports(1, &viewport);
+    _context->OMSetRenderTargets(1, _backBufferView.GetAddressOf(), nullptr);
+}
+
+void Direct3D11::FrameEnd()
+{
+    D3D_OK(_swapChain->Present(0, 0));
 }
