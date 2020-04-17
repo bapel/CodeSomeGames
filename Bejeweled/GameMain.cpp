@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include <SDL_assert.h>
 
+#include "Direct3D11.hpp"
+
 int main(int argc, char** argv)
 {
     SDL_assert(0 == SDL_Init(0));
@@ -13,6 +15,10 @@ int main(int argc, char** argv)
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 
     SDL_assert(nullptr != window);
+
+    Direct3D11 d3d11;
+
+    d3d11.Init(window);
 
     bool quit = false;
     SDL_Event event = {};
