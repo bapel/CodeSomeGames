@@ -27,6 +27,7 @@ public:
     Direct3D11() : _featureLevel(D3D_FEATURE_LEVEL_1_0_CORE) {}
 
     void Init(SDL_Window* window);
+    void OnWindowResized(int w, int h);
     void FrameStart(SDL_Window* window);
     void FrameEnd();
 

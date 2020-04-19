@@ -73,6 +73,19 @@ void Direct3D11::Init(SDL_Window* window)
     D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
 }
 
+void Direct3D11::OnWindowResized(int w, int h)
+{
+    _context->ClearState();
+    _backBufferView->Release();
+    // _depthStencilView->Release();
+
+    D3D_OK(_swapChain->ResizeBuffers(2, w, h, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+
+    ComPtr<ID3D11Texture2D> backBuffer;
+    D3D_OK(_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
+    D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
+}
+
 void Direct3D11::FrameStart(SDL_Window* window)
 {
     SDL_assert(nullptr != window);

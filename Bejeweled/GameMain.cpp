@@ -80,6 +80,16 @@ int main(int argc, char** argv)
                 quit = true;
                 break;
             }
+            else if (SDL_WINDOWEVENT == event.type)
+            {
+                switch (event.window.event) 
+                {
+                case SDL_WINDOWEVENT_RESIZED:
+                    auto w = event.window.data1;
+                    auto h = event.window.data2;
+                    d3d11.OnWindowResized(w, h);
+                }
+            }
         }
 
         if (quit)
@@ -88,17 +98,17 @@ int main(int argc, char** argv)
         // Main Loop.
         d3d11.FrameStart(window);
 
-        const auto context = d3d11.GetDeviceContext();
-        context->VSSetShader(vertexShader.Get(), nullptr, 0);
-        context->PSSetShader(pixelShader.Get(), nullptr, 0);
-        context->IASetInputLayout(inputLayout.Get());
-        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        const auto d3dContext = d3d11.GetDeviceContext();
+        d3dContext->VSSetShader(vertexShader.Get(), nullptr, 0);
+        d3dContext->PSSetShader(pixelShader.Get(), nullptr, 0);
+        d3dContext->IASetInputLayout(inputLayout.Get());
+        d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         UINT strides[] = { sizeof(TriangleVertex) };
         UINT offsets[] = { 0 };
-        context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), strides, offsets);
+        d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), strides, offsets);
 
-        context->Draw(3, 0);
+        d3dContext->Draw(3, 0);
         
         d3d11.FrameEnd();
     }
