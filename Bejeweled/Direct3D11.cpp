@@ -5,6 +5,12 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
+#include <SDL_rwops.h>
+
+#include <vector>
+#include <stdio.h>
+
+size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
 
 void Direct3D11::Init(SDL_Window* window)
 {
@@ -93,4 +99,43 @@ void Direct3D11::FrameStart(SDL_Window* window)
 void Direct3D11::FrameEnd()
 {
     D3D_OK(_swapChain->Present(0, 0));
+}
+
+ComPtr<ID3D11VertexShader> Direct3D11::LoadVertexShader(const std::string& path)
+{
+    std::vector<char> buffer;
+    SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
+
+    ID3D11VertexShader* shader = nullptr;
+    D3D_OK(_device->CreateVertexShader(buffer.data(), buffer.size(), nullptr, &shader));
+    return shader;
+}
+
+ComPtr<ID3D11PixelShader> Direct3D11::LoadPixelShader(const std::string& path)
+{
+    std::vector<char> buffer;
+    SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
+
+    ID3D11PixelShader* shader = nullptr;
+    D3D_OK(_device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
+    return shader;
+}
+
+size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer)
+{
+    SDL_RWops* file = SDL_RWFromFile(path, "rb");
+    SDL_assert(nullptr != file);
+
+    if (file != nullptr)
+    {
+        long size = SDL_RWseek(file, 0, RW_SEEK_END);
+        outBuffer.resize(size);
+        SDL_RWseek(file, 0, RW_SEEK_SET);
+        size_t readSize = SDL_RWread(file, outBuffer.data(), sizeof(char), size);
+        SDL_RWclose(file);
+
+        return readSize;
+    }
+
+    return 0;
 }
