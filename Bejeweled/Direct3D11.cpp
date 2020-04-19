@@ -100,7 +100,7 @@ void Direct3D11::FrameStart(SDL_Window* window)
             OnWindowResized(w, h);
     }
 
-    FLOAT clearColor[] = { 1.0f, 0.75f, 0.5f, 1.0f };
+    FLOAT clearColor[] = { 0.5f, 0.75f, 1.0f, 1.0f };
     _context->ClearRenderTargetView(_backBufferView.Get(), clearColor);
     // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
 

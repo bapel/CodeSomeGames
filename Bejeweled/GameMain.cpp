@@ -10,6 +10,19 @@ using namespace DirectX;
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <random>
+#include <ctime>
+
+struct QuadObject
+{
+    float x, y, z, angle;
+    float r, g, b, a;
+};
+
+struct TriangleVertex
+{
+    float x, y, z, w;
+};
 
 struct TransformsBufferData
 {
@@ -35,12 +48,37 @@ int main(int argc, char** argv)
 
     SDL_assert(nullptr != window);
 
+    const auto kNumQuads = 4096;
+    const auto kQuadSize = 1.0f / 50.0f;
+
+    std::vector<QuadObject> quads;
+    quads.reserve(kNumQuads);
+    
+    std::random_device randomDevice;
+    std::mt19937 generator(randomDevice());
+    std::uniform_real_distribution<> positionDistribution(-0.5f, 0.5f);
+    std::uniform_real_distribution<> colorDistribution(0.5f, 1.0f);
+
+    for (auto i = 0; i < kNumQuads; i++)
+    {
+        quads.emplace_back(QuadObject {
+            (float)positionDistribution(generator),
+            (float)positionDistribution(generator),
+            0.0f,
+            (float)positionDistribution(generator) * XM_PI,
+            (float)colorDistribution(generator),
+            (float)colorDistribution(generator),
+            (float)colorDistribution(generator)
+        });
+    }
+
     Direct3D11 d3d11;
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
     ComPtr<ID3D11InputLayout> inputLayout;
     ComPtr<ID3D11Buffer> vertexBuffer;
-    ComPtr<ID3D11Buffer> constantsBuffer;
+    ComPtr<ID3D11Buffer> instanceBuffer;
+    ComPtr<ID3D11Buffer> transformsBuffer;
 
     d3d11.Init(window);
 
@@ -51,24 +89,23 @@ int main(int argc, char** argv)
     const auto d3dDevice = d3d11.GetDevice();
 
     D3D11_INPUT_ELEMENT_DESC elementDescs[] = {
-        { "POS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "POSITION",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,                 D3D11_INPUT_PER_VERTEX_DATA,   0 },
+        { "QUAD_DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,                 D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "COLOR",     0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 4 * sizeof(float), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     };
 
-    D3D_OK(d3dDevice->CreateInputLayout(elementDescs, 1, vsByteCode.data(), vsByteCode.size(), inputLayout.GetAddressOf()));
-    
-    struct TriangleVertex
-    {
-        float x, y, z, w;
-    };
+    const auto numElements = sizeof(elementDescs) / sizeof(D3D11_INPUT_ELEMENT_DESC);
+
+    D3D_OK(d3dDevice->CreateInputLayout(elementDescs, numElements, vsByteCode.data(), vsByteCode.size(), inputLayout.GetAddressOf()));
 
     TriangleVertex vertices[] = 
     {
-        { -0.25f, -0.25f, 0.0f, 1.0f },
-        { -0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f, -0.25f, 0.0f, 1.0f },
-        { -0.25f, -0.25f, 0.0f, 1.0f }
+        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f },
+        { -0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
+        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
+        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
+        {  0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f },
+        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f }
     };
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};
@@ -81,13 +118,24 @@ int main(int argc, char** argv)
 
     D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
+    D3D11_BUFFER_DESC instanceBufferDesc = {};
+    instanceBufferDesc.ByteWidth = sizeof(QuadObject) * quads.size();
+    instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    initialData = {};
+    initialData.pSysMem = quads.data();
+
+    D3D_OK(d3dDevice->CreateBuffer(&instanceBufferDesc, &initialData, instanceBuffer.GetAddressOf()));
+
     D3D11_BUFFER_DESC constantsBufferDesc = {};
     constantsBufferDesc.ByteWidth = sizeof(TransformsBufferData);
     constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, constantsBuffer.GetAddressOf()));
+    D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
 
     bool quit = false;
     SDL_Event event = {};
@@ -124,7 +172,10 @@ int main(int argc, char** argv)
         auto elapsedMS = currentMS - lastMS;
         lastMS = currentMS;
 
-        rotationAngle += 0.1f * ((float)elapsedMS / 1000.0f);
+        for (auto i = 0; i < kNumQuads; i++)
+        {
+            quads[i].angle += ((float)elapsedMS / 1000.0f);
+        }
 
         int w, h;
         float viewWidth, viewHeight;
@@ -151,24 +202,33 @@ int main(int argc, char** argv)
         d3d11.FrameStart(window);
 
         const auto d3dContext = d3d11.GetDeviceContext();
+
+        D3D11_MAPPED_SUBRESOURCE mappedInstanceBuffer;
+        d3dContext->Map(instanceBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);
+        memcpy(mappedInstanceBuffer.pData, quads.data(), quads.size() * sizeof(QuadObject));
+        d3dContext->Unmap(instanceBuffer.Get(), 0);
+
         d3dContext->VSSetShader(vertexShader.Get(), nullptr, 0);
         d3dContext->PSSetShader(pixelShader.Get(), nullptr, 0);
         d3dContext->IASetInputLayout(inputLayout.Get());
         d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        UINT strides[] = { sizeof(TriangleVertex) };
-        UINT offsets[] = { 0 };
-        d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), strides, offsets);
+        ID3D11Buffer* buffers[] = { vertexBuffer.Get(), instanceBuffer.Get() };
+        UINT strides[] = { sizeof(TriangleVertex), sizeof(QuadObject) };
+        UINT offsets[] = { 0, 0 };
+        const auto numBuffers = sizeof(strides) / sizeof(UINT);
+        d3dContext->IASetVertexBuffers(0, numBuffers, buffers, strides, offsets);
 
         D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
-        d3dContext->Map(constantsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
+        d3dContext->Map(transformsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
         memcpy(mappedConstantsBuffer.pData, &transformsBufferData, sizeof(transformsBufferData));
-        d3dContext->Unmap(constantsBuffer.Get(), 0);
+        d3dContext->Unmap(transformsBuffer.Get(), 0);
 
-        ID3D11Buffer* constantsBuffers[] = { constantsBuffer.Get() };
+        ID3D11Buffer* constantsBuffers[] = { transformsBuffer.Get() };
         d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
 
-        d3dContext->Draw(6, 0);
+        //d3dContext->Draw(6, 0);
+        d3dContext->DrawInstanced(6, quads.size(), 0, 0);
         
         d3d11.FrameEnd();
     }

@@ -38,4 +38,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VsOut.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>
