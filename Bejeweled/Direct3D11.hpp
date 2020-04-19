@@ -3,6 +3,7 @@
 #include <wrl\client.h>
 #include <SDL_assert.h>
 #include <string>
+#include <vector>
 
 #define D3D_OK(__call__)\
     SDL_assert(S_OK == (__call__))
@@ -33,6 +34,6 @@ public:
     ID3D11Device* GetDevice() const { return _device.Get(); }
     ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
 
-    ComPtr<ID3D11VertexShader> LoadVertexShader(const std::string& path);
+    ComPtr<ID3D11VertexShader> LoadVertexShader(const std::string& path, std::vector<char>& outByteCode);
     ComPtr<ID3D11PixelShader> LoadPixelShader(const std::string& path);
 };

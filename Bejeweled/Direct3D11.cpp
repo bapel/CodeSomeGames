@@ -101,9 +101,9 @@ void Direct3D11::FrameEnd()
     D3D_OK(_swapChain->Present(0, 0));
 }
 
-ComPtr<ID3D11VertexShader> Direct3D11::LoadVertexShader(const std::string& path)
+ComPtr<ID3D11VertexShader> Direct3D11::LoadVertexShader(const std::string& path, std::vector<char>& outByteCode)
 {
-    std::vector<char> buffer;
+    std::vector<char>& buffer = outByteCode;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
 
     ID3D11VertexShader* shader = nullptr;

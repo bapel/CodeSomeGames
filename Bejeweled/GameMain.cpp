@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 int main(int argc, char** argv)
 {
@@ -26,11 +27,23 @@ int main(int argc, char** argv)
     SDL_assert(nullptr != window);
 
     Direct3D11 d3d11;
+    ComPtr<ID3D11VertexShader> vertexShader;
+    ComPtr<ID3D11PixelShader> pixelShader;
+    ComPtr<ID3D11InputLayout> inputLayout;
 
     d3d11.Init(window);
 
-    auto vs = d3d11.LoadVertexShader(kBasePath + "TriangleVertex.cso");
-    auto ps = d3d11.LoadPixelShader(kBasePath + "TrianglePixel.cso");
+    std::vector<char> vsByteCode;
+    vertexShader = d3d11.LoadVertexShader(kBasePath + "TriangleVertex.cso", vsByteCode);
+    pixelShader = d3d11.LoadPixelShader(kBasePath + "TrianglePixel.cso");
+
+    const auto d3dDevice = d3d11.GetDevice();
+
+    D3D11_INPUT_ELEMENT_DESC elementDescs[] = {
+        { "POS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    D3D_OK(d3dDevice->CreateInputLayout(elementDescs, 1, vsByteCode.data(), vsByteCode.size(), inputLayout.GetAddressOf()));
 
     bool quit = false;
     SDL_Event event = {};
@@ -51,6 +64,11 @@ int main(int argc, char** argv)
 
         // Main Loop.
         d3d11.FrameStart(window);
+
+        const auto context = d3d11.GetDeviceContext();
+        context->VSSetShader(vertexShader.Get(), nullptr, 0);
+        context->PSSetShader(pixelShader.Get(), nullptr, 0);
+        
         d3d11.FrameEnd();
     }
 
