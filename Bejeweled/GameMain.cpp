@@ -30,6 +30,7 @@ int main(int argc, char** argv)
     ComPtr<ID3D11VertexShader> vertexShader;
     ComPtr<ID3D11PixelShader> pixelShader;
     ComPtr<ID3D11InputLayout> inputLayout;
+    ComPtr<ID3D11Buffer> vertexBuffer;
 
     d3d11.Init(window);
 
@@ -44,6 +45,28 @@ int main(int argc, char** argv)
     };
 
     D3D_OK(d3dDevice->CreateInputLayout(elementDescs, 1, vsByteCode.data(), vsByteCode.size(), inputLayout.GetAddressOf()));
+    
+    struct TriangleVertex
+    {
+        float x, y, z, w;
+    };
+
+    TriangleVertex vertices[] = 
+    {
+        {  0.0f,  0.5f, 0.0f, 1.0f },
+        {  0.5f, -0.5f, 0.0f, 1.0f },
+        { -0.5f, -0.5f, 0.0f, 1.0f }
+    };
+
+    D3D11_BUFFER_DESC vertexBufferDesc = {};
+    vertexBufferDesc.ByteWidth = sizeof(vertices);
+    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA initialData = {};
+    initialData.pSysMem = vertices;
+
+    D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
     bool quit = false;
     SDL_Event event = {};
@@ -68,6 +91,14 @@ int main(int argc, char** argv)
         const auto context = d3d11.GetDeviceContext();
         context->VSSetShader(vertexShader.Get(), nullptr, 0);
         context->PSSetShader(pixelShader.Get(), nullptr, 0);
+        context->IASetInputLayout(inputLayout.Get());
+        context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        UINT strides[] = { sizeof(TriangleVertex) };
+        UINT offsets[] = { 0 };
+        context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), strides, offsets);
+
+        context->Draw(3, 0);
         
         d3d11.FrameEnd();
     }
