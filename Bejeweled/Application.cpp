@@ -5,16 +5,14 @@
 
 #include "Direct3D11.hpp"
 #include <DirectXMath.h>
-using namespace DirectX;
 
 #include <stdio.h>
 #include <string>
 #include <vector>
 
-struct TransformsBufferData
+struct TransformsBuffer
 {
-    XMMATRIX model;
-    XMMATRIX viewProj;
+    DirectXMath::XMMatr
 };
 
 int main(int argc, char** argv)
@@ -63,12 +61,12 @@ int main(int argc, char** argv)
 
     TriangleVertex vertices[] = 
     {
-        { -0.25f, -0.25f, 0.0f, 1.0f },
-        { -0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f,  0.25f, 0.0f, 1.0f },
-        {  0.25f, -0.25f, 0.0f, 1.0f },
-        { -0.25f, -0.25f, 0.0f, 1.0f }
+        { -0.5f, -0.5f, 0.0f, 1.0f },
+        { -0.5f,  0.5f, 0.0f, 1.0f },
+        {  0.5f,  0.5f, 0.0f, 1.0f },
+        {  0.5f,  0.5f, 0.0f, 1.0f },
+        {  0.5f, -0.5f, 0.0f, 1.0f },
+        { -0.5f, -0.5f, 0.0f, 1.0f }
     };
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};
@@ -82,7 +80,7 @@ int main(int argc, char** argv)
     D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
     D3D11_BUFFER_DESC constantsBufferDesc = {};
-    constantsBufferDesc.ByteWidth = sizeof(TransformsBufferData);
+    constantsBufferDesc.ByteWidth = sizeof(float) * 32;
     constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -126,27 +124,8 @@ int main(int argc, char** argv)
 
         rotationAngle += 0.1f * ((float)elapsedMS / 1000.0f);
 
-        int w, h;
-        float viewWidth, viewHeight;
-
-        SDL_GetWindowSize(window, &w, &h);
-        
-        if (w <= h)
-        {
-            viewWidth = 1.0f;
-            viewHeight = (float)h / (float)w;
-        }
-        else
-        {
-            viewWidth = (float)w / (float)h;
-            viewHeight = 1.0f;
-        }
-
-        TransformsBufferData transformsBufferData = 
-        {
-            DirectX::XMMatrixRotationZ(rotationAngle),
-            DirectX::XMMatrixOrthographicLH(viewWidth, viewHeight, 0.0f, 1.0f)
-        };
+        DirectX::XMMATRIX viewproj = DirectX::XMMatrixOrthographicLH(1.0f, 1.0f, 0.0f, 1.0f);
+        DirectX::XMMATRIX transform = DirectX::XMMatrixRotationZ(rotationAngle);
 
         d3d11.FrameStart(window);
 
@@ -162,7 +141,7 @@ int main(int argc, char** argv)
 
         D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
         d3dContext->Map(constantsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
-        memcpy(mappedConstantsBuffer.pData, &transformsBufferData, sizeof(transformsBufferData));
+        memcpy(mappedConstantsBuffer.pData, &transform, sizeof(transform));
         d3dContext->Unmap(constantsBuffer.Get(), 0);
 
         ID3D11Buffer* constantsBuffers[] = { constantsBuffer.Get() };

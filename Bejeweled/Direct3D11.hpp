@@ -18,14 +18,15 @@ class Direct3D11
 private:
     ComPtr<IDXGISwapChain> _swapChain;
     ComPtr<ID3D11Device> _device;
-    D3D_FEATURE_LEVEL _featureLevel;
+    D3D_FEATURE_LEVEL _featureLevel = D3D_FEATURE_LEVEL_1_0_CORE;
     ComPtr<ID3D11DeviceContext> _context;
     ComPtr<ID3D11RenderTargetView> _backBufferView;
     ComPtr<ID3D11DepthStencilView> _depthStencilView;
 
-public:
-    Direct3D11() : _featureLevel(D3D_FEATURE_LEVEL_1_0_CORE) {}
+    int _windowWidth = 0;
+    int _windowHeight = 0;
 
+public:
     void Init(SDL_Window* window);
     void OnWindowResized(int w, int h);
     void FrameStart(SDL_Window* window);

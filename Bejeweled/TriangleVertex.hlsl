@@ -1,4 +1,8 @@
-uniform float4x4 transform;
+cbuffer TransformsBuffer : register(b0)
+{
+    matrix model;
+    matrix viewProj;
+}
 
 /* vertex attributes go here to input to the vertex shader */
 struct vs_in {
@@ -12,6 +16,7 @@ struct vs_out {
 
 vs_out main(vs_in input) {
     vs_out output = (vs_out)0; // zero the memory first
-    output.position_clip = mul(transform, float4(input.position_local, 1.0));
+    matrix modelViewProj = mul(model, viewProj);
+    output.position_clip = mul(float4(input.position_local, 1.0), modelViewProj);
     return output;
 }

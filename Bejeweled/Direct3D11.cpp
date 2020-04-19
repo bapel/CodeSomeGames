@@ -19,11 +19,9 @@ void Direct3D11::Init(SDL_Window* window)
     SDL_SysWMinfo info = {};
     SDL_GetVersion(&info.version);
     SDL_assert(SDL_GetWindowWMInfo(window, &info));
+    SDL_GetWindowSize(window, &_windowWidth, &_windowHeight);
 
     HWND hwnd = info.info.win.window;
-
-    int windowWidth, windowHeight;
-    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
     D3D_FEATURE_LEVEL featureLevels[] = {
         D3D_FEATURE_LEVEL_11_0,
@@ -37,8 +35,8 @@ void Direct3D11::Init(SDL_Window* window)
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 
     swapChainDesc.BufferCount = 2;
-    swapChainDesc.BufferDesc.Width = windowWidth;
-    swapChainDesc.BufferDesc.Height = windowHeight;
+    swapChainDesc.BufferDesc.Width = _windowWidth;
+    swapChainDesc.BufferDesc.Height = _windowHeight;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -84,22 +82,31 @@ void Direct3D11::OnWindowResized(int w, int h)
     ComPtr<ID3D11Texture2D> backBuffer;
     D3D_OK(_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
     D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
+
+    _windowWidth = w;
+    _windowHeight = h;
 }
 
 void Direct3D11::FrameStart(SDL_Window* window)
 {
     SDL_assert(nullptr != window);
 
-    int windowWidth, windowHeight;
-    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+    _context->ClearState();
+
+    {
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        if (w != _windowWidth || h != _windowHeight)
+            OnWindowResized(w, h);
+    }
 
     FLOAT clearColor[] = { 1.0f, 0.75f, 0.5f, 1.0f };
     _context->ClearRenderTargetView(_backBufferView.Get(), clearColor);
     // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
 
     D3D11_VIEWPORT viewport = {};
-    viewport.Width = windowWidth;
-    viewport.Height = windowHeight;
+    viewport.Width = _windowWidth;
+    viewport.Height = _windowHeight;
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
     viewport.MinDepth = 0.0f;

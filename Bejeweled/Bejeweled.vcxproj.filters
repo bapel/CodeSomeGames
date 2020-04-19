@@ -18,10 +18,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameMain.cpp">
+    <ClCompile Include="Direct3D11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D11.cpp">
+    <ClCompile Include="GameMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
