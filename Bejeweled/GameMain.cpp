@@ -1,8 +1,10 @@
 #include <SDL.h>
 #include <SDL_assert.h>
 #include <SDL_log.h>
+#include <SDL_timer.h>
 
 #include "Direct3D11.hpp"
+#include <DirectXMath.h>
 
 #include <stdio.h>
 #include <string>
@@ -31,6 +33,7 @@ int main(int argc, char** argv)
     ComPtr<ID3D11PixelShader> pixelShader;
     ComPtr<ID3D11InputLayout> inputLayout;
     ComPtr<ID3D11Buffer> vertexBuffer;
+    ComPtr<ID3D11Buffer> constantsBuffer;
 
     d3d11.Init(window);
 
@@ -53,7 +56,10 @@ int main(int argc, char** argv)
 
     TriangleVertex vertices[] = 
     {
-        {  0.0f,  0.5f, 0.0f, 1.0f },
+        { -0.5f, -0.5f, 0.0f, 1.0f },
+        { -0.5f,  0.5f, 0.0f, 1.0f },
+        {  0.5f,  0.5f, 0.0f, 1.0f },
+        {  0.5f,  0.5f, 0.0f, 1.0f },
         {  0.5f, -0.5f, 0.0f, 1.0f },
         { -0.5f, -0.5f, 0.0f, 1.0f }
     };
@@ -68,8 +74,18 @@ int main(int argc, char** argv)
 
     D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
+    D3D11_BUFFER_DESC constantsBufferDesc = {};
+    constantsBufferDesc.ByteWidth = sizeof(float) * 32;
+    constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, constantsBuffer.GetAddressOf()));
+
     bool quit = false;
     SDL_Event event = {};
+    uint32_t lastMS = 0;
+    float rotationAngle = 0.0f;
 
     while (!quit)
     {
@@ -96,6 +112,15 @@ int main(int argc, char** argv)
             break;
 
         // Main Loop.
+        auto currentMS = SDL_GetTicks();
+        auto elapsedMS = currentMS - lastMS;
+        lastMS = currentMS;
+
+        rotationAngle += 0.1f * ((float)elapsedMS / 1000.0f);
+
+        DirectX::XMMATRIX viewproj = DirectX::XMMatrixOrthographicLH(1.0f, 1.0f, 0.0f, 1.0f);
+        DirectX::XMMATRIX transform = DirectX::XMMatrixRotationZ(rotationAngle);
+
         d3d11.FrameStart(window);
 
         const auto d3dContext = d3d11.GetDeviceContext();
@@ -108,7 +133,15 @@ int main(int argc, char** argv)
         UINT offsets[] = { 0 };
         d3dContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), strides, offsets);
 
-        d3dContext->Draw(3, 0);
+        D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
+        d3dContext->Map(constantsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
+        memcpy(mappedConstantsBuffer.pData, &transform, sizeof(transform));
+        d3dContext->Unmap(constantsBuffer.Get(), 0);
+
+        ID3D11Buffer* constantsBuffers[] = { constantsBuffer.Get() };
+        d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
+
+        d3dContext->Draw(6, 0);
         
         d3d11.FrameEnd();
     }
