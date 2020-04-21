@@ -2,6 +2,7 @@
 #include <SDL_assert.h>
 #include <SDL_log.h>
 #include <SDL_timer.h>
+#include <SDL_image.h>
 
 #include "Direct3D11.hpp"
 #include <DirectXMath.h>
@@ -22,6 +23,7 @@ struct QuadObject
 struct TriangleVertex
 {
     float x, y, z, w;
+    float u, v;
 };
 
 struct TransformsBufferData
@@ -35,9 +37,13 @@ int main(int argc, char** argv)
     SDL_assert(argc >= 1);
     const std::string kExePath(argv[0]);
     size_t offset = kExePath.find_last_of("\\");
-    const std::string kBasePath = kExePath.substr(0, offset + 1);
+    const std::string kShadersBasePath = kExePath.substr(0, offset + 1);
 
     SDL_assert(0 == SDL_Init(0));
+    
+    auto flags = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+    SDL_assert(IMG_INIT_PNG == (flags & IMG_INIT_PNG));
+    SDL_assert(IMG_INIT_JPG == (flags & IMG_INIT_JPG));
 
     SDL_Window* window = SDL_CreateWindow(
         "Bejeweled Clone",
@@ -83,13 +89,14 @@ int main(int argc, char** argv)
     d3d11.Init(window);
 
     std::vector<char> vsByteCode;
-    vertexShader = d3d11.LoadVertexShader(kBasePath + "TriangleVertex.cso", vsByteCode);
-    pixelShader = d3d11.LoadPixelShader(kBasePath + "TrianglePixel.cso");
+    vertexShader = d3d11.LoadVertexShader(kShadersBasePath + "TriangleVertex.cso", vsByteCode);
+    pixelShader = d3d11.LoadPixelShader(kShadersBasePath + "TrianglePixel.cso");
 
     const auto d3dDevice = d3d11.GetDevice();
 
     D3D11_INPUT_ELEMENT_DESC elementDescs[] = {
         { "POSITION",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,                 D3D11_INPUT_PER_VERTEX_DATA,   0 },
+        { "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,       0, 4 * sizeof(float), D3D11_INPUT_PER_VERTEX_DATA,   0 },
         { "QUAD_DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,                 D3D11_INPUT_PER_INSTANCE_DATA, 1 },
         { "COLOR",     0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 4 * sizeof(float), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     };
@@ -100,16 +107,16 @@ int main(int argc, char** argv)
 
     TriangleVertex vertices[] = 
     {
-        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f },
-        { -0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
-        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
-        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f },
-        {  0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f },
-        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f }
+        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f, 0.0f, 0.0f },
+        { -0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f, 0.0f, 1.0f },
+        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f, 1.0f, 1.0f },
+        {  0.5f * kQuadSize,  0.5f * kQuadSize, 0.0f, 1.0f, 1.0f, 1.0f },
+        {  0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f, 1.0f, 0.0f },
+        { -0.5f * kQuadSize, -0.5f * kQuadSize, 0.0f, 1.0f, 0.0f, 0.0f }
     };
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};
-    vertexBufferDesc.ByteWidth = sizeof(vertices);
+    vertexBufferDesc.ByteWidth = (UINT)sizeof(vertices);
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
@@ -119,7 +126,7 @@ int main(int argc, char** argv)
     D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
     D3D11_BUFFER_DESC instanceBufferDesc = {};
-    instanceBufferDesc.ByteWidth = sizeof(QuadObject) * quads.size();
+    instanceBufferDesc.ByteWidth = (UINT)(sizeof(QuadObject) * quads.size());
     instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -130,12 +137,51 @@ int main(int argc, char** argv)
     D3D_OK(d3dDevice->CreateBuffer(&instanceBufferDesc, &initialData, instanceBuffer.GetAddressOf()));
 
     D3D11_BUFFER_DESC constantsBufferDesc = {};
-    constantsBufferDesc.ByteWidth = sizeof(TransformsBufferData);
+    constantsBufferDesc.ByteWidth = (UINT)sizeof(TransformsBufferData);
     constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
+
+    auto sprite = IMG_Load("Sprites//element_blue_diamond_glossy.png");
+    SDL_assert(nullptr != sprite);
+
+    D3D11_TEXTURE2D_DESC spriteDesc = {};
+    spriteDesc.Width = sprite->w;
+    spriteDesc.Height = sprite->h;
+    spriteDesc.MipLevels = 1;
+    spriteDesc.ArraySize = 1;
+    spriteDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    spriteDesc.SampleDesc.Count = 1;
+    spriteDesc.Usage = D3D11_USAGE_DEFAULT;
+    spriteDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    spriteDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    spriteDesc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA spriteInitData = {};
+    spriteInitData.pSysMem = sprite->pixels;
+    spriteInitData.SysMemPitch = sprite->pitch;
+    spriteInitData.SysMemSlicePitch = sprite->w * sprite->h * 4;
+
+    ComPtr<ID3D11Texture2D> spriteTexture;
+    ComPtr<ID3D11ShaderResourceView> spriteResourceView;
+
+    D3D_OK(d3dDevice->CreateTexture2D(&spriteDesc, &spriteInitData, &spriteTexture));
+    D3D_OK(d3dDevice->CreateShaderResourceView(spriteTexture.Get(), nullptr, spriteResourceView.GetAddressOf()));
+
+    D3D11_BLEND_DESC blendStateDesc = {};
+    blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendStateDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+    ComPtr<ID3D11BlendState> blendState;
+    d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf());
 
     bool quit = false;
     SDL_Event event = {};
@@ -203,6 +249,8 @@ int main(int argc, char** argv)
 
         const auto d3dContext = d3d11.GetDeviceContext();
 
+        d3dContext->OMSetBlendState(blendState.Get(), nullptr, 0xffffffff);
+
         D3D11_MAPPED_SUBRESOURCE mappedInstanceBuffer;
         d3dContext->Map(instanceBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);
         memcpy(mappedInstanceBuffer.pData, quads.data(), quads.size() * sizeof(QuadObject));
@@ -227,12 +275,16 @@ int main(int argc, char** argv)
         ID3D11Buffer* constantsBuffers[] = { transformsBuffer.Get() };
         d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
 
+        d3dContext->PSSetShaderResources(0, 1, spriteResourceView.GetAddressOf());
+
         //d3dContext->Draw(6, 0);
-        d3dContext->DrawInstanced(6, quads.size(), 0, 0);
+        d3dContext->DrawInstanced(6, (UINT)quads.size(), 0, 0);
         
         d3d11.FrameEnd();
     }
 
     SDL_DestroyWindow(window);
+    IMG_Quit();
+    SDL_Quit();
     return 0;
 }

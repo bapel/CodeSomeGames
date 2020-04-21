@@ -105,8 +105,8 @@ void Direct3D11::FrameStart(SDL_Window* window)
     // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
 
     D3D11_VIEWPORT viewport = {};
-    viewport.Width = _windowWidth;
-    viewport.Height = _windowHeight;
+    viewport.Width = (float)_windowWidth;
+    viewport.Height = (float)_windowHeight;
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
     viewport.MinDepth = 0.0f;
@@ -148,7 +148,7 @@ size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer)
 
     if (file != nullptr)
     {
-        long size = SDL_RWseek(file, 0, RW_SEEK_END);
+        auto size = SDL_RWseek(file, 0, RW_SEEK_END);
         outBuffer.resize(size);
         SDL_RWseek(file, 0, RW_SEEK_SET);
         size_t readSize = SDL_RWread(file, outBuffer.data(), sizeof(char), size);

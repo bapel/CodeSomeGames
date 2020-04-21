@@ -9,6 +9,7 @@ cbuffer TransformsBuffer : register(b0)
 /* vertex attributes go here to input to the vertex shader */
 struct vs_in {
     float4 position_local : POSITION;
+    float2 uv : TEXCOORD;
     float4 quad_data : QUAD_DATA;
     float4 color : COLOR;
 };
@@ -46,6 +47,7 @@ vs_out main(vs_in input) {
     matrix r = rotation_z(input.quad_data.w);
     float4 rotated_position = mul(float4(input.position_local), r);
     output.position_clip = mul(rotated_position + float4(input.quad_data.xyz, 0.0), viewProj);
+    output.uv = input.uv;
     output.color = input.color;
     return output;
 }
