@@ -36,6 +36,8 @@ public:
     ID3D11Device* GetDevice() const { return _device.Get(); }
     ID3D11DeviceContext* GetDeviceContext() const { return _context.Get(); }
 
-    ComPtr<ID3D11VertexShader> LoadVertexShader(const std::string& path, std::vector<char>& outByteCode);
-    ComPtr<ID3D11PixelShader> LoadPixelShader(const std::string& path);
+    ComPtr<ID3D11VertexShader> CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode);
+    ComPtr<ID3D11PixelShader> CreatePixelShaderFromFile(const std::string& path);
+
+    ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path);
 };

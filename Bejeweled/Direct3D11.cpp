@@ -5,9 +5,11 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
+#include <SDL_image.h>
 #include <SDL_rwops.h>
 
 #include <vector>
+#include <memory>
 #include <stdio.h>
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
@@ -121,7 +123,7 @@ void Direct3D11::FrameEnd()
     D3D_OK(_swapChain->Present(0, 0));
 }
 
-ComPtr<ID3D11VertexShader> Direct3D11::LoadVertexShader(const std::string& path, std::vector<char>& outByteCode)
+ComPtr<ID3D11VertexShader> Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode)
 {
     std::vector<char>& buffer = outByteCode;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
@@ -131,7 +133,7 @@ ComPtr<ID3D11VertexShader> Direct3D11::LoadVertexShader(const std::string& path,
     return shader;
 }
 
-ComPtr<ID3D11PixelShader> Direct3D11::LoadPixelShader(const std::string& path)
+ComPtr<ID3D11PixelShader> Direct3D11::CreatePixelShaderFromFile(const std::string& path)
 {
     std::vector<char> buffer;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
@@ -139,6 +141,45 @@ ComPtr<ID3D11PixelShader> Direct3D11::LoadPixelShader(const std::string& path)
     ID3D11PixelShader* shader = nullptr;
     D3D_OK(_device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
     return shader;
+}
+
+ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& path)
+{
+    auto sprite = IMG_Load(path.c_str());
+    SDL_assert(nullptr != sprite);
+
+    DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
+    switch (sprite->format->format)
+    {
+    case SDL_PIXELFORMAT_ABGR8888:
+        format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        break;
+    }
+
+    // Unsupported format.
+    SDL_assert(format != DXGI_FORMAT_UNKNOWN);
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = sprite->w;
+    desc.Height = sprite->h;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = format;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = sprite->pixels;
+    data.SysMemPitch = sprite->pitch;
+    data.SysMemSlicePitch = sprite->w * sprite->h * 4;
+
+    ID3D11Texture2D* texture = nullptr;
+    D3D_OK(_device->CreateTexture2D(&desc, &data, &texture));
+    SDL_FreeSurface(sprite);
+    return texture;
 }
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer)

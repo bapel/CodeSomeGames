@@ -89,8 +89,8 @@ int main(int argc, char** argv)
     d3d11.Init(window);
 
     std::vector<char> vsByteCode;
-    vertexShader = d3d11.LoadVertexShader(kShadersBasePath + "TriangleVertex.cso", vsByteCode);
-    pixelShader = d3d11.LoadPixelShader(kShadersBasePath + "TrianglePixel.cso");
+    vertexShader = d3d11.CreateVertexShaderFromFile(kShadersBasePath + "TriangleVertex.cso", vsByteCode);
+    pixelShader = d3d11.CreatePixelShaderFromFile(kShadersBasePath + "TrianglePixel.cso");
 
     const auto d3dDevice = d3d11.GetDevice();
 
@@ -144,31 +144,19 @@ int main(int argc, char** argv)
 
     D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
 
-    auto sprite = IMG_Load("Sprites//element_blue_diamond_glossy.png");
-    SDL_assert(nullptr != sprite);
+    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//element_blue_diamond_glossy.png");
 
-    D3D11_TEXTURE2D_DESC spriteDesc = {};
-    spriteDesc.Width = sprite->w;
-    spriteDesc.Height = sprite->h;
-    spriteDesc.MipLevels = 1;
-    spriteDesc.ArraySize = 1;
-    spriteDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    spriteDesc.SampleDesc.Count = 1;
-    spriteDesc.Usage = D3D11_USAGE_DEFAULT;
-    spriteDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    spriteDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    spriteDesc.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA spriteInitData = {};
-    spriteInitData.pSysMem = sprite->pixels;
-    spriteInitData.SysMemPitch = sprite->pitch;
-    spriteInitData.SysMemSlicePitch = sprite->w * sprite->h * 4;
-
-    ComPtr<ID3D11Texture2D> spriteTexture;
     ComPtr<ID3D11ShaderResourceView> spriteResourceView;
-
-    D3D_OK(d3dDevice->CreateTexture2D(&spriteDesc, &spriteInitData, &spriteTexture));
     D3D_OK(d3dDevice->CreateShaderResourceView(spriteTexture.Get(), nullptr, spriteResourceView.GetAddressOf()));
+
+    D3D11_SAMPLER_DESC samplerDesc = {};
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+    ComPtr<ID3D11SamplerState> samplerState;
+    D3D_OK(d3dDevice->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
 
     D3D11_BLEND_DESC blendStateDesc = {};
     blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -181,7 +169,7 @@ int main(int argc, char** argv)
     blendStateDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
 
     ComPtr<ID3D11BlendState> blendState;
-    d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf());
+    D3D_OK(d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf()));
 
     bool quit = false;
     SDL_Event event = {};
@@ -261,12 +249,6 @@ int main(int argc, char** argv)
         d3dContext->IASetInputLayout(inputLayout.Get());
         d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        ID3D11Buffer* buffers[] = { vertexBuffer.Get(), instanceBuffer.Get() };
-        UINT strides[] = { sizeof(TriangleVertex), sizeof(QuadObject) };
-        UINT offsets[] = { 0, 0 };
-        const auto numBuffers = sizeof(strides) / sizeof(UINT);
-        d3dContext->IASetVertexBuffers(0, numBuffers, buffers, strides, offsets);
-
         D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
         d3dContext->Map(transformsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
         memcpy(mappedConstantsBuffer.pData, &transformsBufferData, sizeof(transformsBufferData));
@@ -275,7 +257,19 @@ int main(int argc, char** argv)
         ID3D11Buffer* constantsBuffers[] = { transformsBuffer.Get() };
         d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
 
-        d3dContext->PSSetShaderResources(0, 1, spriteResourceView.GetAddressOf());
+        ID3D11Buffer* buffers[] = { vertexBuffer.Get(), instanceBuffer.Get() };
+        UINT strides[] = { sizeof(TriangleVertex), sizeof(QuadObject) };
+        UINT offsets[] = { 0, 0 };
+        const auto numBuffers = sizeof(strides) / sizeof(UINT);
+        d3dContext->IASetVertexBuffers(0, numBuffers, buffers, strides, offsets);
+
+        ID3D11ShaderResourceView* shaderResourceViews[] = { spriteResourceView.Get() };
+        UINT numShaderResourceViews = sizeof(shaderResourceViews) / sizeof(ID3D11ShaderResourceView*);
+        d3dContext->PSSetShaderResources(0, numShaderResourceViews, shaderResourceViews);
+
+        ID3D11SamplerState* samplerStates[] = { samplerState.Get() };
+        UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
+        d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
 
         //d3dContext->Draw(6, 0);
         d3dContext->DrawInstanced(6, (UINT)quads.size(), 0, 0);
