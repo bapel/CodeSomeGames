@@ -739,7 +739,7 @@ SW_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *vertic
                 break;
         }
 
-        cmd = cmd->next;
+        cmd = cmd->Next;
     }
 
     return 0;

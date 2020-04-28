@@ -133,7 +133,7 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
     int last_opaque = -1;
     SDL_Color key;
     SDL_ShapeTree* result = (SDL_ShapeTree*)SDL_malloc(sizeof(SDL_ShapeTree));
-    SDL_Rect next = {0,0,0,0};
+    SDL_Rect Next = {0,0,0,0};
 
     for(y=dimensions.y;y<dimensions.y + dimensions.h;y++) {
         for(x=dimensions.x;x<dimensions.x + dimensions.w;x++) {
@@ -177,25 +177,25 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
 
                 result->kind = QuadShape;
 
-                next.x = dimensions.x;
-                next.y = dimensions.y;
-                next.w = halfwidth;
-                next.h = halfheight;
-                result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
+                Next.x = dimensions.x;
+                Next.y = dimensions.y;
+                Next.w = halfwidth;
+                Next.h = halfheight;
+                result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,Next);
 
-                next.x = dimensions.x + halfwidth;
-                next.w = dimensions.w - halfwidth;
-                result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
+                Next.x = dimensions.x + halfwidth;
+                Next.w = dimensions.w - halfwidth;
+                result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,Next);
 
-                next.x = dimensions.x;
-                next.w = halfwidth;
-                next.y = dimensions.y + halfheight;
-                next.h = dimensions.h - halfheight;
-                result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
+                Next.x = dimensions.x;
+                Next.w = halfwidth;
+                Next.y = dimensions.y + halfheight;
+                Next.h = dimensions.h - halfheight;
+                result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,Next);
 
-                next.x = dimensions.x + halfwidth;
-                next.w = dimensions.w - halfwidth;
-                result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
+                Next.x = dimensions.x + halfwidth;
+                Next.w = dimensions.w - halfwidth;
+                result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,Next);
 
                 return result;
             }

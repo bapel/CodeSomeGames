@@ -89,7 +89,7 @@ namespace NAMESPACE {
 			int interface_protocol;
 
 			/** Pointer to the next device */
-			struct hid_device_info *next;
+			struct hid_device_info *Next;
 		};
 
 

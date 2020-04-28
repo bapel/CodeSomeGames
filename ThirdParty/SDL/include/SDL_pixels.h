@@ -335,7 +335,7 @@ typedef struct SDL_PixelFormat
     Uint8 Bshift;
     Uint8 Ashift;
     int refcount;
-    struct SDL_PixelFormat *next;
+    struct SDL_PixelFormat *Next;
 } SDL_PixelFormat;
 
 /**

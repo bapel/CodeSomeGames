@@ -50,7 +50,7 @@ SDL_atomic_t WASAPI_DefaultCaptureGeneration;
 typedef struct DevIdList
 {
     WCHAR *str;
-    struct DevIdList *next;
+    struct DevIdList *Next;
 } DevIdList;
 
 static DevIdList *deviceid_list = NULL;
@@ -102,15 +102,15 @@ void
 WASAPI_RemoveDevice(const SDL_bool iscapture, LPCWSTR devid)
 {
     DevIdList *i;
-    DevIdList *next;
+    DevIdList *Next;
     DevIdList *prev = NULL;
-    for (i = deviceid_list; i; i = next) {
-        next = i->next;
+    for (i = deviceid_list; i; i = Next) {
+        Next = i->Next;
         if (WStrEqual(i->str, devid)) {
             if (prev) {
-                prev->next = next;
+                prev->Next = Next;
             } else {
-                deviceid_list = next;
+                deviceid_list = Next;
             }
             SDL_RemoveAudioDevice(iscapture, i->str);
             SDL_free(i->str);
@@ -131,7 +131,7 @@ WASAPI_AddDevice(const SDL_bool iscapture, const char *devname, LPCWSTR devid)
        available and switch automatically. (!!! FIXME...?) */
 
     /* see if we already have this one. */
-    for (devidlist = deviceid_list; devidlist; devidlist = devidlist->next) {
+    for (devidlist = deviceid_list; devidlist; devidlist = devidlist->Next) {
         if (WStrEqual(devidlist->str, devid)) {
             return;  /* we already have this. */
         }
@@ -149,7 +149,7 @@ WASAPI_AddDevice(const SDL_bool iscapture, const char *devname, LPCWSTR devid)
     }
 
     devidlist->str = (WCHAR *) devid;
-    devidlist->next = deviceid_list;
+    devidlist->Next = deviceid_list;
     deviceid_list = devidlist;
 
     SDL_AddAudioDevice(iscapture, devname, (void *) devid);
@@ -720,12 +720,12 @@ static void
 WASAPI_Deinitialize(void)
 {
     DevIdList *devidlist;
-    DevIdList *next;
+    DevIdList *Next;
 
     WASAPI_PlatformDeinit();
 
-    for (devidlist = deviceid_list; devidlist; devidlist = next) {
-        next = devidlist->next;
+    for (devidlist = deviceid_list; devidlist; devidlist = Next) {
+        Next = devidlist->Next;
         SDL_free(devidlist->str);
         SDL_free(devidlist);
     }

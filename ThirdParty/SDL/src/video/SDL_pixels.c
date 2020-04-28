@@ -507,7 +507,7 @@ SDL_AllocFormat(Uint32 pixel_format)
     SDL_AtomicLock(&formats_lock);
 
     /* Look it up in our list of previously allocated formats */
-    for (format = formats; format; format = format->next) {
+    for (format = formats; format; format = format->Next) {
         if (pixel_format == format->format) {
             ++format->refcount;
             SDL_AtomicUnlock(&formats_lock);
@@ -531,7 +531,7 @@ SDL_AllocFormat(Uint32 pixel_format)
 
     if (!SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
         /* Cache the RGB formats */
-        format->next = formats;
+        format->Next = formats;
         formats = format;
     }
 
@@ -600,7 +600,7 @@ SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
 
     format->palette = NULL;
     format->refcount = 1;
-    format->next = NULL;
+    format->Next = NULL;
 
     return 0;
 }
@@ -624,11 +624,11 @@ SDL_FreeFormat(SDL_PixelFormat *format)
 
     /* Remove this format from our list */
     if (format == formats) {
-        formats = format->next;
+        formats = format->Next;
     } else if (formats) {
-        for (prev = formats; prev->next; prev = prev->next) {
-            if (prev->next == format) {
-                prev->next = format->next;
+        for (prev = formats; prev->Next; prev = prev->Next) {
+            if (prev->Next == format) {
+                prev->Next = format->Next;
                 break;
             }
         }

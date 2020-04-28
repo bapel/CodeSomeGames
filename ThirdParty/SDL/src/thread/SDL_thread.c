@@ -113,7 +113,7 @@ SDL_TLSCleanup()
 typedef struct SDL_TLSEntry {
     SDL_threadID thread;
     SDL_TLSData *storage;
-    struct SDL_TLSEntry *next;
+    struct SDL_TLSEntry *Next;
 } SDL_TLSEntry;
 
 static SDL_mutex *SDL_generic_TLS_mutex;
@@ -146,7 +146,7 @@ SDL_Generic_GetTLSData(void)
 
     SDL_MemoryBarrierAcquire();
     SDL_LockMutex(SDL_generic_TLS_mutex);
-    for (entry = SDL_generic_TLS; entry; entry = entry->next) {
+    for (entry = SDL_generic_TLS; entry; entry = entry->Next) {
         if (entry->thread == thread) {
             storage = entry->storage;
             break;
@@ -168,15 +168,15 @@ SDL_Generic_SetTLSData(SDL_TLSData *storage)
     /* SDL_Generic_GetTLSData() is always called first, so we can assume SDL_generic_TLS_mutex */
     SDL_LockMutex(SDL_generic_TLS_mutex);
     prev = NULL;
-    for (entry = SDL_generic_TLS; entry; entry = entry->next) {
+    for (entry = SDL_generic_TLS; entry; entry = entry->Next) {
         if (entry->thread == thread) {
             if (storage) {
                 entry->storage = storage;
             } else {
                 if (prev) {
-                    prev->next = entry->next;
+                    prev->Next = entry->Next;
                 } else {
-                    SDL_generic_TLS = entry->next;
+                    SDL_generic_TLS = entry->Next;
                 }
                 SDL_free(entry);
             }
@@ -189,7 +189,7 @@ SDL_Generic_SetTLSData(SDL_TLSData *storage)
         if (entry) {
             entry->thread = thread;
             entry->storage = storage;
-            entry->next = SDL_generic_TLS;
+            entry->Next = SDL_generic_TLS;
             SDL_generic_TLS = entry;
         }
     }

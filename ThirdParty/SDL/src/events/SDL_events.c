@@ -69,13 +69,13 @@ typedef struct _SDL_EventEntry
     SDL_Event event;
     SDL_SysWMmsg msg;
     struct _SDL_EventEntry *prev;
-    struct _SDL_EventEntry *next;
+    struct _SDL_EventEntry *Next;
 } SDL_EventEntry;
 
 typedef struct _SDL_SysWMEntry
 {
     SDL_SysWMmsg msg;
-    struct _SDL_SysWMEntry *next;
+    struct _SDL_SysWMEntry *Next;
 } SDL_SysWMEntry;
 
 static struct
@@ -364,24 +364,24 @@ SDL_StopEventLoop(void)
 
     /* Clean out EventQ */
     for (entry = SDL_EventQ.head; entry; ) {
-        SDL_EventEntry *next = entry->next;
+        SDL_EventEntry *Next = entry->Next;
         SDL_free(entry);
-        entry = next;
+        entry = Next;
     }
     for (entry = SDL_EventQ.free; entry; ) {
-        SDL_EventEntry *next = entry->next;
+        SDL_EventEntry *Next = entry->Next;
         SDL_free(entry);
-        entry = next;
+        entry = Next;
     }
     for (wmmsg = SDL_EventQ.wmmsg_used; wmmsg; ) {
-        SDL_SysWMEntry *next = wmmsg->next;
+        SDL_SysWMEntry *Next = wmmsg->Next;
         SDL_free(wmmsg);
-        wmmsg = next;
+        wmmsg = Next;
     }
     for (wmmsg = SDL_EventQ.wmmsg_free; wmmsg; ) {
-        SDL_SysWMEntry *next = wmmsg->next;
+        SDL_SysWMEntry *Next = wmmsg->Next;
         SDL_free(wmmsg);
-        wmmsg = next;
+        wmmsg = Next;
     }
 
     SDL_AtomicSet(&SDL_EventQ.count, 0);
@@ -478,7 +478,7 @@ SDL_AddEvent(SDL_Event * event)
         }
     } else {
         entry = SDL_EventQ.free;
-        SDL_EventQ.free = entry->next;
+        SDL_EventQ.free = entry->Next;
     }
 
     if (SDL_DoEventLogging) {
@@ -492,16 +492,16 @@ SDL_AddEvent(SDL_Event * event)
     }
 
     if (SDL_EventQ.tail) {
-        SDL_EventQ.tail->next = entry;
+        SDL_EventQ.tail->Next = entry;
         entry->prev = SDL_EventQ.tail;
         SDL_EventQ.tail = entry;
-        entry->next = NULL;
+        entry->Next = NULL;
     } else {
         SDL_assert(!SDL_EventQ.head);
         SDL_EventQ.head = entry;
         SDL_EventQ.tail = entry;
         entry->prev = NULL;
-        entry->next = NULL;
+        entry->Next = NULL;
     }
 
     final_count = SDL_AtomicAdd(&SDL_EventQ.count, 1) + 1;
@@ -517,22 +517,22 @@ static void
 SDL_CutEvent(SDL_EventEntry *entry)
 {
     if (entry->prev) {
-        entry->prev->next = entry->next;
+        entry->prev->Next = entry->Next;
     }
-    if (entry->next) {
-        entry->next->prev = entry->prev;
+    if (entry->Next) {
+        entry->Next->prev = entry->prev;
     }
 
     if (entry == SDL_EventQ.head) {
         SDL_assert(entry->prev == NULL);
-        SDL_EventQ.head = entry->next;
+        SDL_EventQ.head = entry->Next;
     }
     if (entry == SDL_EventQ.tail) {
-        SDL_assert(entry->next == NULL);
+        SDL_assert(entry->Next == NULL);
         SDL_EventQ.tail = entry->prev;
     }
 
-    entry->next = SDL_EventQ.free;
+    entry->Next = SDL_EventQ.free;
     SDL_EventQ.free = entry;
     SDL_assert(SDL_AtomicGet(&SDL_EventQ.count) > 0);
     SDL_AtomicAdd(&SDL_EventQ.count, -1);
@@ -561,7 +561,7 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
                 used += SDL_AddEvent(&events[i]);
             }
         } else {
-            SDL_EventEntry *entry, *next;
+            SDL_EventEntry *entry, *Next;
             SDL_SysWMEntry *wmmsg, *wmmsg_next;
             Uint32 type;
 
@@ -570,15 +570,15 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
                    FIXME: Do we want to retain the data for some period of time?
                  */
                 for (wmmsg = SDL_EventQ.wmmsg_used; wmmsg; wmmsg = wmmsg_next) {
-                    wmmsg_next = wmmsg->next;
-                    wmmsg->next = SDL_EventQ.wmmsg_free;
+                    wmmsg_next = wmmsg->Next;
+                    wmmsg->Next = SDL_EventQ.wmmsg_free;
                     SDL_EventQ.wmmsg_free = wmmsg;
                 }
                 SDL_EventQ.wmmsg_used = NULL;
             }
 
-            for (entry = SDL_EventQ.head; entry && (!events || used < numevents); entry = next) {
-                next = entry->next;
+            for (entry = SDL_EventQ.head; entry && (!events || used < numevents); entry = Next) {
+                Next = entry->Next;
                 type = entry->event.type;
                 if (minType <= type && type <= maxType) {
                     if (events) {
@@ -590,12 +590,12 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
                              */
                             if (SDL_EventQ.wmmsg_free) {
                                 wmmsg = SDL_EventQ.wmmsg_free;
-                                SDL_EventQ.wmmsg_free = wmmsg->next;
+                                SDL_EventQ.wmmsg_free = wmmsg->Next;
                             } else {
                                 wmmsg = (SDL_SysWMEntry *)SDL_malloc(sizeof(*wmmsg));
                             }
                             wmmsg->msg = *entry->event.syswm.msg;
-                            wmmsg->next = SDL_EventQ.wmmsg_used;
+                            wmmsg->Next = SDL_EventQ.wmmsg_used;
                             SDL_EventQ.wmmsg_used = wmmsg;
                             events[used].syswm.msg = &wmmsg->msg;
                         }
@@ -657,10 +657,10 @@ SDL_FlushEvents(Uint32 minType, Uint32 maxType)
 
     /* Lock the event queue */
     if (!SDL_EventQ.lock || SDL_LockMutex(SDL_EventQ.lock) == 0) {
-        SDL_EventEntry *entry, *next;
+        SDL_EventEntry *entry, *Next;
         Uint32 type;
-        for (entry = SDL_EventQ.head; entry; entry = next) {
-            next = entry->next;
+        for (entry = SDL_EventQ.head; entry; entry = Next) {
+            Next = entry->Next;
             type = entry->event.type;
             if (minType <= type && type <= maxType) {
                 SDL_CutEvent(entry);
@@ -892,9 +892,9 @@ void
 SDL_FilterEvents(SDL_EventFilter filter, void *userdata)
 {
     if (!SDL_EventQ.lock || SDL_LockMutex(SDL_EventQ.lock) == 0) {
-        SDL_EventEntry *entry, *next;
-        for (entry = SDL_EventQ.head; entry; entry = next) {
-            next = entry->next;
+        SDL_EventEntry *entry, *Next;
+        for (entry = SDL_EventQ.head; entry; entry = Next) {
+            Next = entry->Next;
             if (!filter(userdata, &entry->event)) {
                 SDL_CutEvent(entry);
             }

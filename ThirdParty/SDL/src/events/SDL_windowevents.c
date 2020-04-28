@@ -199,7 +199,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
     }
 
     if (windowevent == SDL_WINDOWEVENT_CLOSE) {
-        if ( !window->prev && !window->next ) {
+        if ( !window->prev && !window->Next ) {
             /* This is the last window in the list so send the SDL_QUIT event */
             SDL_SendQuit();
         }

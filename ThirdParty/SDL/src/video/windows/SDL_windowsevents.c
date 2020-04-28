@@ -1107,7 +1107,7 @@ static void WIN_UpdateClipCursorForWindows()
     SDL_Window *window;
 
     if (_this) {
-        for (window = _this->windows; window; window = window->next) {
+        for (window = _this->windows; window; window = window->Next) {
             if (window->driverdata) {
                 WIN_UpdateClipCursor(window);
             }

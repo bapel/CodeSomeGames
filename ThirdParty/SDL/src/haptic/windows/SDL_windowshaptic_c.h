@@ -74,13 +74,13 @@ typedef struct SDL_hapticlist_item
 #endif
     SDL_bool bXInputHaptic; /* Supports force feedback via XInput. */
     Uint8 userid; /* XInput userid index for this joystick */
-    struct SDL_hapticlist_item *next;
+    struct SDL_hapticlist_item *Next;
 } SDL_hapticlist_item;
 
 extern SDL_hapticlist_item *SDL_hapticlist;
 
-extern int SDL_SYS_AddHapticDevice(SDL_hapticlist_item *item);
-extern int SDL_SYS_RemoveHapticDevice(SDL_hapticlist_item *prev, SDL_hapticlist_item *item);
+extern int SDL_SYS_AddHapticDevice(SDL_hapticlist_item *Item);
+extern int SDL_SYS_RemoveHapticDevice(SDL_hapticlist_item *prev, SDL_hapticlist_item *Item);
 
 #endif /* SDL_windowshaptic_c_h_ */
 

@@ -45,7 +45,7 @@ struct _SDL_Sensor
 
     int ref_count;                  /* Reference count for multiple opens */
 
-    struct _SDL_Sensor *next;       /* pointer to next sensor we have allocated */
+    struct _SDL_Sensor *Next;       /* pointer to next sensor we have allocated */
 };
 
 typedef struct _SDL_SensorDriver

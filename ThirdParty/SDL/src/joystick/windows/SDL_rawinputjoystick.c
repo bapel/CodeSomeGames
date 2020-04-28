@@ -111,7 +111,7 @@ typedef struct _SDL_RAWINPUT_Device
     SDL_Joystick *joystick;
     SDL_JoystickID joystick_id;
 
-    struct _SDL_RAWINPUT_Device *next;
+    struct _SDL_RAWINPUT_Device *Next;
 } SDL_RAWINPUT_Device;
 
 struct joystick_hwdata
@@ -230,7 +230,7 @@ RAWINPUT_DeviceFromHandle(HANDLE hDevice)
 {
     SDL_RAWINPUT_Device *curr;
 
-    for (curr = SDL_RAWINPUT_devices; curr; curr = curr->next) {
+    for (curr = SDL_RAWINPUT_devices; curr; curr = curr->Next) {
         if (curr->hDevice == hDevice)
             return curr;
     }
@@ -335,11 +335,11 @@ RAWINPUT_AddDevice(HANDLE hDevice)
 #endif
 
     /* Add it to the list */
-    for (curr = SDL_RAWINPUT_devices, last = NULL; curr; last = curr, curr = curr->next) {
+    for (curr = SDL_RAWINPUT_devices, last = NULL; curr; last = curr, curr = curr->Next) {
         continue;
     }
     if (last) {
-        last->next = device;
+        last->Next = device;
     } else {
         SDL_RAWINPUT_devices = device;
     }
@@ -364,13 +364,13 @@ static void
 RAWINPUT_DelDevice(SDL_RAWINPUT_Device *device, SDL_bool send_event)
 {
     SDL_RAWINPUT_Device *curr, *last;
-    for (curr = SDL_RAWINPUT_devices, last = NULL; curr; last = curr, curr = curr->next) {
+    for (curr = SDL_RAWINPUT_devices, last = NULL; curr; last = curr, curr = curr->Next) {
         if (curr == device) {
             SDL_Joystick *joystick;
             if (last) {
-                last->next = curr->next;
+                last->Next = curr->Next;
             } else {
-                SDL_RAWINPUT_devices = curr->next;
+                SDL_RAWINPUT_devices = curr->Next;
             }
             --SDL_RAWINPUT_numjoysticks;
 
@@ -455,7 +455,7 @@ RAWINPUT_IsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version)
         if (device->vendor_id == vendor_id && device->product_id == product_id) {
             return SDL_TRUE;
         }
-        device = device->next;
+        device = device->Next;
     }
     return SDL_FALSE;
 }
@@ -492,7 +492,7 @@ RAWINPUT_GetJoystickByIndex(int device_index, SDL_JoystickID *pJoystickID)
             }
             device_index -= device->hiddevice.num_joysticks;
         }
-        device = device->next;
+        device = device->Next;
     }
     return NULL;
 }

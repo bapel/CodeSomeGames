@@ -460,7 +460,7 @@ HIDAPI_GetDeviceByIndex(int device_index, SDL_JoystickID *pJoystickID)
             }
             device_index -= device->num_joysticks;
         }
-        device = device->next;
+        device = device->Next;
     }
     return NULL;
 }
@@ -474,7 +474,7 @@ HIDAPI_GetJoystickByInfo(const char *path, Uint16 vendor_id, Uint16 product_id)
             SDL_strcmp(device->path, path) == 0) {
             break;
         }
-        device = device->next;
+        device = device->Next;
     }
     return device;
 }
@@ -551,7 +551,7 @@ SDL_HIDAPIDriverHintChanged(void *userdata, const char *name, const char *oldVal
     /* Update device list if driver availability changes */
     SDL_LockJoysticks();
 
-    for (device = SDL_HIDAPI_devices; device; device = device->next) {
+    for (device = SDL_HIDAPI_devices; device; device = device->Next) {
         if (device->driver && !device->driver->enabled) {
             HIDAPI_CleanupDeviceDriver(device);
         }
@@ -671,7 +671,7 @@ HIDAPI_AddDevice(struct hid_device_info *info)
     SDL_HIDAPI_Device *device;
     SDL_HIDAPI_Device *curr, *last = NULL;
 
-    for (curr = SDL_HIDAPI_devices, last = NULL; curr; last = curr, curr = curr->next) {
+    for (curr = SDL_HIDAPI_devices, last = NULL; curr; last = curr, curr = curr->Next) {
         continue;
     }
 
@@ -760,7 +760,7 @@ HIDAPI_AddDevice(struct hid_device_info *info)
 
     /* Add it to the list */
     if (last) {
-        last->next = device;
+        last->Next = device;
     } else {
         SDL_HIDAPI_devices = device;
     }
@@ -777,12 +777,12 @@ static void
 HIDAPI_DelDevice(SDL_HIDAPI_Device *device)
 {
     SDL_HIDAPI_Device *curr, *last;
-    for (curr = SDL_HIDAPI_devices, last = NULL; curr; last = curr, curr = curr->next) {
+    for (curr = SDL_HIDAPI_devices, last = NULL; curr; last = curr, curr = curr->Next) {
         if (curr == device) {
             if (last) {
-                last->next = curr->next;
+                last->Next = curr->Next;
             } else {
-                SDL_HIDAPI_devices = curr->next;
+                SDL_HIDAPI_devices = curr->Next;
             }
 
             HIDAPI_CleanupDeviceDriver(device);
@@ -808,14 +808,14 @@ HIDAPI_UpdateDeviceList(void)
     device = SDL_HIDAPI_devices;
     while (device) {
         device->seen = SDL_FALSE;
-        device = device->next;
+        device = device->Next;
     }
 
     /* Enumerate the devices */
     if (SDL_HIDAPI_numdrivers > 0) {
         devs = hid_enumerate(0, 0);
         if (devs) {
-            for (info = devs; info; info = info->next) {
+            for (info = devs; info; info = info->Next) {
                 device = HIDAPI_GetJoystickByInfo(info->path, info->vendor_id, info->product_id);
                 if (device) {
                     device->seen = SDL_TRUE;
@@ -830,12 +830,12 @@ HIDAPI_UpdateDeviceList(void)
     /* Remove any devices that weren't seen */
     device = SDL_HIDAPI_devices;
     while (device) {
-        SDL_HIDAPI_Device *next = device->next;
+        SDL_HIDAPI_Device *Next = device->Next;
 
         if (!device->seen) {
             HIDAPI_DelDevice(device);
         }
-        device = next;
+        device = Next;
     }
 
     SDL_UnlockJoysticks();
@@ -883,7 +883,7 @@ HIDAPI_IsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, cons
         if (device->vendor_id == vendor_id && device->product_id == product_id && device->driver) {
             result = SDL_TRUE;
         }
-        device = device->next;
+        device = device->Next;
     }
     SDL_UnlockJoysticks();
 
@@ -936,7 +936,7 @@ HIDAPI_UpdateDevices(void)
                     SDL_UnlockMutex(device->dev_lock);
                 }
             }
-            device = device->next;
+            device = device->Next;
         }
         SDL_AtomicUnlock(&SDL_HIDAPI_spinlock);
     }

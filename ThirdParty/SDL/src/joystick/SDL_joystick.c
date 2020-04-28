@@ -390,7 +390,7 @@ SDL_JoystickOpen(int device_index)
                 SDL_UnlockJoysticks();
                 return joystick;
         }
-        joysticklist = joysticklist->next;
+        joysticklist = joysticklist->Next;
     }
 
     /* Create and initialize the joystick */
@@ -456,7 +456,7 @@ SDL_JoystickOpen(int device_index)
     /* Add joystick to list */
     ++joystick->ref_count;
     /* Link the joystick in the list */
-    joystick->next = SDL_joysticks;
+    joystick->Next = SDL_joysticks;
     SDL_joysticks = joystick;
 
     SDL_UnlockJoysticks();
@@ -772,7 +772,7 @@ SDL_JoystickFromInstanceID(SDL_JoystickID instance_id)
     SDL_Joystick *joystick;
 
     SDL_LockJoysticks();
-    for (joystick = SDL_joysticks; joystick; joystick = joystick->next) {
+    for (joystick = SDL_joysticks; joystick; joystick = joystick->Next) {
         if (joystick->instance_id == instance_id) {
             break;
         }
@@ -792,7 +792,7 @@ SDL_JoystickFromPlayerIndex(int player_index)
 
     SDL_LockJoysticks();
     instance_id = SDL_GetJoystickIDForPlayerIndex(player_index);
-    for (joystick = SDL_joysticks; joystick; joystick = joystick->next) {
+    for (joystick = SDL_joysticks; joystick; joystick = joystick->Next) {
         if (joystick->instance_id == instance_id) {
             break;
         }
@@ -922,14 +922,14 @@ SDL_JoystickClose(SDL_Joystick * joystick)
         if (joystick == joysticklist) {
             if (joysticklistprev) {
                 /* unlink this entry */
-                joysticklistprev->next = joysticklist->next;
+                joysticklistprev->Next = joysticklist->Next;
             } else {
-                SDL_joysticks = joystick->next;
+                SDL_joysticks = joystick->Next;
             }
             break;
         }
         joysticklistprev = joysticklist;
-        joysticklist = joysticklist->next;
+        joysticklist = joysticklist->Next;
     }
 
     SDL_free(joystick->name);
@@ -1104,7 +1104,7 @@ void SDL_PrivateJoystickRemoved(SDL_JoystickID device_instance)
 #endif
 
     /* Find this joystick... */
-    for (joystick = SDL_joysticks; joystick; joystick = joystick->next) {
+    for (joystick = SDL_joysticks; joystick; joystick = joystick->Next) {
         if (joystick->instance_id == device_instance) {
             SDL_PrivateJoystickForceRecentering(joystick);
             joystick->attached = SDL_FALSE;
@@ -1326,7 +1326,7 @@ void
 SDL_JoystickUpdate(void)
 {
     int i;
-    SDL_Joystick *joystick, *next;
+    SDL_Joystick *joystick, *Next;
 
     if (!SDL_WasInit(SDL_INIT_JOYSTICK)) {
         return;
@@ -1350,7 +1350,7 @@ SDL_JoystickUpdate(void)
     HIDAPI_UpdateDevices();
 #endif /* SDL_JOYSTICK_HIDAPI */
 
-    for (joystick = SDL_joysticks; joystick; joystick = joystick->next) {
+    for (joystick = SDL_joysticks; joystick; joystick = joystick->Next) {
         if (joystick->attached) {
             /* This should always be true, but seeing a crash in the wild...? */
             if (joystick->driver) {
@@ -1384,8 +1384,8 @@ SDL_JoystickUpdate(void)
     SDL_updating_joystick = SDL_FALSE;
 
     /* If any joysticks were closed while updating, free them here */
-    for (joystick = SDL_joysticks; joystick; joystick = next) {
-        next = joystick->next;
+    for (joystick = SDL_joysticks; joystick; joystick = Next) {
+        Next = joystick->Next;
         if (joystick->ref_count <= 0) {
             SDL_JoystickClose(joystick);
         }

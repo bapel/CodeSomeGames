@@ -84,7 +84,7 @@ typedef struct _SDL_HIDAPI_Device
     /* Used during scanning for device changes */
     SDL_bool seen;
 
-    struct _SDL_HIDAPI_Device *next;
+    struct _SDL_HIDAPI_Device *Next;
 } SDL_HIDAPI_Device;
 
 typedef struct _SDL_HIDAPI_DeviceDriver

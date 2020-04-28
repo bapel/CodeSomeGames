@@ -46,7 +46,7 @@ typedef struct SDL_LogLevel
 {
     int category;
     SDL_LogPriority priority;
-    struct SDL_LogLevel *next;
+    struct SDL_LogLevel *Next;
 } SDL_LogLevel;
 
 /* The default log output function */
@@ -98,7 +98,7 @@ SDL_LogSetAllPriority(SDL_LogPriority priority)
 {
     SDL_LogLevel *entry;
 
-    for (entry = SDL_loglevels; entry; entry = entry->next) {
+    for (entry = SDL_loglevels; entry; entry = entry->Next) {
         entry->priority = priority;
     }
     SDL_default_priority = priority;
@@ -111,7 +111,7 @@ SDL_LogSetPriority(int category, SDL_LogPriority priority)
 {
     SDL_LogLevel *entry;
 
-    for (entry = SDL_loglevels; entry; entry = entry->next) {
+    for (entry = SDL_loglevels; entry; entry = entry->Next) {
         if (entry->category == category) {
             entry->priority = priority;
             return;
@@ -123,7 +123,7 @@ SDL_LogSetPriority(int category, SDL_LogPriority priority)
     if (entry) {
         entry->category = category;
         entry->priority = priority;
-        entry->next = SDL_loglevels;
+        entry->Next = SDL_loglevels;
         SDL_loglevels = entry;
     }
 }
@@ -133,7 +133,7 @@ SDL_LogGetPriority(int category)
 {
     SDL_LogLevel *entry;
 
-    for (entry = SDL_loglevels; entry; entry = entry->next) {
+    for (entry = SDL_loglevels; entry; entry = entry->Next) {
         if (entry->category == category) {
             return entry->priority;
         }
@@ -157,7 +157,7 @@ SDL_LogResetPriorities(void)
 
     while (SDL_loglevels) {
         entry = SDL_loglevels;
-        SDL_loglevels = entry->next;
+        SDL_loglevels = entry->Next;
         SDL_free(entry);
     }
 

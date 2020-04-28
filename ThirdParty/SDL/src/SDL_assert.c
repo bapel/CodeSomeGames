@@ -83,7 +83,7 @@ static void SDL_AddAssertionToReport(SDL_assert_data *data)
        we don't have to worry about copying or allocating them. */
     data->trigger_count++;
     if (data->trigger_count == 1) {  /* not yet added? */
-        data->next = triggered_assertions;
+        data->Next = triggered_assertions;
         triggered_assertions = data;
     }
 }
@@ -91,24 +91,24 @@ static void SDL_AddAssertionToReport(SDL_assert_data *data)
 
 static void SDL_GenerateAssertionReport(void)
 {
-    const SDL_assert_data *item = triggered_assertions;
+    const SDL_assert_data *Item = triggered_assertions;
 
     /* only do this if the app hasn't assigned an assertion handler. */
-    if ((item != NULL) && (assertion_handler != SDL_PromptAssertion)) {
+    if ((Item != NULL) && (assertion_handler != SDL_PromptAssertion)) {
         debug_print("\n\nSDL assertion report.\n");
         debug_print("All SDL assertions between last init/quit:\n\n");
 
-        while (item != NULL) {
+        while (Item != NULL) {
             debug_print(
                 "'%s'\n"
                 "    * %s (%s:%d)\n"
                 "    * triggered %u time%s.\n"
                 "    * always ignore: %s.\n",
-                item->condition, item->function, item->filename,
-                item->linenum, item->trigger_count,
-                (item->trigger_count == 1) ? "" : "s",
-                item->always_ignore ? "yes" : "no");
-            item = item->next;
+                Item->condition, Item->function, Item->filename,
+                Item->linenum, Item->trigger_count,
+                (Item->trigger_count == 1) ? "" : "s",
+                Item->always_ignore ? "yes" : "no");
+            Item = Item->Next;
         }
         debug_print("\n");
 
@@ -411,13 +411,13 @@ const SDL_assert_data *SDL_GetAssertionReport(void)
 
 void SDL_ResetAssertionReport(void)
 {
-    SDL_assert_data *next = NULL;
-    SDL_assert_data *item;
-    for (item = triggered_assertions; item != NULL; item = next) {
-        next = (SDL_assert_data *) item->next;
-        item->always_ignore = SDL_FALSE;
-        item->trigger_count = 0;
-        item->next = NULL;
+    SDL_assert_data *Next = NULL;
+    SDL_assert_data *Item;
+    for (Item = triggered_assertions; Item != NULL; Item = Next) {
+        Next = (SDL_assert_data *) Item->Next;
+        Item->always_ignore = SDL_FALSE;
+        Item->trigger_count = 0;
+        Item->Next = NULL;
     }
 
     triggered_assertions = NULL;

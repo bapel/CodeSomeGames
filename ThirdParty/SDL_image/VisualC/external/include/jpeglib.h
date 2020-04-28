@@ -207,7 +207,7 @@ typedef struct {
 typedef struct jpeg_marker_struct FAR * jpeg_saved_marker_ptr;
 
 struct jpeg_marker_struct {
-  jpeg_saved_marker_ptr next;	/* next in list, or NULL */
+  jpeg_saved_marker_ptr Next;	/* next in list, or NULL */
   UINT8 marker;			/* marker code: JPEG_COM, or JPEG_APP0+n */
   unsigned int original_length;	/* # bytes of data in the file */
   unsigned int data_length;	/* # bytes of data saved at data[] */

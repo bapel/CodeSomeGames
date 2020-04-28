@@ -63,13 +63,13 @@ SDL_SYS_HapticInit(void)
 }
 
 int
-SDL_SYS_AddHapticDevice(SDL_hapticlist_item *item)
+SDL_SYS_AddHapticDevice(SDL_hapticlist_item *Item)
 {
     if (SDL_hapticlist_tail == NULL) {
-        SDL_hapticlist = SDL_hapticlist_tail = item;
+        SDL_hapticlist = SDL_hapticlist_tail = Item;
     } else {
-        SDL_hapticlist_tail->next = item;
-        SDL_hapticlist_tail = item;
+        SDL_hapticlist_tail->Next = Item;
+        SDL_hapticlist_tail = Item;
     }
 
     /* Device has been added. */
@@ -79,21 +79,21 @@ SDL_SYS_AddHapticDevice(SDL_hapticlist_item *item)
 }
 
 int
-SDL_SYS_RemoveHapticDevice(SDL_hapticlist_item *prev, SDL_hapticlist_item *item)
+SDL_SYS_RemoveHapticDevice(SDL_hapticlist_item *prev, SDL_hapticlist_item *Item)
 {
-    const int retval = item->haptic ? item->haptic->index : -1;
+    const int retval = Item->haptic ? Item->haptic->index : -1;
     if (prev != NULL) {
-        prev->next = item->next;
+        prev->Next = Item->Next;
     } else {
-        SDL_assert(SDL_hapticlist == item);
-        SDL_hapticlist = item->next;
+        SDL_assert(SDL_hapticlist == Item);
+        SDL_hapticlist = Item->Next;
     }
-    if (item == SDL_hapticlist_tail) {
+    if (Item == SDL_hapticlist_tail) {
         SDL_hapticlist_tail = prev;
     }
     --numhaptics;
     /* !!! TODO: Send a haptic remove event? */
-    SDL_free(item);
+    SDL_free(Item);
     return retval;
 }
 
@@ -106,18 +106,18 @@ SDL_SYS_NumHaptics(void)
 static SDL_hapticlist_item *
 HapticByDevIndex(int device_index)
 {
-    SDL_hapticlist_item *item = SDL_hapticlist;
+    SDL_hapticlist_item *Item = SDL_hapticlist;
 
     if ((device_index < 0) || (device_index >= numhaptics)) {
         return NULL;
     }
 
     while (device_index > 0) {
-        SDL_assert(item != NULL);
+        SDL_assert(Item != NULL);
         --device_index;
-        item = item->next;
+        Item = Item->Next;
     }
-    return item;
+    return Item;
 }
 
 /*
@@ -126,8 +126,8 @@ HapticByDevIndex(int device_index)
 const char *
 SDL_SYS_HapticName(int index)
 {
-    SDL_hapticlist_item *item = HapticByDevIndex(index);
-    return item->name;
+    SDL_hapticlist_item *Item = HapticByDevIndex(index);
+    return Item->name;
 }
 
 /*
@@ -136,11 +136,11 @@ SDL_SYS_HapticName(int index)
 int
 SDL_SYS_HapticOpen(SDL_Haptic * haptic)
 {
-    SDL_hapticlist_item *item = HapticByDevIndex(haptic->index);
-    if (item->bXInputHaptic) {
-        return SDL_XINPUT_HapticOpen(haptic, item);
+    SDL_hapticlist_item *Item = HapticByDevIndex(haptic->index);
+    if (Item->bXInputHaptic) {
+        return SDL_XINPUT_HapticOpen(haptic, Item);
     } else {
-        return SDL_DINPUT_HapticOpen(haptic, item);
+        return SDL_DINPUT_HapticOpen(haptic, Item);
     }
 }
 
@@ -152,12 +152,12 @@ int
 SDL_SYS_HapticMouse(void)
 {
 #if SDL_HAPTIC_DINPUT
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     int index = 0;
 
     /* Grab the first mouse haptic device we find. */
-    for (item = SDL_hapticlist; item != NULL; item = item->next) {
-        if (item->capabilities.dwDevType == DI8DEVCLASS_POINTER) {
+    for (Item = SDL_hapticlist; Item != NULL; Item = Item->Next) {
+        if (Item->capabilities.dwDevType == DI8DEVCLASS_POINTER) {
             return index;
         }
         ++index;
@@ -254,12 +254,12 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 void
 SDL_SYS_HapticQuit(void)
 {
-    SDL_hapticlist_item *item;
-    SDL_hapticlist_item *next = NULL;
+    SDL_hapticlist_item *Item;
+    SDL_hapticlist_item *Next = NULL;
     SDL_Haptic *hapticitem = NULL;
 
     extern SDL_Haptic *SDL_haptics;
-    for (hapticitem = SDL_haptics; hapticitem; hapticitem = hapticitem->next) {
+    for (hapticitem = SDL_haptics; hapticitem; hapticitem = hapticitem->Next) {
         if ((hapticitem->hwdata->bXInputHaptic) && (hapticitem->hwdata->thread)) {
             /* we _have_ to stop the thread before we free the XInput DLL! */
             SDL_AtomicSet(&hapticitem->hwdata->stopThread, 1);
@@ -268,13 +268,13 @@ SDL_SYS_HapticQuit(void)
         }
     }
 
-    for (item = SDL_hapticlist; item; item = next) {
+    for (Item = SDL_hapticlist; Item; Item = Next) {
         /* Opened and not closed haptics are leaked, this is on purpose.
          * Close your haptic devices after usage. */
         /* !!! FIXME: (...is leaking on purpose a good idea?) - No, of course not. */
-        next = item->next;
-        SDL_free(item->name);
-        SDL_free(item);
+        Next = Item->Next;
+        SDL_free(Item->name);
+        SDL_free(Item);
     }
 
     SDL_XINPUT_HapticQuit();

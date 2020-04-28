@@ -100,7 +100,7 @@ typedef struct SDL_AudioDeviceItem
     char *name;
     char *original_name;
     int dupenum;
-    struct SDL_AudioDeviceItem *next;
+    struct SDL_AudioDeviceItem *Next;
 } SDL_AudioDeviceItem;
 
 

@@ -127,15 +127,15 @@ SDL_DINPUT_MaybeAddDevice(const DIDEVICEINSTANCE * pdidInstance)
     LPDIRECTINPUTDEVICE8 device;
     const DWORD needflags = DIDC_ATTACHED | DIDC_FORCEFEEDBACK;
     DIDEVCAPS capabilities;
-    SDL_hapticlist_item *item = NULL;
+    SDL_hapticlist_item *Item = NULL;
 
     if (dinput == NULL) {
         return -1;  /* not initialized. We'll pick these up on enumeration if we init later. */
     }
 
     /* Make sure we don't already have it */
-    for (item = SDL_hapticlist; item; item = item->next) {
-        if ((!item->bXInputHaptic) && (SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0)) {
+    for (Item = SDL_hapticlist; Item; Item = Item->Next) {
+        if ((!Item->bXInputHaptic) && (SDL_memcmp(&Item->instance, pdidInstance, sizeof(*pdidInstance)) == 0)) {
             return -1;  /* Already added */
         }
     }
@@ -161,40 +161,40 @@ SDL_DINPUT_MaybeAddDevice(const DIDEVICEINSTANCE * pdidInstance)
         return -1;  /* not a device we can use. */
     }
 
-    item = (SDL_hapticlist_item *)SDL_calloc(1, sizeof(SDL_hapticlist_item));
-    if (item == NULL) {
+    Item = (SDL_hapticlist_item *)SDL_calloc(1, sizeof(SDL_hapticlist_item));
+    if (Item == NULL) {
         return SDL_OutOfMemory();
     }
 
-    item->name = WIN_StringToUTF8(pdidInstance->tszProductName);
-    if (!item->name) {
-        SDL_free(item);
+    Item->name = WIN_StringToUTF8(pdidInstance->tszProductName);
+    if (!Item->name) {
+        SDL_free(Item);
         return -1;
     }
 
     /* Copy the instance over, useful for creating devices. */
-    SDL_memcpy(&item->instance, pdidInstance, sizeof(DIDEVICEINSTANCE));
-    SDL_memcpy(&item->capabilities, &capabilities, sizeof(capabilities));
+    SDL_memcpy(&Item->instance, pdidInstance, sizeof(DIDEVICEINSTANCE));
+    SDL_memcpy(&Item->capabilities, &capabilities, sizeof(capabilities));
 
-    return SDL_SYS_AddHapticDevice(item);
+    return SDL_SYS_AddHapticDevice(Item);
 }
 
 int
 SDL_DINPUT_MaybeRemoveDevice(const DIDEVICEINSTANCE * pdidInstance)
 {
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     SDL_hapticlist_item *prev = NULL;
 
     if (dinput == NULL) {
         return -1;  /* not initialized, ignore this. */
     }
 
-    for (item = SDL_hapticlist; item != NULL; item = item->next) {
-        if (!item->bXInputHaptic && SDL_memcmp(&item->instance, pdidInstance, sizeof(*pdidInstance)) == 0) {
+    for (Item = SDL_hapticlist; Item != NULL; Item = Item->Next) {
+        if (!Item->bXInputHaptic && SDL_memcmp(&Item->instance, pdidInstance, sizeof(*pdidInstance)) == 0) {
             /* found it, remove it. */
-            return SDL_SYS_RemoveHapticDevice(prev, item);
+            return SDL_SYS_RemoveHapticDevice(prev, Item);
         }
-        prev = item;
+        prev = Item;
     }
     return -1;
 }
@@ -419,14 +419,14 @@ SDL_DINPUT_HapticOpenFromDevice(SDL_Haptic * haptic, LPDIRECTINPUTDEVICE8 device
 }
 
 int
-SDL_DINPUT_HapticOpen(SDL_Haptic * haptic, SDL_hapticlist_item *item)
+SDL_DINPUT_HapticOpen(SDL_Haptic * haptic, SDL_hapticlist_item *Item)
 {
     HRESULT ret;
     LPDIRECTINPUTDEVICE8 device;
     LPDIRECTINPUTDEVICE8 device8;
 
     /* Open the device */
-    ret = IDirectInput8_CreateDevice(dinput, &item->instance.guidInstance,
+    ret = IDirectInput8_CreateDevice(dinput, &Item->instance.guidInstance,
         &device, NULL);
     if (FAILED(ret)) {
         DI_SetError("Creating DirectInput device", ret);
@@ -478,7 +478,7 @@ SDL_DINPUT_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 int
 SDL_DINPUT_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     int index = 0;
     HRESULT ret;
     DIDEVICEINSTANCE joy_instance;
@@ -490,8 +490,8 @@ SDL_DINPUT_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
     }
 
     /* Since it comes from a joystick we have to try to match it with a haptic device on our haptic list. */
-    for (item = SDL_hapticlist; item != NULL; item = item->next) {
-        if (!item->bXInputHaptic && WIN_IsEqualGUID(&item->instance.guidInstance, &joy_instance.guidInstance)) {
+    for (Item = SDL_hapticlist; Item != NULL; Item = Item->Next) {
+        if (!Item->bXInputHaptic && WIN_IsEqualGUID(&Item->instance.guidInstance, &joy_instance.guidInstance)) {
             haptic->index = index;
             return SDL_DINPUT_HapticOpenFromDevice(haptic, joystick->hwdata->InputDevice, SDL_TRUE);
         }

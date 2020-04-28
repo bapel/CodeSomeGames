@@ -292,26 +292,26 @@ static void Vec2ToDLU(short *x, short *y)
 
 static SDL_bool AddDialogControl(WIN_DialogData *dialog, WORD type, DWORD style, DWORD exStyle, int x, int y, int w, int h, int id, const char *caption, WORD ordinal)
 {
-    DLGITEMTEMPLATEEX item;
+    DLGITEMTEMPLATEEX Item;
     WORD marker = 0xFFFF;
     WORD extraData = 0;
 
-    SDL_zero(item);
-    item.style = style;
-    item.exStyle = exStyle;
-    item.x = x;
-    item.y = y;
-    item.cx = w;
-    item.cy = h;
-    item.id = id;
+    SDL_zero(Item);
+    Item.style = style;
+    Item.exStyle = exStyle;
+    Item.x = x;
+    Item.y = y;
+    Item.cx = w;
+    Item.cy = h;
+    Item.id = id;
 
-    Vec2ToDLU(&item.x, &item.y);
-    Vec2ToDLU(&item.cx, &item.cy);
+    Vec2ToDLU(&Item.x, &Item.y);
+    Vec2ToDLU(&Item.cx, &Item.cy);
 
     if (!AlignDialogData(dialog, sizeof(DWORD))) {
         return SDL_FALSE;
     }
-    if (!AddDialogData(dialog, &item, sizeof(item))) {
+    if (!AddDialogData(dialog, &Item, sizeof(Item))) {
         return SDL_FALSE;
     }
     if (!AddDialogData(dialog, &marker, sizeof(marker))) {

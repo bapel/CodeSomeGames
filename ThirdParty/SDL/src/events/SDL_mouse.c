@@ -653,7 +653,7 @@ SDL_SendMouseWheel(SDL_Window * window, SDL_MouseID mouseID, float x, float y, S
 void
 SDL_MouseQuit(void)
 {
-    SDL_Cursor *cursor, *next;
+    SDL_Cursor *cursor, *Next;
     SDL_Mouse *mouse = SDL_GetMouse();
 
     if (mouse->CaptureMouse) {
@@ -664,9 +664,9 @@ SDL_MouseQuit(void)
 
     cursor = mouse->cursors;
     while (cursor) {
-        next = cursor->next;
+        Next = cursor->Next;
         SDL_FreeCursor(cursor);
-        cursor = next;
+        cursor = Next;
     }
     mouse->cursors = NULL;
     mouse->cur_cursor = NULL;
@@ -964,7 +964,7 @@ SDL_CreateColorCursor(SDL_Surface *surface, int hot_x, int hot_y)
 
     cursor = mouse->CreateCursor(surface, hot_x, hot_y);
     if (cursor) {
-        cursor->next = mouse->cursors;
+        cursor->Next = mouse->cursors;
         mouse->cursors = cursor;
     }
 
@@ -986,7 +986,7 @@ SDL_CreateSystemCursor(SDL_SystemCursor id)
 
     cursor = mouse->CreateSystemCursor(id);
     if (cursor) {
-        cursor->next = mouse->cursors;
+        cursor->Next = mouse->cursors;
         mouse->cursors = cursor;
     }
 
@@ -1007,7 +1007,7 @@ SDL_SetCursor(SDL_Cursor * cursor)
         /* Make sure the cursor is still valid for this mouse */
         if (cursor != mouse->def_cursor) {
             SDL_Cursor *found;
-            for (found = mouse->cursors; found; found = found->next) {
+            for (found = mouse->cursors; found; found = found->Next) {
                 if (found == cursor) {
                     break;
                 }
@@ -1077,12 +1077,12 @@ SDL_FreeCursor(SDL_Cursor * cursor)
     }
 
     for (prev = NULL, curr = mouse->cursors; curr;
-         prev = curr, curr = curr->next) {
+         prev = curr, curr = curr->Next) {
         if (curr == cursor) {
             if (prev) {
-                prev->next = curr->next;
+                prev->Next = curr->Next;
             } else {
-                mouse->cursors = curr->next;
+                mouse->cursors = curr->Next;
             }
 
             if (mouse->FreeCursor) {

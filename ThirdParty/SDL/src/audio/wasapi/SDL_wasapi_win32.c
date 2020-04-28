@@ -407,11 +407,11 @@ WASAPI_EnumerateEndpointsForFlow(const SDL_bool iscapture)
     }
 
     for (i = 0; i < total; i++) {
-        EndpointItem *item = items + i;
+        EndpointItem *Item = items + i;
         IMMDevice *device = NULL;
         if (SUCCEEDED(IMMDeviceCollection_Item(collection, i, &device))) {
-            if (SUCCEEDED(IMMDevice_GetId(device, &item->devid))) {
-                item->devname = GetWasapiDeviceName(device);
+            if (SUCCEEDED(IMMDevice_GetId(device, &Item->devid))) {
+                Item->devname = GetWasapiDeviceName(device);
             }
             IMMDevice_Release(device);
         }
@@ -422,12 +422,12 @@ WASAPI_EnumerateEndpointsForFlow(const SDL_bool iscapture)
 
     /* Send the sorted list on to the SDL's higher level. */
     for (i = 0; i < total; i++) {
-        EndpointItem *item = items + i;
-        if ((item->devid) && (item->devname)) {
-            WASAPI_AddDevice(iscapture, item->devname, item->devid);
+        EndpointItem *Item = items + i;
+        if ((Item->devid) && (Item->devname)) {
+            WASAPI_AddDevice(iscapture, Item->devname, Item->devid);
         }
-        SDL_free(item->devname);
-        CoTaskMemFree(item->devid);
+        SDL_free(Item->devname);
+        CoTaskMemFree(Item->devid);
     }
 
     SDL_free(items);

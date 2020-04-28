@@ -75,7 +75,7 @@ struct _SDL_Joystick
 
     int ref_count;              /* Reference count for multiple opens */
 
-    struct _SDL_Joystick *next; /* pointer to next joystick we have allocated */
+    struct _SDL_Joystick *Next; /* pointer to next joystick we have allocated */
 };
 
 /* Device bus definitions */

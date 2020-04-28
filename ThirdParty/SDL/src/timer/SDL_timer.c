@@ -36,14 +36,14 @@ typedef struct _SDL_Timer
     Uint32 interval;
     Uint32 scheduled;
     SDL_atomic_t canceled;
-    struct _SDL_Timer *next;
+    struct _SDL_Timer *Next;
 } SDL_Timer;
 
 typedef struct _SDL_TimerMap
 {
     int timerID;
     SDL_Timer *timer;
-    struct _SDL_TimerMap *next;
+    struct _SDL_TimerMap *Next;
 } SDL_TimerMap;
 
 /* The timers are kept in a sorted list */
@@ -82,7 +82,7 @@ SDL_AddTimerInternal(SDL_TimerData *data, SDL_Timer *timer)
     SDL_Timer *prev, *curr;
 
     prev = NULL;
-    for (curr = data->timers; curr; prev = curr, curr = curr->next) {
+    for (curr = data->timers; curr; prev = curr, curr = curr->Next) {
         if ((Sint32)(timer->scheduled-curr->scheduled) < 0) {
             break;
         }
@@ -90,11 +90,11 @@ SDL_AddTimerInternal(SDL_TimerData *data, SDL_Timer *timer)
 
     /* Insert the timer here! */
     if (prev) {
-        prev->next = timer;
+        prev->Next = timer;
     } else {
         data->timers = timer;
     }
-    timer->next = curr;
+    timer->Next = curr;
 }
 
 static int SDLCALL
@@ -122,7 +122,7 @@ SDL_TimerThread(void *_data)
 
             /* Make any unused timer structures available */
             if (freelist_head) {
-                freelist_tail->next = data->freelist;
+                freelist_tail->Next = data->freelist;
                 data->freelist = freelist_head;
             }
         }
@@ -131,7 +131,7 @@ SDL_TimerThread(void *_data)
         /* Sort the pending timers into our list */
         while (pending) {
             current = pending;
-            pending = pending->next;
+            pending = pending->Next;
             SDL_AddTimerInternal(data, current);
         }
         freelist_head = NULL;
@@ -158,7 +158,7 @@ SDL_TimerThread(void *_data)
             }
 
             /* We're going to do something with this timer */
-            data->timers = current->next;
+            data->timers = current->Next;
 
             if (SDL_AtomicGet(&current->canceled)) {
                 interval = 0;
@@ -176,7 +176,7 @@ SDL_TimerThread(void *_data)
                     freelist_head = current;
                 }
                 if (freelist_tail) {
-                    freelist_tail->next = current;
+                    freelist_tail->Next = current;
                 }
                 freelist_tail = current;
 
@@ -256,17 +256,17 @@ SDL_TimerQuit(void)
         /* Clean up the timer entries */
         while (data->timers) {
             timer = data->timers;
-            data->timers = timer->next;
+            data->timers = timer->Next;
             SDL_free(timer);
         }
         while (data->freelist) {
             timer = data->freelist;
-            data->freelist = timer->next;
+            data->freelist = timer->Next;
             SDL_free(timer);
         }
         while (data->timermap) {
             entry = data->timermap;
-            data->timermap = entry->next;
+            data->timermap = entry->Next;
             SDL_free(entry);
         }
 
@@ -292,7 +292,7 @@ SDL_AddTimer(Uint32 interval, SDL_TimerCallback callback, void *param)
 
     timer = data->freelist;
     if (timer) {
-        data->freelist = timer->next;
+        data->freelist = timer->Next;
     }
     SDL_AtomicUnlock(&data->lock);
 
@@ -322,13 +322,13 @@ SDL_AddTimer(Uint32 interval, SDL_TimerCallback callback, void *param)
     entry->timerID = timer->timerID;
 
     SDL_LockMutex(data->timermap_lock);
-    entry->next = data->timermap;
+    entry->Next = data->timermap;
     data->timermap = entry;
     SDL_UnlockMutex(data->timermap_lock);
 
     /* Add the timer to the pending list for the timer thread */
     SDL_AtomicLock(&data->lock);
-    timer->next = data->pending;
+    timer->Next = data->pending;
     data->pending = timer;
     SDL_AtomicUnlock(&data->lock);
 
@@ -348,12 +348,12 @@ SDL_RemoveTimer(SDL_TimerID id)
     /* Find the timer */
     SDL_LockMutex(data->timermap_lock);
     prev = NULL;
-    for (entry = data->timermap; entry; prev = entry, entry = entry->next) {
+    for (entry = data->timermap; entry; prev = entry, entry = entry->Next) {
         if (entry->timerID == id) {
             if (prev) {
-                prev->next = entry->next;
+                prev->Next = entry->Next;
             } else {
-                data->timermap = entry->next;
+                data->timermap = entry->Next;
             }
             break;
         }

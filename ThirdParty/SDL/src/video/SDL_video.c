@@ -494,7 +494,7 @@ SDL_VideoInit(const char *driver_name)
         for (i = 0; bootstrap[i]; ++i) {
             if (SDL_strncasecmp(bootstrap[i]->name, driver_name, SDL_strlen(driver_name)) == 0) {
                 if (bootstrap[i]->available()) {
-                    video = bootstrap[i]->create(index);
+                    video = bootstrap[i]->Create(index);
                     break;
                 }
             }
@@ -502,7 +502,7 @@ SDL_VideoInit(const char *driver_name)
     } else {
         for (i = 0; bootstrap[i]; ++i) {
             if (bootstrap[i]->available()) {
-                video = bootstrap[i]->create(index);
+                video = bootstrap[i]->Create(index);
                 if (video != NULL) {
                     break;
                 }
@@ -1286,7 +1286,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
     }
 
     /* See if there are any fullscreen windows */
-    for (other = _this->windows; other; other = other->next) {
+    for (other = _this->windows; other; other = other->Next) {
         SDL_bool setDisplayMode = SDL_FALSE;
 
         if (other == window) {
@@ -1394,7 +1394,7 @@ SDL_ToggleDragAndDropSupport(void)
     if (_this && _this->AcceptDragAndDrop) {
         const SDL_bool enable = IsAcceptingDragAndDrop();
         SDL_Window *window;
-        for (window = _this->windows; window; window = window->next) {
+        for (window = _this->windows; window; window = window->Next) {
             _this->AcceptDragAndDrop(window, enable);
         }
     }
@@ -1545,7 +1545,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window->last_fullscreen_flags = window->flags;
     window->opacity = 1.0f;
     window->brightness = 1.0f;
-    window->next = _this->windows;
+    window->Next = _this->windows;
     window->is_destroying = SDL_FALSE;
 
     if (_this->windows) {
@@ -1615,7 +1615,7 @@ SDL_CreateWindowFrom(const void *data)
     window->is_destroying = SDL_FALSE;
     window->opacity = 1.0f;
     window->brightness = 1.0f;
-    window->next = _this->windows;
+    window->Next = _this->windows;
     if (_this->windows) {
         _this->windows->prev = window;
     }
@@ -1750,7 +1750,7 @@ SDL_GetWindowFromID(Uint32 id)
     if (!_this) {
         return NULL;
     }
-    for (window = _this->windows; window; window = window->next) {
+    for (window = _this->windows; window; window = window->Next) {
         if (window->id == id) {
             return window;
         }
@@ -1828,7 +1828,7 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
 
     /* See if the named data already exists */
     prev = NULL;
-    for (data = window->data; data; prev = data, data = data->next) {
+    for (data = window->data; data; prev = data, data = data->Next) {
         if (data->name && SDL_strcmp(data->name, name) == 0) {
             void *last_value = data->data;
 
@@ -1838,9 +1838,9 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
             } else {
                 /* Delete this value */
                 if (prev) {
-                    prev->next = data->next;
+                    prev->Next = data->Next;
                 } else {
-                    window->data = data->next;
+                    window->data = data->Next;
                 }
                 SDL_free(data->name);
                 SDL_free(data);
@@ -1854,7 +1854,7 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
         data = (SDL_WindowUserData *)SDL_malloc(sizeof(*data));
         data->name = SDL_strdup(name);
         data->data = userdata;
-        data->next = window->data;
+        data->Next = window->data;
         window->data = data;
     }
     return NULL;
@@ -1873,7 +1873,7 @@ SDL_GetWindowData(SDL_Window * window, const char *name)
       return NULL;
     }
 
-    for (data = window->data; data; data = data->next) {
+    for (data = window->data; data; data = data->Next) {
         if (data->name && SDL_strcmp(data->name, name) == 0) {
             return data->data;
         }
@@ -2725,7 +2725,7 @@ SDL_GetFocusWindow(void)
     if (!_this) {
         return NULL;
     }
-    for (window = _this->windows; window; window = window->next) {
+    for (window = _this->windows; window; window = window->Next) {
         if (window->flags & SDL_WINDOW_INPUT_FOCUS) {
             return window;
         }
@@ -2792,19 +2792,19 @@ SDL_DestroyWindow(SDL_Window * window)
     while (window->data) {
         SDL_WindowUserData *data = window->data;
 
-        window->data = data->next;
+        window->data = data->Next;
         SDL_free(data->name);
         SDL_free(data);
     }
 
     /* Unlink the window from the list */
-    if (window->next) {
-        window->next->prev = window->prev;
+    if (window->Next) {
+        window->Next->prev = window->prev;
     }
     if (window->prev) {
-        window->prev->next = window->next;
+        window->prev->Next = window->Next;
     } else {
-        _this->windows = window->next;
+        _this->windows = window->Next;
     }
 
     SDL_free(window);
@@ -4075,7 +4075,7 @@ void SDL_OnApplicationWillResignActive(void)
 {
     if (_this) {
         SDL_Window *window;
-        for (window = _this->windows; window != NULL; window = window->next) {
+        for (window = _this->windows; window != NULL; window = window->Next) {
             SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
             SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
         }
@@ -4099,7 +4099,7 @@ void SDL_OnApplicationDidBecomeActive(void)
 
     if (_this) {
         SDL_Window *window;
-        for (window = _this->windows; window != NULL; window = window->next) {
+        for (window = _this->windows; window != NULL; window = window->Next) {
             SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
             SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
         }

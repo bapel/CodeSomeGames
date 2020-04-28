@@ -61,7 +61,7 @@ int
 SDL_XINPUT_MaybeAddDevice(const DWORD dwUserid)
 {
     const Uint8 userid = (Uint8)dwUserid;
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     XINPUT_VIBRATION state;
 
     if ((!loaded_xinput) || (dwUserid >= XUSER_MAX_COUNT)) {
@@ -69,8 +69,8 @@ SDL_XINPUT_MaybeAddDevice(const DWORD dwUserid)
     }
 
     /* Make sure we don't already have it */
-    for (item = SDL_hapticlist; item; item = item->next) {
-        if (item->bXInputHaptic && item->userid == userid) {
+    for (Item = SDL_hapticlist; Item; Item = Item->Next) {
+        if (Item->bXInputHaptic && Item->userid == userid) {
             return -1;  /* Already added */
         }
     }
@@ -80,49 +80,49 @@ SDL_XINPUT_MaybeAddDevice(const DWORD dwUserid)
         return -1;  /* no force feedback on this device. */
     }
 
-    item = (SDL_hapticlist_item *)SDL_malloc(sizeof(SDL_hapticlist_item));
-    if (item == NULL) {
+    Item = (SDL_hapticlist_item *)SDL_malloc(sizeof(SDL_hapticlist_item));
+    if (Item == NULL) {
         return SDL_OutOfMemory();
     }
 
-    SDL_zerop(item);
+    SDL_zerop(Item);
 
     /* !!! FIXME: I'm not bothering to query for a real name right now (can we even?) */
     {
         char buf[64];
         SDL_snprintf(buf, sizeof(buf), "XInput Controller #%u", (unsigned int)(userid + 1));
-        item->name = SDL_strdup(buf);
+        Item->name = SDL_strdup(buf);
     }
 
-    if (!item->name) {
-        SDL_free(item);
+    if (!Item->name) {
+        SDL_free(Item);
         return -1;
     }
 
     /* Copy the instance over, useful for creating devices. */
-    item->bXInputHaptic = SDL_TRUE;
-    item->userid = userid;
+    Item->bXInputHaptic = SDL_TRUE;
+    Item->userid = userid;
 
-    return SDL_SYS_AddHapticDevice(item);
+    return SDL_SYS_AddHapticDevice(Item);
 }
 
 int
 SDL_XINPUT_MaybeRemoveDevice(const DWORD dwUserid)
 {
     const Uint8 userid = (Uint8)dwUserid;
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     SDL_hapticlist_item *prev = NULL;
 
     if ((!loaded_xinput) || (dwUserid >= XUSER_MAX_COUNT)) {
         return -1;
     }
 
-    for (item = SDL_hapticlist; item != NULL; item = item->next) {
-        if (item->bXInputHaptic && item->userid == userid) {
+    for (Item = SDL_hapticlist; Item != NULL; Item = Item->Next) {
+        if (Item->bXInputHaptic && Item->userid == userid) {
             /* found it, remove it. */
-            return SDL_SYS_RemoveHapticDevice(prev, item);
+            return SDL_SYS_RemoveHapticDevice(prev, Item);
         }
-        prev = item;
+        prev = Item;
     }
     return -1;
 }
@@ -219,9 +219,9 @@ SDL_XINPUT_HapticOpenFromUserIndex(SDL_Haptic *haptic, const Uint8 userid)
 }
 
 int
-SDL_XINPUT_HapticOpen(SDL_Haptic * haptic, SDL_hapticlist_item *item)
+SDL_XINPUT_HapticOpen(SDL_Haptic * haptic, SDL_hapticlist_item *Item)
 {
-    return SDL_XINPUT_HapticOpenFromUserIndex(haptic, item->userid);
+    return SDL_XINPUT_HapticOpenFromUserIndex(haptic, Item->userid);
 }
 
 int
@@ -233,12 +233,12 @@ SDL_XINPUT_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 int
 SDL_XINPUT_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    SDL_hapticlist_item *item;
+    SDL_hapticlist_item *Item;
     int index = 0;
 
     /* Since it comes from a joystick we have to try to match it with a haptic device on our haptic list. */
-    for (item = SDL_hapticlist; item != NULL; item = item->next) {
-        if (item->bXInputHaptic && item->userid == joystick->hwdata->userid) {
+    for (Item = SDL_hapticlist; Item != NULL; Item = Item->Next) {
+        if (Item->bXInputHaptic && Item->userid == joystick->hwdata->userid) {
             haptic->index = index;
             return SDL_XINPUT_HapticOpenFromUserIndex(haptic, joystick->hwdata->userid);
         }

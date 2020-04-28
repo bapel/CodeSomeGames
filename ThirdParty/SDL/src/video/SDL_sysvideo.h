@@ -67,7 +67,7 @@ typedef struct SDL_WindowUserData
 {
     char *name;
     void *data;
-    struct SDL_WindowUserData *next;
+    struct SDL_WindowUserData *Next;
 } SDL_WindowUserData;
 
 /* Define the SDL window structure, corresponding to toplevel windows */
@@ -112,7 +112,7 @@ struct SDL_Window
     void *driverdata;
 
     SDL_Window *prev;
-    SDL_Window *next;
+    SDL_Window *Next;
 };
 #define FULLSCREEN_VISIBLE(W) \
     (((W)->flags & SDL_WINDOW_FULLSCREEN) && \
@@ -407,7 +407,7 @@ typedef struct VideoBootStrap
     const char *name;
     const char *desc;
     int (*available) (void);
-    SDL_VideoDevice *(*create) (int devindex);
+    SDL_VideoDevice *(*Create) (int devindex);
 } VideoBootStrap;
 
 /* Not all of these are available in a given build. Use #ifdefs, etc. */

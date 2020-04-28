@@ -2000,7 +2000,7 @@ struct malloc_segment
 {
     char *base;                 /* base address */
     size_t size;                /* allocated size */
-    struct malloc_segment *next;        /* ptr to next segment */
+    struct malloc_segment *Next;        /* ptr to next segment */
     flag_t sflags;              /* mmap and extern flag */
 };
 
@@ -2190,7 +2190,7 @@ segment_holding(mstate m, char *addr)
     for (;;) {
         if (addr >= sp->base && addr < sp->base + sp->size)
             return sp;
-        if ((sp = sp->next) == 0)
+        if ((sp = sp->Next) == 0)
             return 0;
     }
 }
@@ -2203,7 +2203,7 @@ has_segment_link(mstate m, msegmentptr ss)
     for (;;) {
         if ((char *) sp >= ss->base && (char *) sp < ss->base + ss->size)
             return 1;
-        if ((sp = sp->next) == 0)
+        if ((sp = sp->Next) == 0)
             return 0;
     }
 }
@@ -2962,7 +2962,7 @@ internal_mallinfo(mstate m)
                     }
                     q = next_chunk(q);
                 }
-                s = s->next;
+                s = s->Next;
             }
 
             nm.arena = sum;
@@ -3006,7 +3006,7 @@ internal_malloc_stats(mstate m)
                         used -= chunksize(q);
                     q = next_chunk(q);
                 }
-                s = s->next;
+                s = s->Next;
             }
         }
 #ifndef LACKS_STDIO_H
@@ -3470,7 +3470,7 @@ add_segment(mstate m, char *tbase, size_t tsize, flag_t mmapped)
     m->seg.base = tbase;
     m->seg.size = tsize;
     m->seg.sflags = mmapped;
-    m->seg.next = ss;
+    m->seg.Next = ss;
 
     /* Insert trailing fenceposts */
     for (;;) {
@@ -3658,7 +3658,7 @@ sys_alloc(mstate m, size_t nb)
             /* Try to merge with an existing segment */
             msegmentptr sp = &m->seg;
             while (sp != 0 && tbase != sp->base + sp->size)
-                sp = sp->next;
+                sp = sp->Next;
             if (sp != 0 && !is_extern_segment(sp) && (sp->sflags & IS_MMAPPED_BIT) == mmap_flag && segment_holds(sp, m->top)) { /* append */
                 sp->size += tsize;
                 init_top(m, m->top, m->topsize + tsize);
@@ -3667,7 +3667,7 @@ sys_alloc(mstate m, size_t nb)
                     m->least_addr = tbase;
                 sp = &m->seg;
                 while (sp != 0 && sp->base != tbase + tsize)
-                    sp = sp->next;
+                    sp = sp->Next;
                 if (sp != 0 &&
                     !is_extern_segment(sp) &&
                     (sp->sflags & IS_MMAPPED_BIT) == mmap_flag) {
@@ -3704,11 +3704,11 @@ release_unused_segments(mstate m)
 {
     size_t released = 0;
     msegmentptr pred = &m->seg;
-    msegmentptr sp = pred->next;
+    msegmentptr sp = pred->Next;
     while (sp != 0) {
         char *base = sp->base;
         size_t size = sp->size;
-        msegmentptr next = sp->next;
+        msegmentptr Next = sp->Next;
         if (is_mmapped_segment(sp) && !is_extern_segment(sp)) {
             mchunkptr p = align_as_chunk(base);
             size_t psize = chunksize(p);
@@ -3728,14 +3728,14 @@ release_unused_segments(mstate m)
                     m->footprint -= size;
                     /* unlink obsoleted record */
                     sp = pred;
-                    sp->next = next;
+                    sp->Next = Next;
                 } else {        /* back out if cannot unmap */
                     insert_large_chunk(m, tp, psize);
                 }
             }
         }
         pred = sp;
-        sp = next;
+        sp = Next;
     }
     return released;
 }
@@ -3933,14 +3933,14 @@ internal_realloc(mstate m, void *oldmem, size_t bytes)
     if (!PREACTION(m)) {
         mchunkptr oldp = mem2chunk(oldmem);
         size_t oldsize = chunksize(oldp);
-        mchunkptr next = chunk_plus_offset(oldp, oldsize);
+        mchunkptr Next = chunk_plus_offset(oldp, oldsize);
         mchunkptr newp = 0;
         void *extra = 0;
 
         /* Try to either shrink or extend into top. Else malloc-copy-free */
 
         if (RTCHECK(ok_address(m, oldp) && ok_cinuse(oldp) &&
-                    ok_next(oldp, next) && ok_pinuse(next))) {
+                    ok_next(oldp, Next) && ok_pinuse(Next))) {
             size_t nb = request2size(bytes);
             if (is_mmapped(oldp))
                 newp = mmap_resize(m, oldp, nb);
@@ -3953,7 +3953,7 @@ internal_realloc(mstate m, void *oldmem, size_t bytes)
                     set_inuse(m, remainder, rsize);
                     extra = chunk2mem(remainder);
                 }
-            } else if (next == m->top && oldsize + m->topsize > nb) {
+            } else if (Next == m->top && oldsize + m->topsize > nb) {
                 /* Expand into top */
                 size_t newsize = oldsize + m->topsize;
                 size_t newtopsize = newsize - nb;
@@ -4367,7 +4367,7 @@ dlfree(void *mem)
             check_inuse_chunk(fm, p);
             if (RTCHECK(ok_address(fm, p) && ok_cinuse(p))) {
                 size_t psize = chunksize(p);
-                mchunkptr next = chunk_plus_offset(p, psize);
+                mchunkptr Next = chunk_plus_offset(p, psize);
                 if (!pinuse(p)) {
                     size_t prevsize = p->prev_foot;
                     if ((prevsize & IS_MMAPPED_BIT) != 0) {
@@ -4383,10 +4383,10 @@ dlfree(void *mem)
                         if (RTCHECK(ok_address(fm, prev))) {    /* consolidate backward */
                             if (p != fm->dv) {
                                 unlink_chunk(fm, p, prevsize);
-                            } else if ((next->head & INUSE_BITS) ==
+                            } else if ((Next->head & INUSE_BITS) ==
                                        INUSE_BITS) {
                                 fm->dvsize = psize;
-                                set_free_with_pinuse(p, psize, next);
+                                set_free_with_pinuse(p, psize, Next);
                                 goto postaction;
                             }
                         } else
@@ -4394,9 +4394,9 @@ dlfree(void *mem)
                     }
                 }
 
-                if (RTCHECK(ok_next(p, next) && ok_pinuse(next))) {
-                    if (!cinuse(next)) {        /* consolidate forward */
-                        if (next == fm->top) {
+                if (RTCHECK(ok_next(p, Next) && ok_pinuse(Next))) {
+                    if (!cinuse(Next)) {        /* consolidate forward */
+                        if (Next == fm->top) {
                             size_t tsize = fm->topsize += psize;
                             fm->top = p;
                             p->head = tsize | PINUSE_BIT;
@@ -4407,15 +4407,15 @@ dlfree(void *mem)
                             if (should_trim(fm, tsize))
                                 sys_trim(fm, 0);
                             goto postaction;
-                        } else if (next == fm->dv) {
+                        } else if (Next == fm->dv) {
                             size_t dsize = fm->dvsize += psize;
                             fm->dv = p;
                             set_size_and_pinuse_of_free_chunk(p, dsize);
                             goto postaction;
                         } else {
-                            size_t nsize = chunksize(next);
+                            size_t nsize = chunksize(Next);
                             psize += nsize;
-                            unlink_chunk(fm, next, nsize);
+                            unlink_chunk(fm, Next, nsize);
                             set_size_and_pinuse_of_free_chunk(p, psize);
                             if (p == fm->dv) {
                                 fm->dvsize = psize;
@@ -4423,7 +4423,7 @@ dlfree(void *mem)
                             }
                         }
                     } else
-                        set_free_with_pinuse(p, psize, next);
+                        set_free_with_pinuse(p, psize, Next);
                     insert_chunk(fm, p, psize);
                     check_free_chunk(fm, p);
                     goto postaction;

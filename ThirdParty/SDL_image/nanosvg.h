@@ -134,7 +134,7 @@ typedef struct NSVGpath
 	int npts;					// Total number of bezier points.
 	char closed;				// Flag indicating if shapes should be treated as closed.
 	float bounds[4];			// Tight bounding box of the shape [minx,miny,maxx,maxy].
-	struct NSVGpath* next;		// Pointer to next path, or NULL if last element.
+	struct NSVGpath* Next;		// Pointer to next path, or NULL if last element.
 } NSVGpath;
 
 typedef struct NSVGshape
@@ -154,7 +154,7 @@ typedef struct NSVGshape
 	unsigned char flags;		// Logical or of NSVG_FLAGS_* flags
 	float bounds[4];			// Tight bounding box of the shape [minx,miny,maxx,maxy].
 	NSVGpath* paths;			// Linked list of paths in the image.
-	struct NSVGshape* next;		// Pointer to next shape, or NULL if last element.
+	struct NSVGshape* Next;		// Pointer to next shape, or NULL if last element.
 } NSVGshape;
 
 typedef struct NSVGimage
@@ -409,7 +409,7 @@ typedef struct NSVGgradientData
 	float xform[6];
 	int nstops;
 	NSVGgradientStop* stops;
-	struct NSVGgradientData* next;
+	struct NSVGgradientData* Next;
 } NSVGgradientData;
 
 typedef struct NSVGattrib
@@ -444,7 +444,7 @@ typedef struct NSVGstyles
 {
 	char*	name;
 	char* description;
-	struct NSVGstyles* next;
+	struct NSVGstyles* Next;
 } NSVGstyles;
 
 typedef struct NSVGparser
@@ -663,24 +663,24 @@ error:
 }
 static void nsvg__deleteStyles(NSVGstyles* style) {
 	while (style) {
-		NSVGstyles *next = style->next;
+		NSVGstyles *Next = style->Next;
 		if (style->name!= NULL)
 			free(style->name);
 		if (style->description != NULL)
 			free(style->description);
 		free(style);
-		style = next;
+		style = Next;
 	}
 }
 
 static void nsvg__deletePaths(NSVGpath* path)
 {
 	while (path) {
-		NSVGpath *next = path->next;
+		NSVGpath *Next = path->Next;
 		if (path->pts != NULL)
 			free(path->pts);
 		free(path);
-		path = next;
+		path = Next;
 	}
 }
 
@@ -692,12 +692,12 @@ static void nsvg__deletePaint(NSVGpaint* paint)
 
 static void nsvg__deleteGradientData(NSVGgradientData* grad)
 {
-	NSVGgradientData* next;
+	NSVGgradientData* Next;
 	while (grad != NULL) {
-		next = grad->next;
+		Next = grad->Next;
 		free(grad->stops);
 		free(grad);
-		grad = next;
+		grad = Next;
 	}
 }
 
@@ -830,7 +830,7 @@ static NSVGgradientData* nsvg__findGradientData(NSVGparser* p, const char* id)
 	while (grad) {
 		if (strcmp(grad->id, id) == 0)
 			return grad;
-		grad = grad->next;
+		grad = grad->Next;
 	}
 	return NULL;
 }
@@ -928,7 +928,7 @@ static void nsvg__getLocalBounds(float* bounds, NSVGshape *shape, float* xform)
 	NSVGpath* path;
 	float curve[4*2], curveBounds[4];
 	int i, first = 1;
-	for (path = shape->paths; path != NULL; path = path->next) {
+	for (path = shape->paths; path != NULL; path = path->Next) {
 		nsvg__xformPoint(&curve[0], &curve[1], path->pts[0], path->pts[1], xform);
 		for (i = 0; i < path->npts-1; i += 3) {
 			nsvg__xformPoint(&curve[2], &curve[3], path->pts[(i+1)*2], path->pts[(i+1)*2+1], xform);
@@ -989,7 +989,7 @@ static void nsvg__addShape(NSVGparser* p)
 	shape->bounds[1] = shape->paths->bounds[1];
 	shape->bounds[2] = shape->paths->bounds[2];
 	shape->bounds[3] = shape->paths->bounds[3];
-	for (path = shape->paths->next; path != NULL; path = path->next) {
+	for (path = shape->paths->Next; path != NULL; path = path->Next) {
 		shape->bounds[0] = nsvg__minf(shape->bounds[0], path->bounds[0]);
 		shape->bounds[1] = nsvg__minf(shape->bounds[1], path->bounds[1]);
 		shape->bounds[2] = nsvg__maxf(shape->bounds[2], path->bounds[2]);
@@ -1036,7 +1036,7 @@ static void nsvg__addShape(NSVGparser* p)
 	if (p->image->shapes == NULL)
 		p->image->shapes = shape;
 	else
-		p->shapesTail->next = shape;
+		p->shapesTail->Next = shape;
 	p->shapesTail = shape;
 
 	return;
@@ -1089,7 +1089,7 @@ static void nsvg__addPath(NSVGparser* p, char closed)
 		}
 	}
 
-	path->next = p->plist;
+	path->Next = p->plist;
 	p->plist = path;
 
 	return;
@@ -1709,7 +1709,7 @@ static const char* nsvg__getNextDashItem(const char* s, char* it)
 
 static int nsvg__parseStrokeDashArray(NSVGparser* p, const char* str, float* strokeDashArray)
 {
-	char item[64];
+	char Item[64];
 	int count = 0, i;
 	float sum = 0.0f;
 
@@ -1719,10 +1719,10 @@ static int nsvg__parseStrokeDashArray(NSVGparser* p, const char* str, float* str
 
 	// Parse dashes
 	while (*str) {
-		str = nsvg__getNextDashItem(str, item);
-		if (!*item) break;
+		str = nsvg__getNextDashItem(str, Item);
+		if (!*Item) break;
 		if (count < NSVG_MAX_DASHES)
-			strokeDashArray[count++] = fabsf(nsvg__parseCoordinate(p, item, 0.0f, nsvg__actualLength(p)));
+			strokeDashArray[count++] = fabsf(nsvg__parseCoordinate(p, Item, 0.0f, nsvg__actualLength(p)));
 	}
 
 	for (i = 0; i < count; i++)
@@ -1808,7 +1808,7 @@ static int nsvg__parseAttr(NSVGparser* p, const char* name, const char* value)
 			if (strcmp(style->name + 1, value) == 0) {
 				break;
 			}
-			style = style->next;
+			style = style->Next;
 		}
 		if (style) {
 			nsvg__parseStyle(p, style->description);
@@ -2226,7 +2226,7 @@ static void nsvg__parsePath(NSVGparser* p, const char** attr)
 	const char* tmp[4];
 	char closedFlag;
 	int i;
-	char item[64];
+	char Item[64];
 
 	for (i = 0; attr[i]; i += 2) {
 		if (strcmp(attr[i], "d") == 0) {
@@ -2248,11 +2248,11 @@ static void nsvg__parsePath(NSVGparser* p, const char** attr)
 		nargs = 0;
 
 		while (*s) {
-			s = nsvg__getNextPathItem(s, item);
-			if (!*item) break;
-			if (nsvg__isnum(item[0])) {
+			s = nsvg__getNextPathItem(s, Item);
+			if (!*Item) break;
+			if (nsvg__isnum(Item[0])) {
 				if (nargs < 10)
-					args[nargs++] = (float)nsvg__atof(item);
+					args[nargs++] = (float)nsvg__atof(Item);
 				if (nargs >= rargs) {
 					switch (cmd) {
 						case 'm':
@@ -2311,7 +2311,7 @@ static void nsvg__parsePath(NSVGparser* p, const char** attr)
 					nargs = 0;
 				}
 			} else {
-				cmd = item[0];
+				cmd = Item[0];
 				rargs = nsvg__getArgsPerElement(cmd);
 				if (cmd == 'M' || cmd == 'm') {
 					// Commit path.
@@ -2498,7 +2498,7 @@ static void nsvg__parsePoly(NSVGparser* p, const char** attr, int closeFlag)
 	const char* s;
 	float args[2];
 	int nargs, npts = 0;
-	char item[64];
+	char Item[64];
 
 	nsvg__resetPath(p);
 
@@ -2508,8 +2508,8 @@ static void nsvg__parsePoly(NSVGparser* p, const char** attr, int closeFlag)
 				s = attr[i + 1];
 				nargs = 0;
 				while (*s) {
-					s = nsvg__getNextPathItem(s, item);
-					args[nargs++] = (float)nsvg__atof(item);
+					s = nsvg__getNextPathItem(s, Item);
+					args[nargs++] = (float)nsvg__atof(Item);
 					if (nargs >= 2) {
 						if (npts == 0)
 							nsvg__moveTo(p, args[0], args[1]);
@@ -2634,7 +2634,7 @@ static void nsvg__parseGradient(NSVGparser* p, const char** attr, char type)
 		}
 	}
 
-	grad->next = p->gradients;
+	grad->Next = p->gradients;
 	p->gradients = grad;
 }
 
@@ -2786,10 +2786,10 @@ static void nsvg__content(void* ud, const char* s)
 			char c = *s;
 			if (nsvg__isspace(c) || c == '{') {
 				if (state == 1) {
-					NSVGstyles* next = p->styles;
+					NSVGstyles* Next = p->styles;
 
 					p->styles = (NSVGstyles*)malloc(sizeof(NSVGstyles));
-					p->styles->next = next;
+					p->styles->Next = Next;
 					p->styles->name = nsvg__strndup(start, (size_t)(s - start));
 					start = s + 1;
 					state = 2;
@@ -2838,7 +2838,7 @@ static void nsvg__imageBounds(NSVGparser* p, float* bounds)
 	bounds[2] = -FLT_MAX;
 	bounds[3] = -FLT_MAX;
 
-	for (; shape != NULL; shape = shape->next) {
+	for (; shape != NULL; shape = shape->Next) {
 		if ( (shape->flags & NSVG_FLAGS_VISIBLE) == NSVG_FLAGS_VISIBLE) {
 			bounds[0] = nsvg__minf(bounds[0], shape->bounds[0]);
 			bounds[1] = nsvg__minf(bounds[1], shape->bounds[1]);
@@ -2929,12 +2929,12 @@ static void nsvg__scaleToViewbox(NSVGparser* p, const char* units)
 	sx *= us;
 	sy *= us;
 	avgs = (sx+sy) / 2.0f;
-	for (shape = p->image->shapes; shape != NULL; shape = shape->next) {
+	for (shape = p->image->shapes; shape != NULL; shape = shape->Next) {
 		shape->bounds[0] = (shape->bounds[0] + tx) * sx;
 		shape->bounds[1] = (shape->bounds[1] + ty) * sy;
 		shape->bounds[2] = (shape->bounds[2] + tx) * sx;
 		shape->bounds[3] = (shape->bounds[3] + ty) * sy;
-		for (path = shape->paths; path != NULL; path = path->next) {
+		for (path = shape->paths; path != NULL; path = path->Next) {
 			path->bounds[0] = (path->bounds[0] + tx) * sx;
 			path->bounds[1] = (path->bounds[1] + ty) * sy;
 			path->bounds[2] = (path->bounds[2] + tx) * sx;
@@ -3025,7 +3025,7 @@ NSVG_EXPORT void nsvgDelete(NSVGimage* image)
 	if (image == NULL) return;
 	shape = image->shapes;
 	while (shape != NULL) {
-		snext = shape->next;
+		snext = shape->Next;
 		nsvg__deletePaths(shape->paths);
 		nsvg__deletePaint(&shape->fill);
 		nsvg__deletePaint(&shape->stroke);

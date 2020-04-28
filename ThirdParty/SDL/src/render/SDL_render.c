@@ -224,7 +224,7 @@ FlushRenderCommands(SDL_Renderer *renderer)
 
     /* Move the whole render command queue to the unused pool so we can reuse them next time. */
     if (renderer->render_commands_tail != NULL) {
-        renderer->render_commands_tail->next = renderer->render_commands_pool;
+        renderer->render_commands_tail->Next = renderer->render_commands_pool;
         renderer->render_commands_pool = renderer->render_commands;
         renderer->render_commands_tail = NULL;
         renderer->render_commands = NULL;
@@ -302,8 +302,8 @@ AllocateRenderCommand(SDL_Renderer *renderer)
     /* !!! FIXME: are there threading limitations in SDL's render API? If not, we need to mutex this. */
     retval = renderer->render_commands_pool;
     if (retval != NULL) {
-        renderer->render_commands_pool = retval->next;
-        retval->next = NULL;
+        renderer->render_commands_pool = retval->Next;
+        retval->Next = NULL;
     } else {
         retval = SDL_calloc(1, sizeof (*retval));
         if (!retval) {
@@ -314,7 +314,7 @@ AllocateRenderCommand(SDL_Renderer *renderer)
 
     SDL_assert((renderer->render_commands == NULL) == (renderer->render_commands_tail == NULL));
     if (renderer->render_commands_tail != NULL) {
-        renderer->render_commands_tail->next = retval;
+        renderer->render_commands_tail->Next = retval;
     } else {
         renderer->render_commands = retval;
     }
@@ -1083,7 +1083,7 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
     texture->a = 255;
     texture->scaleMode = SDL_GetScaleMode();
     texture->renderer = renderer;
-    texture->next = renderer->textures;
+    texture->Next = renderer->textures;
     if (renderer->textures) {
         renderer->textures->prev = texture;
     }
@@ -1104,16 +1104,16 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
         }
 
         /* Swap textures to have texture before texture->native in the list */
-        texture->native->next = texture->next;
-        if (texture->native->next) {
-            texture->native->next->prev = texture->native;
+        texture->native->Next = texture->Next;
+        if (texture->native->Next) {
+            texture->native->Next->prev = texture->native;
         }
         texture->prev = texture->native->prev;
         if (texture->prev) {
-            texture->prev->next = texture;
+            texture->prev->Next = texture;
         }
         texture->native->prev = texture;
-        texture->next = texture->native;
+        texture->Next = texture->native;
         renderer->textures = texture;
 
         if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
@@ -3172,13 +3172,13 @@ SDL_DestroyTexture(SDL_Texture * texture)
 
     texture->magic = NULL;
 
-    if (texture->next) {
-        texture->next->prev = texture->prev;
+    if (texture->Next) {
+        texture->Next->prev = texture->prev;
     }
     if (texture->prev) {
-        texture->prev->next = texture->next;
+        texture->prev->Next = texture->Next;
     } else {
-        renderer->textures = texture->next;
+        renderer->textures = texture->Next;
     }
 
     if (texture->native) {
@@ -3209,7 +3209,7 @@ SDL_DestroyRenderer(SDL_Renderer * renderer)
     SDL_DelEventWatch(SDL_RendererEventWatch, renderer);
 
     if (renderer->render_commands_tail != NULL) {
-        renderer->render_commands_tail->next = renderer->render_commands_pool;
+        renderer->render_commands_tail->Next = renderer->render_commands_pool;
         cmd = renderer->render_commands;
     } else {
         cmd = renderer->render_commands_pool;
@@ -3220,9 +3220,9 @@ SDL_DestroyRenderer(SDL_Renderer * renderer)
     renderer->render_commands = NULL;
 
     while (cmd != NULL) {
-        SDL_RenderCommand *next = cmd->next;
+        SDL_RenderCommand *Next = cmd->Next;
         SDL_free(cmd);
-        cmd = next;
+        cmd = Next;
     }
 
     SDL_free(renderer->vertex_data);

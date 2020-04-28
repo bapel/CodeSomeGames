@@ -497,7 +497,7 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 			/* VID/PID match. Create the record. */
 			tmp = (struct hid_device_info*) calloc(1, sizeof(struct hid_device_info));
 			if (cur_dev) {
-				cur_dev->next = tmp;
+				cur_dev->Next = tmp;
 			}
 			else {
 				root = tmp;
@@ -507,7 +507,7 @@ struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned shor
 			/* Fill out the record */
 			cur_dev->usage_page = caps.UsagePage;
 			cur_dev->usage = caps.Usage;
-			cur_dev->next = NULL;
+			cur_dev->Next = NULL;
 			str = device_interface_detail_data->DevicePath;
 			if (str) {
 				len = strlen(str);
@@ -588,13 +588,13 @@ void  HID_API_EXPORT HID_API_CALL hid_free_enumeration(struct hid_device_info *d
 	/* TODO: Merge this with the Linux version. This function is platform-independent. */
 	struct hid_device_info *d = devs;
 	while (d) {
-		struct hid_device_info *next = d->next;
+		struct hid_device_info *Next = d->Next;
 		free(d->path);
 		free(d->serial_number);
 		free(d->manufacturer_string);
 		free(d->product_string);
 		free(d);
-		d = next;
+		d = Next;
 	}
 }
 
@@ -622,7 +622,7 @@ HID_API_EXPORT hid_device * HID_API_CALL hid_open(unsigned short vendor_id, unsi
 				break;
 			}
 		}
-		cur_dev = cur_dev->next;
+		cur_dev = cur_dev->Next;
 	}
 
 	if (path_to_open) {

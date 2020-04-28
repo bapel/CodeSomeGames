@@ -91,7 +91,7 @@ NSVG_EXPORT void nsvgDeleteRasterizer(NSVGrasterizer*);
 typedef struct NSVGedge {
 	float x0,y0, x1,y1;
 	int dir;
-	struct NSVGedge* next;
+	struct NSVGedge* Next;
 } NSVGedge;
 
 typedef struct NSVGpoint {
@@ -106,13 +106,13 @@ typedef struct NSVGactiveEdge {
 	int x,dx;
 	float ey;
 	int dir;
-	struct NSVGactiveEdge *next;
+	struct NSVGactiveEdge *Next;
 } NSVGactiveEdge;
 
 typedef struct NSVGmemPage {
 	unsigned char mem[NSVG__MEMPAGE_SIZE];
 	int size;
-	struct NSVGmemPage* next;
+	struct NSVGmemPage* Next;
 } NSVGmemPage;
 
 typedef struct NSVGcachedPaint {
@@ -176,9 +176,9 @@ NSVG_EXPORT void nsvgDeleteRasterizer(NSVGrasterizer* r)
 
 	p = r->pages;
 	while (p != NULL) {
-		NSVGmemPage* next = p->next;
+		NSVGmemPage* Next = p->Next;
 		free(p);
-		p = next;
+		p = Next;
 	}
 
 	if (r->edges) free(r->edges);
@@ -194,8 +194,8 @@ static NSVGmemPage* nsvg__nextPage(NSVGrasterizer* r, NSVGmemPage* cur)
 	NSVGmemPage *newp;
 
 	// If using existing chain, return the next page in chain
-	if (cur != NULL && cur->next != NULL) {
-		return cur->next;
+	if (cur != NULL && cur->Next != NULL) {
+		return cur->Next;
 	}
 
 	// Alloc new page
@@ -205,7 +205,7 @@ static NSVGmemPage* nsvg__nextPage(NSVGrasterizer* r, NSVGmemPage* cur)
 
 	// Add to linked list
 	if (cur != NULL)
-		cur->next = newp;
+		cur->Next = newp;
 	else
 		r->pages = newp;
 
@@ -217,7 +217,7 @@ static void nsvg__resetPool(NSVGrasterizer* r)
 	NSVGmemPage* p = r->pages;
 	while (p != NULL) {
 		p->size = 0;
-		p = p->next;
+		p = p->Next;
 	}
 	r->curpage = r->pages;
 }
@@ -377,7 +377,7 @@ static void nsvg__flattenShape(NSVGrasterizer* r, NSVGshape* shape, float scale)
 	int i, j;
 	NSVGpath* path;
 
-	for (path = shape->paths; path != NULL; path = path->next) {
+	for (path = shape->paths; path != NULL; path = path->Next) {
 		r->npoints = 0;
 		// Flatten path
 		nsvg__addPathPoint(r, path->pts[0]*scale, path->pts[1]*scale, 0);
@@ -746,7 +746,7 @@ static void nsvg__flattenShapeStroke(NSVGrasterizer* r, NSVGshape* shape, float 
 	int lineCap = shape->strokeLineCap;
 	float lineWidth = shape->strokeWidth * scale;
 
-	for (path = shape->paths; path != NULL; path = path->next) {
+	for (path = shape->paths; path != NULL; path = path->Next) {
 		// Flatten path
 		r->npoints = 0;
 		nsvg__addPathPoint(r, path->pts[0]*scale, path->pts[1]*scale, NSVG_PT_CORNER);
@@ -864,7 +864,7 @@ static NSVGactiveEdge* nsvg__addActive(NSVGrasterizer* r, NSVGedge* e, float sta
 	if (r->freelist != NULL) {
 		// Restore from freelist.
 		z = r->freelist;
-		r->freelist = z->next;
+		r->freelist = z->Next;
 	} else {
 		// Alloc new edge.
 		z = (NSVGactiveEdge*)nsvg__alloc(r, sizeof(NSVGactiveEdge));
@@ -881,7 +881,7 @@ static NSVGactiveEdge* nsvg__addActive(NSVGrasterizer* r, NSVGedge* e, float sta
 	z->x = (int)floorf(NSVG__FIX * (e->x0 + dxdy * (startPoint - e->y0)));
 //	z->x -= off_x * FIX;
 	z->ey = e->y1;
-	z->next = 0;
+	z->Next = 0;
 	z->dir = e->dir;
 
 	return z;
@@ -889,7 +889,7 @@ static NSVGactiveEdge* nsvg__addActive(NSVGrasterizer* r, NSVGedge* e, float sta
 
 static void nsvg__freeActive(NSVGrasterizer* r, NSVGactiveEdge* z)
 {
-	z->next = r->freelist;
+	z->Next = r->freelist;
 	r->freelist = z;
 }
 
@@ -940,7 +940,7 @@ static void nsvg__fillActiveEdges(unsigned char* scanline, int len, NSVGactiveEd
 				if (w == 0)
 					nsvg__fillScanline(scanline, len, x0, x1, maxWeight, xmin, xmax);
 			}
-			e = e->next;
+			e = e->Next;
 		}
 	} else if (fillRule == NSVG_FILLRULE_EVENODD) {
 		// Even-odd
@@ -952,7 +952,7 @@ static void nsvg__fillActiveEdges(unsigned char* scanline, int len, NSVGactiveEd
 				int x1 = e->x; w = 0;
 				nsvg__fillScanline(scanline, len, x0, x1, maxWeight, xmin, xmax);
 			}
-			e = e->next;
+			e = e->Next;
 		}
 	}
 }
@@ -1139,12 +1139,12 @@ static void nsvg__rasterizeSortedEdges(NSVGrasterizer *r, float tx, float ty, fl
 			while (*step) {
 				NSVGactiveEdge *z = *step;
 				if (z->ey <= scany) {
-					*step = z->next; // delete from list
+					*step = z->Next; // delete from list
 //					NSVG__assert(z->valid);
 					nsvg__freeActive(r, z);
 				} else {
 					z->x += z->dx; // advance to position for current scanline
-					step = &((*step)->next); // advance through list
+					step = &((*step)->Next); // advance through list
 				}
 			}
 
@@ -1152,16 +1152,16 @@ static void nsvg__rasterizeSortedEdges(NSVGrasterizer *r, float tx, float ty, fl
 			for (;;) {
 				int changed = 0;
 				step = &active;
-				while (*step && (*step)->next) {
-					if ((*step)->x > (*step)->next->x) {
+				while (*step && (*step)->Next) {
+					if ((*step)->x > (*step)->Next->x) {
 						NSVGactiveEdge* t = *step;
-						NSVGactiveEdge* q = t->next;
-						t->next = q->next;
-						q->next = t;
+						NSVGactiveEdge* q = t->Next;
+						t->Next = q->Next;
+						q->Next = t;
 						*step = q;
 						changed = 1;
 					}
-					step = &(*step)->next;
+					step = &(*step)->Next;
 				}
 				if (!changed) break;
 			}
@@ -1176,16 +1176,16 @@ static void nsvg__rasterizeSortedEdges(NSVGrasterizer *r, float tx, float ty, fl
 						active = z;
 					} else if (z->x < active->x) {
 						// insert at front
-						z->next = active;
+						z->Next = active;
 						active = z;
 					} else {
 						// find thing to insert AFTER
 						NSVGactiveEdge* p = active;
-						while (p->next && p->next->x < z->x)
-							p = p->next;
+						while (p->Next && p->Next->x < z->x)
+							p = p->Next;
 						// at this point, p->next->x is NOT < z->x
-						z->next = p->next;
-						p->next = z;
+						z->Next = p->Next;
+						p->Next = z;
 					}
 				}
 				e++;
@@ -1390,7 +1390,7 @@ NSVG_EXPORT void nsvgRasterize(NSVGrasterizer* r,
 	for (i = 0; i < h; i++)
 		memset(&dst[i*stride], 0, w*4);
 
-	for (shape = image->shapes; shape != NULL; shape = shape->next) {
+	for (shape = image->shapes; shape != NULL; shape = shape->Next) {
 		if (!(shape->flags & NSVG_FLAGS_VISIBLE))
 			continue;
 

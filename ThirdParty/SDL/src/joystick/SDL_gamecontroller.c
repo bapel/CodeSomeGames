@@ -99,7 +99,7 @@ typedef struct _ControllerMapping_t
     char *name;
     char *mapping;
     SDL_ControllerMappingPriority priority;
-    struct _ControllerMapping_t *next;
+    struct _ControllerMapping_t *Next;
 } ControllerMapping_t;
 
 static SDL_JoystickGUID s_zeroGUID;
@@ -121,7 +121,7 @@ struct _SDL_GameController
     Uint8 *last_hat_mask;
     Uint32 guide_button_down;
 
-    struct _SDL_GameController *next; /* pointer to next game controller we have allocated */
+    struct _SDL_GameController *Next; /* pointer to next game controller we have allocated */
 };
 
 
@@ -358,7 +358,7 @@ static int SDLCALL SDL_GameControllerEventWatcher(void *userdata, SDL_Event * ev
                     HandleJoystickAxis(controllerlist, event->jaxis.axis, event->jaxis.value);
                     break;
                 }
-                controllerlist = controllerlist->next;
+                controllerlist = controllerlist->Next;
             }
         }
         break;
@@ -371,7 +371,7 @@ static int SDLCALL SDL_GameControllerEventWatcher(void *userdata, SDL_Event * ev
                     HandleJoystickButton(controllerlist, event->jbutton.button, event->jbutton.state);
                     break;
                 }
-                controllerlist = controllerlist->next;
+                controllerlist = controllerlist->Next;
             }
         }
         break;
@@ -383,7 +383,7 @@ static int SDLCALL SDL_GameControllerEventWatcher(void *userdata, SDL_Event * ev
                     HandleJoystickHat(controllerlist, event->jhat.hat, event->jhat.value);
                     break;
                 }
-                controllerlist = controllerlist->next;
+                controllerlist = controllerlist->Next;
             }
         }
         break;
@@ -411,7 +411,7 @@ static int SDLCALL SDL_GameControllerEventWatcher(void *userdata, SDL_Event * ev
                     UpdateEventsForDeviceRemoval();
                     break;
                 }
-                controllerlist = controllerlist->next;
+                controllerlist = controllerlist->Next;
             }
         }
         break;
@@ -432,7 +432,7 @@ static ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickG
         if (SDL_memcmp(guid, &pSupportedController->guid, sizeof(*guid)) == 0) {
             return pSupportedController;
         }
-        pSupportedController = pSupportedController->next;
+        pSupportedController = pSupportedController->Next;
     }
     if (!exact_match) {
         if (SDL_IsJoystickHIDAPI(*guid)) {
@@ -825,7 +825,7 @@ static void SDL_PrivateGameControllerRefreshMapping(ControllerMapping_t *pContro
             }
         }
 
-        gamecontrollerlist = gamecontrollerlist->next;
+        gamecontrollerlist = gamecontrollerlist->Next;
     }
 }
 
@@ -880,19 +880,19 @@ SDL_PrivateAddMappingForGUID(SDL_JoystickGUID jGUID, const char *mappingString, 
         pControllerMapping->guid = jGUID;
         pControllerMapping->name = pchName;
         pControllerMapping->mapping = pchMapping;
-        pControllerMapping->next = NULL;
+        pControllerMapping->Next = NULL;
         pControllerMapping->priority = priority;
 
         if (s_pSupportedControllers) {
             /* Add the mapping to the end of the list */
             ControllerMapping_t *pCurrMapping, *pPrevMapping;
 
-            for ( pPrevMapping = s_pSupportedControllers, pCurrMapping = pPrevMapping->next;
+            for ( pPrevMapping = s_pSupportedControllers, pCurrMapping = pPrevMapping->Next;
                   pCurrMapping; 
-                  pPrevMapping = pCurrMapping, pCurrMapping = pCurrMapping->next ) {
+                  pPrevMapping = pCurrMapping, pCurrMapping = pCurrMapping->Next ) {
                 /* continue; */
             }
-            pPrevMapping->next = pControllerMapping;
+            pPrevMapping->Next = pControllerMapping;
         } else {
             s_pSupportedControllers = pControllerMapping;
         }
@@ -1284,7 +1284,7 @@ SDL_GameControllerNumMappings(void)
     int num_mappings = 0;
     ControllerMapping_t *mapping;
 
-    for (mapping = s_pSupportedControllers; mapping; mapping = mapping->next) {
+    for (mapping = s_pSupportedControllers; mapping; mapping = mapping->Next) {
         if (SDL_memcmp(&mapping->guid, &s_zeroGUID, sizeof(mapping->guid)) == 0) {
             continue;
         }
@@ -1301,7 +1301,7 @@ SDL_GameControllerMappingForIndex(int mapping_index)
 {
     ControllerMapping_t *mapping;
 
-    for (mapping = s_pSupportedControllers; mapping; mapping = mapping->next) {
+    for (mapping = s_pSupportedControllers; mapping; mapping = mapping->Next) {
         if (SDL_memcmp(&mapping->guid, &s_zeroGUID, sizeof(mapping->guid)) == 0) {
             continue;
         }
@@ -1640,7 +1640,7 @@ SDL_GameControllerOpen(int device_index)
                 SDL_UnlockJoysticks();
                 return (gamecontroller);
         }
-        gamecontrollerlist = gamecontrollerlist->next;
+        gamecontrollerlist = gamecontrollerlist->Next;
     }
 
     /* Find a controller mapping */
@@ -1693,7 +1693,7 @@ SDL_GameControllerOpen(int device_index)
     /* Add the controller to list */
     ++gamecontroller->ref_count;
     /* Link the controller in the list */
-    gamecontroller->next = SDL_gamecontrollers;
+    gamecontroller->Next = SDL_gamecontrollers;
     SDL_gamecontrollers = gamecontroller;
 
     SDL_UnlockJoysticks();
@@ -1903,7 +1903,7 @@ SDL_GameControllerFromInstanceID(SDL_JoystickID joyid)
             SDL_UnlockJoysticks();
             return gamecontroller;
         }
-        gamecontroller = gamecontroller->next;
+        gamecontroller = gamecontroller->Next;
     }
     SDL_UnlockJoysticks();
     return NULL;
@@ -2016,14 +2016,14 @@ SDL_GameControllerClose(SDL_GameController * gamecontroller)
         if (gamecontroller == gamecontrollerlist) {
             if (gamecontrollerlistprev) {
                 /* unlink this entry */
-                gamecontrollerlistprev->next = gamecontrollerlist->next;
+                gamecontrollerlistprev->Next = gamecontrollerlist->Next;
             } else {
-                SDL_gamecontrollers = gamecontroller->next;
+                SDL_gamecontrollers = gamecontroller->Next;
             }
             break;
         }
         gamecontrollerlistprev = gamecontrollerlist;
-        gamecontrollerlist = gamecontrollerlist->next;
+        gamecontrollerlist = gamecontrollerlist->Next;
     }
 
     SDL_free(gamecontroller->bindings);
@@ -2056,7 +2056,7 @@ SDL_GameControllerQuitMappings(void)
 
     while (s_pSupportedControllers) {
         pControllerMap = s_pSupportedControllers;
-        s_pSupportedControllers = s_pSupportedControllers->next;
+        s_pSupportedControllers = s_pSupportedControllers->Next;
         SDL_free(pControllerMap->name);
         SDL_free(pControllerMap->mapping);
         SDL_free(pControllerMap);
@@ -2204,7 +2204,7 @@ SDL_GameControllerHandleDelayedGuideButton(SDL_Joystick *joystick)
             SDL_PrivateGameControllerButton(controllerlist, SDL_CONTROLLER_BUTTON_GUIDE, SDL_RELEASED);
             break;
         }
-        controllerlist = controllerlist->next;
+        controllerlist = controllerlist->Next;
     }
 }
 

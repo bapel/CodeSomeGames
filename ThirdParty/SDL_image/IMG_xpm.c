@@ -72,7 +72,7 @@ int IMG_isXPM(SDL_RWops *src)
 struct hash_entry {
     char *key;
     Uint32 color;
-    struct hash_entry *next;
+    struct hash_entry *Next;
 };
 
 struct color_hash {
@@ -149,7 +149,7 @@ static int add_colorhash(struct color_hash *hash,
     struct hash_entry *e = hash->next_free++;
     e->color = color;
     e->key = key;
-    e->next = hash->table[index];
+    e->Next = hash->table[index];
     hash->table[index] = e;
     return 1;
 }
@@ -163,7 +163,7 @@ static Uint32 get_colorhash(struct color_hash *hash, const char *key, int cpp)
     while (entry) {
         if (SDL_memcmp(key, entry->key, cpp) == 0)
             return entry->color;
-        entry = entry->next;
+        entry = entry->Next;
     }
     return 0;       /* garbage in - garbage out */
 }

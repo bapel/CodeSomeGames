@@ -67,7 +67,7 @@ ValidHaptic(SDL_Haptic * haptic)
                 valid = 1;
                 break;
             }
-            hapticlist = hapticlist->next;
+            hapticlist = hapticlist->Next;
         }
     }
 
@@ -131,7 +131,7 @@ SDL_HapticOpen(int device_index)
             ++haptic->ref_count;
             return haptic;
         }
-        hapticlist = hapticlist->next;
+        hapticlist = hapticlist->Next;
     }
 
     /* Create the haptic device */
@@ -153,7 +153,7 @@ SDL_HapticOpen(int device_index)
     /* Add haptic to list */
     ++haptic->ref_count;
     /* Link the haptic in the list */
-    haptic->next = SDL_haptics;
+    haptic->Next = SDL_haptics;
     SDL_haptics = haptic;
 
     /* Disable autocenter and set gain to max. */
@@ -191,7 +191,7 @@ SDL_HapticOpened(int device_index)
             opened = 1;
             break;
         }
-        hapticlist = hapticlist->next;
+        hapticlist = hapticlist->Next;
     }
     return opened;
 }
@@ -303,7 +303,7 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
             ++haptic->ref_count;
             return haptic;
         }
-        hapticlist = hapticlist->next;
+        hapticlist = hapticlist->Next;
     }
 
     /* Create the haptic device */
@@ -325,7 +325,7 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
     /* Add haptic to list */
     ++haptic->ref_count;
     /* Link the haptic in the list */
-    haptic->next = SDL_haptics;
+    haptic->Next = SDL_haptics;
     SDL_haptics = haptic;
 
     return haptic;
@@ -370,17 +370,17 @@ SDL_HapticClose(SDL_Haptic * haptic)
             if ( hapticlistprev )
             {
                 /* unlink this entry */
-                hapticlistprev->next = hapticlist->next;
+                hapticlistprev->Next = hapticlist->Next;
             }
             else
             {
-                SDL_haptics = haptic->next;
+                SDL_haptics = haptic->Next;
             }
 
             break;
         }
         hapticlistprev = hapticlist;
-        hapticlist = hapticlist->next;
+        hapticlist = hapticlist->Next;
     }
 
     /* Free */

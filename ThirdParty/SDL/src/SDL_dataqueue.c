@@ -28,7 +28,7 @@ typedef struct SDL_DataQueuePacket
 {
     size_t datalen;  /* bytes currently in use in this packet. */
     size_t startpos;  /* bytes currently consumed in this packet. */
-    struct SDL_DataQueuePacket *next;  /* next item in linked list. */
+    struct SDL_DataQueuePacket *Next;  /* next item in linked list. */
     Uint8 data[SDL_VARIABLE_LENGTH_ARRAY];  /* packet data */
 } SDL_DataQueuePacket;
 
@@ -45,9 +45,9 @@ static void
 SDL_FreeDataQueueList(SDL_DataQueuePacket *packet)
 {
     while (packet) {
-        SDL_DataQueuePacket *next = packet->next;
+        SDL_DataQueuePacket *Next = packet->Next;
         SDL_free(packet);
-        packet = next;
+        packet = Next;
     }
 }
 
@@ -75,7 +75,7 @@ SDL_NewDataQueue(const size_t _packetlen, const size_t initialslack)
             if (packet) { /* don't care if this fails, we'll deal later. */
                 packet->datalen = 0;
                 packet->startpos = 0;
-                packet->next = queue->pool;
+                packet->Next = queue->pool;
                 queue->pool = packet;
             }
         }
@@ -111,7 +111,7 @@ SDL_ClearDataQueue(SDL_DataQueue *queue, const size_t slack)
 
     /* merge the available pool and the current queue into one list. */
     if (packet) {
-        queue->tail->next = queue->pool;
+        queue->tail->Next = queue->pool;
     } else {
         packet = queue->pool;
     }
@@ -125,11 +125,11 @@ SDL_ClearDataQueue(SDL_DataQueue *queue, const size_t slack)
     /* Optionally keep some slack in the pool to reduce malloc pressure. */
     for (i = 0; packet && (i < slackpackets); i++) {
         prev = packet;
-        packet = packet->next;
+        packet = packet->Next;
     }
 
     if (prev) {
-        prev->next = NULL;
+        prev->Next = NULL;
     } else {
         queue->pool = NULL;
     }
@@ -147,7 +147,7 @@ AllocateDataQueuePacket(SDL_DataQueue *queue)
     packet = queue->pool;
     if (packet != NULL) {
         /* we have one available in the pool. */
-        queue->pool = packet->next;
+        queue->pool = packet->Next;
     } else {
         /* Have to allocate a new one! */
         packet = (SDL_DataQueuePacket *) SDL_malloc(sizeof (SDL_DataQueuePacket) + queue->packet_size);
@@ -158,13 +158,13 @@ AllocateDataQueuePacket(SDL_DataQueue *queue)
 
     packet->datalen = 0;
     packet->startpos = 0;
-    packet->next = NULL;
+    packet->Next = NULL;
                 
     SDL_assert((queue->head != NULL) == (queue->queued_bytes != 0));
     if (queue->tail == NULL) {
         queue->head = packet;
     } else {
-        queue->tail->next = packet;
+        queue->tail->Next = packet;
     }
     queue->tail = packet;
     return packet;
@@ -201,8 +201,8 @@ SDL_WriteToDataQueue(SDL_DataQueue *queue, const void *_data, const size_t _len)
                 if (!origtail) {
                     packet = queue->head;  /* whole queue. */
                 } else {
-                    packet = origtail->next;  /* what we added to existing queue. */
-                    origtail->next = NULL;
+                    packet = origtail->Next;  /* what we added to existing queue. */
+                    origtail->Next = NULL;
                     origtail->datalen = origlen;
                 }
                 queue->head = orighead;
@@ -237,7 +237,7 @@ SDL_PeekIntoDataQueue(SDL_DataQueue *queue, void *_buf, const size_t _len)
         return 0;
     }
 
-    for (packet = queue->head; len && packet; packet = packet->next) {
+    for (packet = queue->head; len && packet; packet = packet->Next) {
         const size_t avail = packet->datalen - packet->startpos;
         const size_t cpy = SDL_min(len, avail);
         SDL_assert(queue->queued_bytes >= avail);
@@ -274,9 +274,9 @@ SDL_ReadFromDataQueue(SDL_DataQueue *queue, void *_buf, const size_t _len)
         len -= cpy;
 
         if (packet->startpos == packet->datalen) {  /* packet is done, put it in the pool. */
-            queue->head = packet->next;
-            SDL_assert((packet->next != NULL) || (packet == queue->tail));
-            packet->next = queue->pool;
+            queue->head = packet->Next;
+            SDL_assert((packet->Next != NULL) || (packet == queue->tail));
+            packet->Next = queue->pool;
             queue->pool = packet;
         }
     }

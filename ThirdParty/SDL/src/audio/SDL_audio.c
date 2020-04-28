@@ -374,31 +374,31 @@ static int
 add_audio_device(const char *name, void *handle, SDL_AudioDeviceItem **devices, int *devCount)
 {
     int retval = -1;
-    SDL_AudioDeviceItem *item;
+    SDL_AudioDeviceItem *Item;
     const SDL_AudioDeviceItem *i;
     int dupenum = 0;
 
     SDL_assert(handle != NULL);  /* we reserve NULL, audio backends can't use it. */
     SDL_assert(name != NULL);
 
-    item = (SDL_AudioDeviceItem *) SDL_malloc(sizeof (SDL_AudioDeviceItem));
-    if (!item) {
+    Item = (SDL_AudioDeviceItem *) SDL_malloc(sizeof (SDL_AudioDeviceItem));
+    if (!Item) {
         return SDL_OutOfMemory();
     }
 
-    item->original_name = SDL_strdup(name);
-    if (!item->original_name) {
-        SDL_free(item);
+    Item->original_name = SDL_strdup(name);
+    if (!Item->original_name) {
+        SDL_free(Item);
         return SDL_OutOfMemory();
     }
 
-    item->dupenum = 0;
-    item->name = item->original_name;
-    item->handle = handle;
+    Item->dupenum = 0;
+    Item->name = Item->original_name;
+    Item->handle = handle;
 
     SDL_LockMutex(current_audio.detectionLock);
 
-    for (i = *devices; i != NULL; i = i->next) {
+    for (i = *devices; i != NULL; i = i->Next) {
         if (SDL_strcmp(name, i->original_name) == 0) {
             dupenum = i->dupenum + 1;
             break;  /* stop at the highest-numbered dupe. */
@@ -410,19 +410,19 @@ add_audio_device(const char *name, void *handle, SDL_AudioDeviceItem **devices, 
         char *replacement = (char *) SDL_malloc(len);
         if (!replacement) {
             SDL_UnlockMutex(current_audio.detectionLock);
-            SDL_free(item->original_name);
-            SDL_free(item);
+            SDL_free(Item->original_name);
+            SDL_free(Item);
             SDL_OutOfMemory();
             return -1;
         }
 
         SDL_snprintf(replacement, len, "%s (%d)", name, dupenum + 1);
-        item->dupenum = dupenum;
-        item->name = replacement;
+        Item->dupenum = dupenum;
+        Item->name = replacement;
     }
 
-    item->next = *devices;
-    *devices = item;
+    Item->Next = *devices;
+    *devices = Item;
     retval = (*devCount)++;   /* !!! FIXME: this should be an atomic increment */
 
     SDL_UnlockMutex(current_audio.detectionLock);
@@ -446,18 +446,18 @@ add_output_device(const char *name, void *handle)
 static void
 free_device_list(SDL_AudioDeviceItem **devices, int *devCount)
 {
-    SDL_AudioDeviceItem *item, *next;
-    for (item = *devices; item != NULL; item = next) {
-        next = item->next;
-        if (item->handle != NULL) {
-            current_audio.impl.FreeDeviceHandle(item->handle);
+    SDL_AudioDeviceItem *Item, *Next;
+    for (Item = *devices; Item != NULL; Item = Next) {
+        Next = Item->Next;
+        if (Item->handle != NULL) {
+            current_audio.impl.FreeDeviceHandle(Item->handle);
         }
         /* these two pointers are the same if not a duplicate devname */
-        if (item->name != item->original_name) {
-            SDL_free(item->name);
+        if (Item->name != Item->original_name) {
+            SDL_free(Item->name);
         }
-        SDL_free(item->original_name);
-        SDL_free(item);
+        SDL_free(Item->original_name);
+        SDL_free(Item);
     }
     *devices = NULL;
     *devCount = 0;
@@ -515,11 +515,11 @@ void SDL_OpenedAudioDeviceDisconnected(SDL_AudioDevice *device)
 static void
 mark_device_removed(void *handle, SDL_AudioDeviceItem *devices, SDL_bool *removedFlag)
 {
-    SDL_AudioDeviceItem *item;
+    SDL_AudioDeviceItem *Item;
     SDL_assert(handle != NULL);
-    for (item = devices; item != NULL; item = item->next) {
-        if (item->handle == handle) {
-            item->handle = NULL;
+    for (Item = devices; Item != NULL; Item = Item->Next) {
+        if (Item->handle == handle) {
+            Item->handle = NULL;
             *removedFlag = SDL_TRUE;
             return;
         }
@@ -1011,29 +1011,29 @@ SDL_GetCurrentAudioDriver()
 static void
 clean_out_device_list(SDL_AudioDeviceItem **devices, int *devCount, SDL_bool *removedFlag)
 {
-    SDL_AudioDeviceItem *item = *devices;
+    SDL_AudioDeviceItem *Item = *devices;
     SDL_AudioDeviceItem *prev = NULL;
     int total = 0;
 
-    while (item) {
-        SDL_AudioDeviceItem *next = item->next;
-        if (item->handle != NULL) {
+    while (Item) {
+        SDL_AudioDeviceItem *Next = Item->Next;
+        if (Item->handle != NULL) {
             total++;
-            prev = item;
+            prev = Item;
         } else {
             if (prev) {
-                prev->next = next;
+                prev->Next = Next;
             } else {
-                *devices = next;
+                *devices = Next;
             }
             /* these two pointers are the same if not a duplicate devname */
-            if (item->name != item->original_name) {
-                SDL_free(item->name);
+            if (Item->name != Item->original_name) {
+                SDL_free(Item->name);
             }
-            SDL_free(item->original_name);
-            SDL_free(item);
+            SDL_free(Item->original_name);
+            SDL_free(Item);
         }
-        item = next;
+        Item = Next;
     }
 
     *devCount = total;
@@ -1082,18 +1082,18 @@ SDL_GetAudioDeviceName(int index, int iscapture)
     }
 
     if (index >= 0) {
-        SDL_AudioDeviceItem *item;
+        SDL_AudioDeviceItem *Item;
         int i;
 
         SDL_LockMutex(current_audio.detectionLock);
-        item = iscapture ? current_audio.inputDevices : current_audio.outputDevices;
+        Item = iscapture ? current_audio.inputDevices : current_audio.outputDevices;
         i = iscapture ? current_audio.inputDeviceCount : current_audio.outputDeviceCount;
         if (index < i) {
-            for (i--; i > index; i--, item = item->next) {
-                SDL_assert(item != NULL);
+            for (i--; i > index; i--, Item = Item->Next) {
+                SDL_assert(Item != NULL);
             }
-            SDL_assert(item != NULL);
-            retval = item->name;
+            SDL_assert(Item != NULL);
+            retval = Item->name;
         }
         SDL_UnlockMutex(current_audio.detectionLock);
     }
@@ -1303,11 +1303,11 @@ open_audio_device(const char *devname, int iscapture,
            everything again to find the matching human-readable name).
            It might still need to open a device based on the string for,
            say, a network audio server, but this optimizes some cases. */
-        SDL_AudioDeviceItem *item;
+        SDL_AudioDeviceItem *Item;
         SDL_LockMutex(current_audio.detectionLock);
-        for (item = iscapture ? current_audio.inputDevices : current_audio.outputDevices; item; item = item->next) {
-            if ((item->handle != NULL) && (SDL_strcmp(item->name, devname) == 0)) {
-                handle = item->handle;
+        for (Item = iscapture ? current_audio.inputDevices : current_audio.outputDevices; Item; Item = Item->Next) {
+            if ((Item->handle != NULL) && (SDL_strcmp(Item->name, devname) == 0)) {
+                handle = Item->handle;
                 break;
             }
         }

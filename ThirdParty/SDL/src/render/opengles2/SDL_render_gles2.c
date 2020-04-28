@@ -48,7 +48,7 @@ struct GLES2_FBOList
 {
    Uint32 w, h;
    GLuint FBO;
-   GLES2_FBOList *next;
+   GLES2_FBOList *Next;
 };
 
 typedef struct GLES2_TextureData
@@ -74,7 +74,7 @@ typedef struct GLES2_ShaderCacheEntry
     const GLES2_ShaderInstance *instance;
     int references;
     struct GLES2_ShaderCacheEntry *prev;
-    struct GLES2_ShaderCacheEntry *next;
+    struct GLES2_ShaderCacheEntry *Next;
 } GLES2_ShaderCacheEntry;
 
 typedef struct GLES2_ShaderCache
@@ -92,7 +92,7 @@ typedef struct GLES2_ProgramCacheEntry
     Uint32 color;
     GLfloat projection[4][4];
     struct GLES2_ProgramCacheEntry *prev;
-    struct GLES2_ProgramCacheEntry *next;
+    struct GLES2_ProgramCacheEntry *Next;
 } GLES2_ProgramCacheEntry;
 
 typedef struct GLES2_ProgramCache
@@ -280,14 +280,14 @@ GLES2_GetFBO(GLES2_RenderData *data, Uint32 w, Uint32 h)
 {
    GLES2_FBOList *result = data->framebuffers;
    while ((result) && ((result->w != w) || (result->h != h)) ) {
-       result = result->next;
+       result = result->Next;
    }
    if (result == NULL) {
        result = SDL_malloc(sizeof(GLES2_FBOList));
        result->w = w;
        result->h = h;
        data->glGenFramebuffers(1, &result->FBO);
-       result->next = data->framebuffers;
+       result->Next = data->framebuffers;
        data->framebuffers = result;
    }
    return result;
@@ -398,14 +398,14 @@ static void
 GLES2_EvictShader(GLES2_RenderData *data, GLES2_ShaderCacheEntry *entry)
 {
     /* Unlink the shader from the cache */
-    if (entry->next) {
-        entry->next->prev = entry->prev;
+    if (entry->Next) {
+        entry->Next->prev = entry->prev;
     }
     if (entry->prev) {
-        entry->prev->next = entry->next;
+        entry->prev->Next = entry->Next;
     }
     if (data->shader_cache.head == entry) {
-        data->shader_cache.head = entry->next;
+        data->shader_cache.head = entry->Next;
     }
     --data->shader_cache.count;
 
@@ -428,18 +428,18 @@ GLES2_CacheProgram(GLES2_RenderData *data, GLES2_ShaderCacheEntry *vertex,
         if (entry->vertex_shader == vertex && entry->fragment_shader == fragment) {
             break;
         }
-        entry = entry->next;
+        entry = entry->Next;
     }
     if (entry) {
         if (data->program_cache.head != entry) {
-            if (entry->next) {
-                entry->next->prev = entry->prev;
+            if (entry->Next) {
+                entry->Next->prev = entry->prev;
             }
             if (entry->prev) {
-                entry->prev->next = entry->next;
+                entry->prev->Next = entry->Next;
             }
             entry->prev = NULL;
-            entry->next = data->program_cache.head;
+            entry->Next = data->program_cache.head;
             data->program_cache.head->prev = entry;
             data->program_cache.head = entry;
         }
@@ -505,7 +505,7 @@ GLES2_CacheProgram(GLES2_RenderData *data, GLES2_ShaderCacheEntry *vertex,
 
     /* Cache the linked program */
     if (data->program_cache.head) {
-        entry->next = data->program_cache.head;
+        entry->Next = data->program_cache.head;
         data->program_cache.head->prev = entry;
     } else {
         data->program_cache.tail = entry;
@@ -530,8 +530,8 @@ GLES2_CacheProgram(GLES2_RenderData *data, GLES2_ShaderCacheEntry *vertex,
         data->glDeleteProgram(data->program_cache.tail->id);
         data->program_cache.tail = data->program_cache.tail->prev;
         if (data->program_cache.tail != NULL) {
-            SDL_free(data->program_cache.tail->next);
-            data->program_cache.tail->next = NULL;
+            SDL_free(data->program_cache.tail->Next);
+            data->program_cache.tail->Next = NULL;
         }
         --data->program_cache.count;
     }
@@ -577,7 +577,7 @@ GLES2_CacheShader(GLES2_RenderData *data, GLES2_ShaderType type)
         if (entry->instance == instance) {
             break;
         }
-        entry = entry->next;
+        entry = entry->Next;
     }
     if (entry) {
         return entry;
@@ -627,7 +627,7 @@ GLES2_CacheShader(GLES2_RenderData *data, GLES2_ShaderType type)
 
     /* Link the shader entry in at the front of the cache */
     if (data->shader_cache.head) {
-        entry->next = data->shader_cache.head;
+        entry->Next = data->shader_cache.head;
         data->shader_cache.head->prev = entry;
     }
     data->shader_cache.head = entry;
@@ -1332,7 +1332,7 @@ GLES2_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *ver
                 break;
         }
 
-        cmd = cmd->next;
+        cmd = cmd->Next;
     }
 
     return GL_CheckError("", renderer);
@@ -1349,30 +1349,30 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
 
         {
             GLES2_ShaderCacheEntry *entry;
-            GLES2_ShaderCacheEntry *next;
+            GLES2_ShaderCacheEntry *Next;
             entry = data->shader_cache.head;
             while (entry) {
                 data->glDeleteShader(entry->id);
-                next = entry->next;
+                Next = entry->Next;
                 SDL_free(entry);
-                entry = next;
+                entry = Next;
             }
         }
         {
             GLES2_ProgramCacheEntry *entry;
-            GLES2_ProgramCacheEntry *next;
+            GLES2_ProgramCacheEntry *Next;
             entry = data->program_cache.head;
             while (entry) {
                 data->glDeleteProgram(entry->id);
-                next = entry->next;
+                Next = entry->Next;
                 SDL_free(entry);
-                entry = next;
+                entry = Next;
             }
         }
 
         if (data->context) {
             while (data->framebuffers) {
-                GLES2_FBOList *nextnode = data->framebuffers->next;
+                GLES2_FBOList *nextnode = data->framebuffers->Next;
                 data->glDeleteFramebuffers(1, &data->framebuffers->FBO);
                 GL_CheckError("", renderer);
                 SDL_free(data->framebuffers);

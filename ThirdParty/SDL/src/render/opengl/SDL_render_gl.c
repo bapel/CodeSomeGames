@@ -57,7 +57,7 @@ struct GL_FBOList
 {
     Uint32 w, h;
     GLuint FBO;
-    GL_FBOList *next;
+    GL_FBOList *Next;
 };
 
 typedef struct
@@ -300,7 +300,7 @@ GL_GetFBO(GL_RenderData *data, Uint32 w, Uint32 h)
     GL_FBOList *result = data->framebuffers;
 
     while (result && ((result->w != w) || (result->h != h))) {
-        result = result->next;
+        result = result->Next;
     }
 
     if (!result) {
@@ -309,7 +309,7 @@ GL_GetFBO(GL_RenderData *data, Uint32 w, Uint32 h)
             result->w = w;
             result->h = h;
             data->glGenFramebuffersEXT(1, &result->FBO);
-            result->next = data->framebuffers;
+            result->Next = data->framebuffers;
             data->framebuffers = result;
         }
     }
@@ -1339,7 +1339,7 @@ GL_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *vertic
                 break;
         }
 
-        cmd = cmd->next;
+        cmd = cmd->Next;
     }
 
     return GL_CheckError("", renderer);
@@ -1478,7 +1478,7 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
         }
         if (data->context) {
             while (data->framebuffers) {
-                GL_FBOList *nextnode = data->framebuffers->next;
+                GL_FBOList *nextnode = data->framebuffers->Next;
                 /* delete the framebuffer object */
                 data->glDeleteFramebuffersEXT(1, &data->framebuffers->FBO);
                 GL_CheckError("", renderer);

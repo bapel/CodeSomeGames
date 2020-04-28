@@ -60,7 +60,7 @@ struct SDL_Texture
     void *driverdata;           /**< Driver specific texture representation */
 
     SDL_Texture *prev;
-    SDL_Texture *next;
+    SDL_Texture *Next;
 };
 
 typedef enum
@@ -101,7 +101,7 @@ typedef struct SDL_RenderCommand
             Uint8 r, g, b, a;
         } color;
     } data;
-    struct SDL_RenderCommand *next;
+    struct SDL_RenderCommand *Next;
 } SDL_RenderCommand;
 
 

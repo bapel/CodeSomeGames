@@ -1436,7 +1436,7 @@ D3D_RunCommandQueue(SDL_Renderer * renderer, SDL_RenderCommand *cmd, void *verti
                 break;
         }
 
-        cmd = cmd->next;
+        cmd = cmd->Next;
     }
 
     return 0;
@@ -1616,7 +1616,7 @@ D3D_Reset(SDL_Renderer * renderer)
     }
 
     /* Release application render targets */
-    for (texture = renderer->textures; texture; texture = texture->next) {
+    for (texture = renderer->textures; texture; texture = texture->Next) {
         if (texture->access == SDL_TEXTUREACCESS_TARGET) {
             D3D_DestroyTexture(renderer, texture);
         } else {
@@ -1644,7 +1644,7 @@ D3D_Reset(SDL_Renderer * renderer)
     }
 
     /* Allocate application render targets */
-    for (texture = renderer->textures; texture; texture = texture->next) {
+    for (texture = renderer->textures; texture; texture = texture->Next) {
         if (texture->access == SDL_TEXTUREACCESS_TARGET) {
             D3D_CreateTexture(renderer, texture);
         }

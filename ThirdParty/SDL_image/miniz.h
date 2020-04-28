@@ -1865,20 +1865,20 @@ static tdefl_sym_freq* tdefl_radix_sort_syms(mz_uint num_syms, tdefl_sym_freq* p
 // tdefl_calculate_minimum_redundancy() originally written by: Alistair Moffat, alistair@cs.mu.oz.au, Jyrki Katajainen, jyrki@diku.dk, November 1996.
 static void tdefl_calculate_minimum_redundancy(tdefl_sym_freq *A, int n)
 {
-  int root, leaf, next, avbl, used, dpth;
+  int root, leaf, Next, avbl, used, dpth;
   if (n==0) return; else if (n==1) { A[0].m_key = 1; return; }
   A[0].m_key += A[1].m_key; root = 0; leaf = 2;
-  for (next=1; next < n-1; next++)
+  for (Next=1; Next < n-1; Next++)
   {
-    if (leaf>=n || A[root].m_key<A[leaf].m_key) { A[next].m_key = A[root].m_key; A[root++].m_key = (mz_uint16)next; } else A[next].m_key = A[leaf++].m_key;
-    if (leaf>=n || (root<next && A[root].m_key<A[leaf].m_key)) { A[next].m_key = (mz_uint16)(A[next].m_key + A[root].m_key); A[root++].m_key = (mz_uint16)next; } else A[next].m_key = (mz_uint16)(A[next].m_key + A[leaf++].m_key);
+    if (leaf>=n || A[root].m_key<A[leaf].m_key) { A[Next].m_key = A[root].m_key; A[root++].m_key = (mz_uint16)Next; } else A[Next].m_key = A[leaf++].m_key;
+    if (leaf>=n || (root<Next && A[root].m_key<A[leaf].m_key)) { A[Next].m_key = (mz_uint16)(A[Next].m_key + A[root].m_key); A[root++].m_key = (mz_uint16)Next; } else A[Next].m_key = (mz_uint16)(A[Next].m_key + A[leaf++].m_key);
   }
-  A[n-2].m_key = 0; for (next=n-3; next>=0; next--) A[next].m_key = A[A[next].m_key].m_key+1;
-  avbl = 1; used = dpth = 0; root = n-2; next = n-1;
+  A[n-2].m_key = 0; for (Next=n-3; Next>=0; Next--) A[Next].m_key = A[A[Next].m_key].m_key+1;
+  avbl = 1; used = dpth = 0; root = n-2; Next = n-1;
   while (avbl>0)
   {
     while (root>=0 && (int)A[root].m_key==dpth) { used++; root--; }
-    while (avbl>used) { A[next--].m_key = (mz_uint16)(dpth); avbl--; }
+    while (avbl>used) { A[Next--].m_key = (mz_uint16)(dpth); avbl--; }
     avbl = 2*used; dpth++; used = 0;
   }
 }
@@ -2764,7 +2764,7 @@ mz_bool tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, tdefl_put
 
 typedef struct
 {
-  size_t m_size, m_capacity;
+  size_t m_size, m_Capacity;
   mz_uint8 *m_pBuf;
   mz_bool m_expandable;
 } tdefl_output_buffer;
@@ -2773,12 +2773,12 @@ static mz_bool tdefl_output_buffer_putter(const void *pBuf, int len, void *pUser
 {
   tdefl_output_buffer *p = (tdefl_output_buffer *)pUser;
   size_t new_size = p->m_size + len;
-  if (new_size > p->m_capacity)
+  if (new_size > p->m_Capacity)
   {
-    size_t new_capacity = p->m_capacity; mz_uint8 *pNew_buf; if (!p->m_expandable) return MZ_FALSE;
+    size_t new_capacity = p->m_Capacity; mz_uint8 *pNew_buf; if (!p->m_expandable) return MZ_FALSE;
     do { new_capacity = MZ_MAX(128U, new_capacity << 1U); } while (new_size > new_capacity);
     pNew_buf = (mz_uint8*)MZ_REALLOC(p->m_pBuf, new_capacity); if (!pNew_buf) return MZ_FALSE;
-    p->m_pBuf = pNew_buf; p->m_capacity = new_capacity;
+    p->m_pBuf = pNew_buf; p->m_Capacity = new_capacity;
   }
   memcpy((mz_uint8*)p->m_pBuf + p->m_size, pBuf, len); p->m_size = new_size;
   return MZ_TRUE;
@@ -2797,7 +2797,7 @@ size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void 
 {
   tdefl_output_buffer out_buf; MZ_CLEAR_OBJ(out_buf);
   if (!pOut_buf) return 0;
-  out_buf.m_pBuf = (mz_uint8*)pOut_buf; out_buf.m_capacity = out_buf_len;
+  out_buf.m_pBuf = (mz_uint8*)pOut_buf; out_buf.m_Capacity = out_buf_len;
   if (!tdefl_compress_mem_to_output(pSrc_buf, src_buf_len, tdefl_output_buffer_putter, &out_buf, flags)) return 0;
   return out_buf.m_size;
 }
@@ -2835,7 +2835,7 @@ MINIZ_STATIC void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage
   static const mz_uint s_tdefl_png_num_probes[11] = { 0, 1, 6, 32,  16, 32, 128, 256,  512, 768, 1500 };
   tdefl_compressor *pComp = (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor)); tdefl_output_buffer out_buf; int i, y, z; mz_uint32 c; *pLen_out = 0;
   if (!pComp) return NULL;
-  MZ_CLEAR_OBJ(out_buf); out_buf.m_expandable = MZ_TRUE; out_buf.m_capacity = 57+MZ_MAX(64, (1+bpl)*h); if (NULL == (out_buf.m_pBuf = (mz_uint8*)MZ_MALLOC(out_buf.m_capacity))) { MZ_FREE(pComp); return NULL; }
+  MZ_CLEAR_OBJ(out_buf); out_buf.m_expandable = MZ_TRUE; out_buf.m_Capacity = 57+MZ_MAX(64, (1+bpl)*h); if (NULL == (out_buf.m_pBuf = (mz_uint8*)MZ_MALLOC(out_buf.m_Capacity))) { MZ_FREE(pComp); return NULL; }
   // write dummy header
   for (z = 41; z; --z) tdefl_output_buffer_putter(&z, 1, &out_buf);
   // compress image data
