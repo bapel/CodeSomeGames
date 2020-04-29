@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="StackWalk.h">
+    <ClInclude Include="CallStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
