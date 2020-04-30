@@ -4,7 +4,7 @@
 #include <thread>
 #include <mutex>
 
-void PrintStack();
+void PrintStack(uint64_t process);
 
 #define FooMember(idx__, idxM1__)\
     void Fn##idx__(uint64_t process) { Fn##idxM1__(process); }
@@ -49,58 +49,43 @@ void TestThreads(int numThreads, uint64_t process)
         threads[i].join();
 }
 
+#include <iostream>
+
 int main()
 {
     auto process = CallStack_Init();
 
-    CallFoo(process);
-    TestThreads(4, process);
+    for (auto i = 0; i < 1000; i++)
+    {
+        printf("\n~~~~ Attempt: %d ~~~~\n", i);
+
+        CallFoo(process);
+        TestThreads(4, process);
+    }
 
     CallStack_Shutdown(process);
 }
 
 void PrintStack(uint64_t process)
 {
-    struct LineInfo
-    {
-        uint64_t Address;
-        char* FileName;
-        uint32_t LineNumber;
-        char FunctionName[63];
-    };
-
-    const int k_MaxCapturedLines = 24;
-    LineInfo lines[k_MaxCapturedLines];
-    size_t linesCount = 0;
-
-    CallStackContext context = { (HANDLE)process };
-    CallStack_StartCapture(context, process);
-
-    while (CallStack_Next(&context))
-    {
-        auto i = linesCount;
-        
-        lines[i].Address = context.Symbol.Address;
-        lines[i].FileName = context.Line.FileName;
-        lines[i].LineNumber = context.Line.LineNumber;
-        strcpy_s(lines[i].FunctionName, context.FunctionName);
-
-        linesCount++;
-        if (linesCount == k_MaxCapturedLines)
-            break;
-    }
-
     g_LogMutex.lock();
 
-    printf("\n---- Thread: %d ----\n\n", std::this_thread::get_id());
+    CallStack callStack = {};
+    CallStack_Capture(callStack);
 
-    for (auto i = 0; i < linesCount; i++)
+    // Can't printf get_id()
+    std::cout<< "\n---- Thread: " << std::this_thread::get_id() << " ----\n\n";
+
+    for (auto i = 0; i < CallStack::k_MaxDepth; i++)
     {
+        if (callStack.Lines[i].Address == UINT64_MAX)
+            break;
+
         printf("0x%llx __ %s __ file %s, line %d\n", 
-            lines[i].Address,
-            lines[i].FunctionName, 
-            lines[i].FileName, 
-            lines[i].LineNumber);
+            callStack.Lines[i].Address,
+            callStack.Lines[i].FuncName, 
+            callStack.Lines[i].FileName, 
+            callStack.Lines[i].LineNumber);
     }
 
     g_LogMutex.unlock();
