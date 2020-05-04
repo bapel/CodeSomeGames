@@ -7,7 +7,6 @@
 #include <winnt.h>
 #include <Psapi.h>
 #include <stdint.h>
-#include <assert.h>
 
 // Some versions of imagehlp.dll lack the proper packing directives themselves
 // so we need to do it.
@@ -18,9 +17,9 @@
 #pragma comment(lib, "psapi.lib")
 #pragma comment(lib, "dbghelp.lib")
 
-// This has to be a macro to capture context at the call site.
-#define CallStack_StartCapture(context__, process__)\
+#define bfk_stack_trace(process__, callstack__)\
 {\
+    CallStackContext context__ = { (HANDLE)process__ };\
     context__ = { (HANDLE)process__, GetCurrentThread(), {}, {} };\
     context__.ContextRecord.ContextFlags = CONTEXT_FULL;\
     RtlCaptureContext(&context__.ContextRecord);\
@@ -32,13 +31,7 @@
     context__.StackFrame.AddrFrame.Mode   = AddrModeFlat;\
     context__.Symbol.SizeOfStruct  = sizeof(IMAGEHLP_SYMBOL64);\
     context__.Symbol.MaxNameLength = CallStackContext::k_MaxFuncNameLen;\
-}
-
-#define CallStack_Capture(callstack__)\
-{\
-    CallStackContext context = { (HANDLE)process };\
-    CallStack_StartCapture(context, process);\
-    CallStack_DoCapture(context, &callstack__);\
+    CallStack_DoCapture(context__, &callstack__);\
 }
 
 #if __cplusplus

@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pfk\collections.hpp" />
+    <ClInclude Include="pfk\collections\ArrayList.hpp" />
     <ClInclude Include="pfk\FreeList.hpp" />
     <ClInclude Include="pfk\Memory.hpp" />
     <ClInclude Include="pfk\Platform.hpp" />
+    <ClInclude Include="Pool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pfk\Memory.cpp" />

@@ -27,6 +27,12 @@
     <ClInclude Include="pfk\Platform.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pfk\collections\ArrayList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pfk\Memory.cpp">

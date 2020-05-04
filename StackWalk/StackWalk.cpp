@@ -6,8 +6,8 @@
 
 void PrintStack(uint64_t process);
 
-#define FooMember(idx__, idxM1__)\
-    void Fn##idx__(uint64_t process) { Fn##idxM1__(process); }
+#define FooMember(idx__, idx1__)\
+    void Fn##idx__(uint64_t process) { Fn##idx1__(process); }
 
 class Foo
 {
@@ -29,6 +29,8 @@ public:
     FooMember( 2,  1);
     void Fn1(uint64_t process) { PrintStack(process); }
 };
+
+#undef FooMember
 
 void CallFoo(uint64_t process)
 {
@@ -71,7 +73,7 @@ void PrintStack(uint64_t process)
     g_LogMutex.lock();
 
     CallStack callStack = {};
-    CallStack_Capture(callStack);
+    bfk_stack_trace(process, callStack);
 
     // Can't printf get_id()
     std::cout<< "\n---- Thread: " << std::this_thread::get_id() << " ----\n\n";
