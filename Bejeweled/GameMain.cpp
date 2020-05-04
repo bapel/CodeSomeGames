@@ -17,7 +17,7 @@ using namespace DirectX;
 struct QuadObject
 {
     float x, y, z, angle;
-    float r, g, b, a;
+    uint32_t color;
 };
 
 struct TriangleVertex
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
     std::uniform_real_distribution<> positionDistribution(-0.5f, 0.5f);
-    std::uniform_real_distribution<> colorDistribution(0.5f, 1.0f);
+    std::uniform_int_distribution<> colorDistribution(0xffaaaaaa, 0xffffffff);
 
     for (auto i = 0; i < kNumQuads; i++)
     {
@@ -72,10 +72,7 @@ int main(int argc, char** argv)
             (float)positionDistribution(generator),
             0.0f,
             (float)positionDistribution(generator) * XM_PI,
-            (float)colorDistribution(generator),
-            (float)colorDistribution(generator),
-            (float)colorDistribution(generator),
-            1.0f
+            (uint32_t)colorDistribution(generator)
         });
     }
 
@@ -99,7 +96,7 @@ int main(int argc, char** argv)
         { "POSITION",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,                 D3D11_INPUT_PER_VERTEX_DATA,   0 },
         { "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,       0, 4 * sizeof(float), D3D11_INPUT_PER_VERTEX_DATA,   0 },
         { "QUAD_DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,                 D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-        { "COLOR",     0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 4 * sizeof(float), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+        { "COLOR",     0, DXGI_FORMAT_R8G8B8A8_UNORM,     1, 4 * sizeof(float), D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     };
 
     const auto numElements = sizeof(elementDescs) / sizeof(D3D11_INPUT_ELEMENT_DESC);
