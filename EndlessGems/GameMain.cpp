@@ -19,7 +19,7 @@ using namespace DirectX;
 struct QuadObject
 {
     float x, y, z, angle;
-    uint32_t color;
+    Color color;
 };
 
 struct TriangleVertex
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     SDL_assert(nullptr != window);
 
     const auto kNumQuads = 4096;
-    const auto kQuadSize = 1.0f / 50.0f;
+    const auto kQuadSize = 2 * 32.0f;
 
     std::vector<QuadObject> quads;
     quads.reserve(kNumQuads);
@@ -70,24 +70,13 @@ int main(int argc, char** argv)
     GemsBoardState boardState;
     std::uniform_int_distribution<> gemColorDistribution(1, (int)GemColor::Count - 1);
 
-    for (int c = 0; c < boardState.Cols; c++)
+    for (int r = 0; r < boardState.Rows; r++)
     {
-        for (int r = 0; r < boardState.Rows; r++)
+        for (int c = 0; c < boardState.Cols; c++)
         {
             auto color = gemColorDistribution(generator);
-            boardState[{ c, r }] = (GemColor)color;
+            boardState[{ r, c }] = (GemColor)color;
         }
-    }
-
-    for (auto i = 0; i < kNumQuads; i++)
-    {
-        quads.emplace_back(QuadObject {
-            (float)positionDistribution(generator),
-            (float)positionDistribution(generator),
-            0.0f,
-            (float)positionDistribution(generator) * XM_PI,
-            (uint32_t)colorDistribution(generator)
-        });
     }
 
     Direct3D11 d3d11;
@@ -139,15 +128,12 @@ int main(int argc, char** argv)
     D3D_OK(d3dDevice->CreateBuffer(&vertexBufferDesc, &initialData, vertexBuffer.GetAddressOf()));
 
     D3D11_BUFFER_DESC instanceBufferDesc = {};
-    instanceBufferDesc.ByteWidth = (UINT)(sizeof(QuadObject) * quads.size());
+    instanceBufferDesc.ByteWidth = (UINT)(sizeof(QuadObject) * 64);
     instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    initialData = {};
-    initialData.pSysMem = quads.data();
-
-    D3D_OK(d3dDevice->CreateBuffer(&instanceBufferDesc, &initialData, instanceBuffer.GetAddressOf()));
+    D3D_OK(d3dDevice->CreateBuffer(&instanceBufferDesc, nullptr, instanceBuffer.GetAddressOf()));
 
     D3D11_BUFFER_DESC constantsBufferDesc = {};
     constantsBufferDesc.ByteWidth = (UINT)sizeof(TransformsBufferData);
@@ -161,7 +147,7 @@ int main(int argc, char** argv)
     ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png", spriteResourceView.GetAddressOf());
 
     D3D11_SAMPLER_DESC samplerDesc = {};
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -232,9 +218,19 @@ int main(int argc, char** argv)
         auto elapsedMS = currentMS - lastMS;
         lastMS = currentMS;
 
-        for (auto i = 0; i < kNumQuads; i++)
+        quads.clear();
+        for (int r = 0; r < boardState.Rows; r++)
         {
-            quads[i].angle += ((float)elapsedMS / 1000.0f);
+            for (int c = 0; c < boardState.Cols; c++)
+            {
+                quads.emplace_back(QuadObject {
+                    kQuadSize * (boardState.Cols - 1) * ((float)c / (boardState.Cols - 1) - 0.5f),
+                    kQuadSize * (boardState.Rows - 1) * ((float)r / (boardState.Rows - 1) - 0.5f),
+                    0.0f,
+                    0.0f,//(float)positionDistribution(generator) * XM_PI,
+                    GemsConstants::Colors[(uint32_t)boardState[{ r, c }]]
+                });
+            }
         }
 
         int w, h;
@@ -242,16 +238,8 @@ int main(int argc, char** argv)
 
         SDL_GetWindowSize(window, &w, &h);
         
-        if (w <= h)
-        {
-            viewWidth = 1.0f;
-            viewHeight = (float)h / (float)w;
-        }
-        else
-        {
-            viewWidth = (float)w / (float)h;
-            viewHeight = 1.0f;
-        }
+        viewWidth = w;
+        viewHeight = h;
 
         TransformsBufferData transformsBufferData = 
         {
@@ -259,7 +247,7 @@ int main(int argc, char** argv)
             DirectX::XMMatrixOrthographicLH(viewWidth, viewHeight, 0.0f, 1.0f)
         };
 
-        d3d11.FrameStart(window);
+        d3d11.FrameStart(window, 0x2a2b3eff);
 
         const auto d3dContext = d3d11.GetDeviceContext();
 
@@ -298,7 +286,6 @@ int main(int argc, char** argv)
         UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
         d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
 
-        //d3dContext->Draw(6, 0);
         d3dContext->DrawInstanced(6, (UINT)quads.size(), 0, 0);
         
         d3d11.FrameEnd();

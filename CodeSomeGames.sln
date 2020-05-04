@@ -17,8 +17,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collections", "Collections\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StackWalk", "StackWalk\StackWalk.vcxproj", "{767EE1EC-29A4-4B88-8846-FE9E27FCC73A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EndlessGems-Test", "EndlessGems-Test\EndlessGems-Test.vcxproj", "{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -75,14 +73,6 @@ Global
 		{767EE1EC-29A4-4B88-8846-FE9E27FCC73A}.Release|x64.Build.0 = Release|x64
 		{767EE1EC-29A4-4B88-8846-FE9E27FCC73A}.Release|x86.ActiveCfg = Release|Win32
 		{767EE1EC-29A4-4B88-8846-FE9E27FCC73A}.Release|x86.Build.0 = Release|Win32
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Debug|x64.ActiveCfg = Debug|x64
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Debug|x64.Build.0 = Debug|x64
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Debug|x86.ActiveCfg = Debug|Win32
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Debug|x86.Build.0 = Debug|Win32
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Release|x64.ActiveCfg = Release|x64
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Release|x64.Build.0 = Release|x64
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Release|x86.ActiveCfg = Release|Win32
-		{FA4C99B3-E6DE-450A-895C-8AB2F551BE49}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

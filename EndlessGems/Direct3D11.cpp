@@ -88,7 +88,7 @@ void Direct3D11::OnWindowResized(int w, int h)
     _windowHeight = h;
 }
 
-void Direct3D11::FrameStart(SDL_Window* window)
+void Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
 {
     SDL_assert(nullptr != window);
 
@@ -101,8 +101,7 @@ void Direct3D11::FrameStart(SDL_Window* window)
             OnWindowResized(w, h);
     }
 
-    FLOAT clearColor[] = { 0.5f, 0.75f, 1.0f, 1.0f };
-    _context->ClearRenderTargetView(_backBufferView.Get(), clearColor);
+    _context->ClearRenderTargetView(_backBufferView.Get(), clearColor.ToFloats().data());
     // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
 
     D3D11_VIEWPORT viewport = {};

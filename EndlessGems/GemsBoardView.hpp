@@ -3,23 +3,25 @@
 #include <assert.h>
 #include <stdint.h>
 #include <vector>
+#include <array>
 
 #include "Direct3D11.hpp"
 
 struct GemsConstants
 {
-    static const int BoardRows = 10;
-    static const int BoardCols = 10;
-    static const uint32_t Colors[];
+    static const int BoardRows = 8;
+    static const int BoardCols = 8;
+    static const Color Colors[];
 };
 
-const uint32_t GemsConstants::Colors[] = 
+const Color GemsConstants::Colors[] = 
 {
-    0x0000ffff,
-    0x00ff00ff,
-    0x800080ff,
-    0xff6600ff,
-    0xff0000ff
+    Color(0), // 0,
+    Color(0xe1b23cff), // 0xffff0000,
+    Color(0xdd663cff), // 0xff00ff00,
+    Color(0x014025ff), // 0xff800080,
+    Color(0x067473ff), // 0xff0066ff,
+    Color(0x735c6eff)  // 0xff0000ff
 };
 
 enum class GemColor
