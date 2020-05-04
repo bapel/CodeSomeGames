@@ -14,6 +14,8 @@ using namespace DirectX;
 #include <random>
 #include <ctime>
 
+#include "GemsBoardView.hpp"
+
 struct QuadObject
 {
     float x, y, z, angle;
@@ -40,10 +42,10 @@ int main(int argc, char** argv)
     const std::string kShadersBasePath = kExePath.substr(0, offset + 1);
 
     SDL_assert(0 == SDL_Init(0));
-    
+
     auto flags = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
-    SDL_assert(IMG_INIT_PNG == (flags & IMG_INIT_PNG));
     SDL_assert(IMG_INIT_JPG == (flags & IMG_INIT_JPG));
+    SDL_assert(IMG_INIT_PNG == (flags & IMG_INIT_PNG));
 
     SDL_Window* window = SDL_CreateWindow(
         "Bejeweled Clone",
@@ -64,6 +66,18 @@ int main(int argc, char** argv)
     std::mt19937 generator(randomDevice());
     std::uniform_real_distribution<> positionDistribution(-0.5f, 0.5f);
     std::uniform_int_distribution<> colorDistribution(0xffaaaaaa, 0xffffffff);
+
+    GemsBoardState boardState;
+    std::uniform_int_distribution<> gemColorDistribution(1, (int)GemColor::Count - 1);
+
+    for (int c = 0; c < boardState.Cols; c++)
+    {
+        for (int r = 0; r < boardState.Rows; r++)
+        {
+            auto color = gemColorDistribution(generator);
+            boardState[{ c, r }] = (GemColor)color;
+        }
+    }
 
     for (auto i = 0; i < kNumQuads; i++)
     {
@@ -92,7 +106,8 @@ int main(int argc, char** argv)
 
     const auto d3dDevice = d3d11.GetDevice();
 
-    D3D11_INPUT_ELEMENT_DESC elementDescs[] = {
+    D3D11_INPUT_ELEMENT_DESC elementDescs[] = 
+    {
         { "POSITION",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,                 D3D11_INPUT_PER_VERTEX_DATA,   0 },
         { "TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,       0, 4 * sizeof(float), D3D11_INPUT_PER_VERTEX_DATA,   0 },
         { "QUAD_DATA", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,                 D3D11_INPUT_PER_INSTANCE_DATA, 1 },

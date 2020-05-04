@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{06FDF994-C6BC-4016-A2B2-B9A873F66F85}</ProjectGuid>
-    <RootNamespace>Bejeweled</RootNamespace>
+    <RootNamespace>EndlessGems</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,19 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -146,6 +150,7 @@
     <ClCompile Include="GameMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GemsBoardView.hpp" />
     <ClInclude Include="Direct3D11.hpp" />
   </ItemGroup>
   <ItemGroup>

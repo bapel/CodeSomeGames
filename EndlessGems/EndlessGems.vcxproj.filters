@@ -29,6 +29,9 @@
     <ClInclude Include="Direct3D11.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GemsBoardView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TriangleVertex.hlsl">
