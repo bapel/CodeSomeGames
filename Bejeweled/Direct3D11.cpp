@@ -35,7 +35,6 @@ void Direct3D11::Init(SDL_Window* window)
     const UINT numFeatureLevels = sizeof(featureLevels) / sizeof(D3D_FEATURE_LEVEL);
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-
     swapChainDesc.BufferCount = 2;
     swapChainDesc.BufferDesc.Width = _windowWidth;
     swapChainDesc.BufferDesc.Height = _windowHeight;
@@ -44,10 +43,10 @@ void Direct3D11::Init(SDL_Window* window)
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     swapChainDesc.OutputWindow = hwnd;
-    swapChainDesc.SampleDesc.Count = 1;
+    swapChainDesc.SampleDesc.Count = 4;
     swapChainDesc.SampleDesc.Quality = 0;
     swapChainDesc.Windowed = TRUE;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     UINT deviceCreateFlags = 0;
 #if _DEBUG
@@ -143,10 +142,13 @@ ComPtr<ID3D11PixelShader> Direct3D11::CreatePixelShaderFromFile(const std::strin
     return shader;
 }
 
-ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& path)
+ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView)
 {
     auto sprite = IMG_Load(path.c_str());
     SDL_assert(nullptr != sprite);
+
+    auto formatName = SDL_GetPixelFormatName(sprite->format->format);
+    SDL_Log("%s: %s", path.c_str(), formatName);
 
     DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
     switch (sprite->format->format)
@@ -179,6 +181,10 @@ ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& pat
     ID3D11Texture2D* texture = nullptr;
     D3D_OK(_device->CreateTexture2D(&desc, &data, &texture));
     SDL_FreeSurface(sprite);
+
+    if (outView != nullptr)
+        D3D_OK(_device->CreateShaderResourceView(texture, nullptr, outView));
+
     return texture;
 }
 

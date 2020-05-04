@@ -74,7 +74,8 @@ int main(int argc, char** argv)
             (float)positionDistribution(generator) * XM_PI,
             (float)colorDistribution(generator),
             (float)colorDistribution(generator),
-            (float)colorDistribution(generator)
+            (float)colorDistribution(generator),
+            1.0f
         });
     }
 
@@ -144,10 +145,8 @@ int main(int argc, char** argv)
 
     D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
 
-    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//element_blue_diamond_glossy.png");
-
     ComPtr<ID3D11ShaderResourceView> spriteResourceView;
-    D3D_OK(d3dDevice->CreateShaderResourceView(spriteTexture.Get(), nullptr, spriteResourceView.GetAddressOf()));
+    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png", spriteResourceView.GetAddressOf());
 
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
@@ -170,6 +169,21 @@ int main(int argc, char** argv)
 
     ComPtr<ID3D11BlendState> blendState;
     D3D_OK(d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf()));
+
+    D3D11_RASTERIZER_DESC rasterizerDesc = {};
+    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+    rasterizerDesc.CullMode = D3D11_CULL_BACK;
+    rasterizerDesc.FrontCounterClockwise = FALSE;
+    rasterizerDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
+    rasterizerDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
+    rasterizerDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+    rasterizerDesc.DepthClipEnable = true;
+    rasterizerDesc.ScissorEnable = false;
+    rasterizerDesc.MultisampleEnable = true;
+    rasterizerDesc.AntialiasedLineEnable = true;
+
+    ComPtr<ID3D11RasterizerState> rasterizerState;
+    D3D_OK(d3dDevice->CreateRasterizerState(&rasterizerDesc, rasterizerState.GetAddressOf()));
 
     bool quit = false;
     SDL_Event event = {};
@@ -238,6 +252,7 @@ int main(int argc, char** argv)
         const auto d3dContext = d3d11.GetDeviceContext();
 
         d3dContext->OMSetBlendState(blendState.Get(), nullptr, 0xffffffff);
+        d3dContext->RSSetState(rasterizerState.Get());
 
         D3D11_MAPPED_SUBRESOURCE mappedInstanceBuffer;
         d3dContext->Map(instanceBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);

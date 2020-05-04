@@ -5,5 +5,5 @@ SamplerState spriteSampler;
 
 float4 main(vs_out input) : SV_TARGET {
     float4 color = spriteTexture.Sample(spriteSampler, input.uv);
-    return color;//float4(input.uv, 0.0, 1.0);// + input.color; // must return an RGBA colour
+    return color * input.color;//float4(input.uv, 0.0, 1.0);// + input.color; // must return an RGBA colour
 }

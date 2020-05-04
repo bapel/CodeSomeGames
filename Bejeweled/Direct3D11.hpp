@@ -39,5 +39,5 @@ public:
     ComPtr<ID3D11VertexShader> CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode);
     ComPtr<ID3D11PixelShader> CreatePixelShaderFromFile(const std::string& path);
 
-    ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path);
+    ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView);
 };
