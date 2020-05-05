@@ -12,6 +12,7 @@ struct GemsConstants
     static const int BoardRows = 8;
     static const int BoardCols = 8;
     static const Color Colors[];
+    static const char Tokens[];
 };
 
 const Color GemsConstants::Colors[] = 
@@ -23,6 +24,8 @@ const Color GemsConstants::Colors[] =
     Color(0x067473ff), // 0xff0066ff,
     Color(0x735c6eff)  // 0xff0000ff
 };
+
+const char GemsConstants::Tokens[] = { ' ', 'B', 'G', 'P', 'O', 'R' };
 
 enum class GemColor
 {
@@ -46,8 +49,8 @@ union GemLocation
         Col = col;
     }
 
-    inline GemLocation Above() const { return { Row - 1, Col }; }
-    inline GemLocation Below() const { return { Row + 1, Col }; }
+    inline GemLocation Above() const { return { Row + 1, Col }; }
+    inline GemLocation Below() const { return { Row - 1, Col }; }
     inline GemLocation Left() const  { return { Row, Col - 1 }; }
     inline GemLocation Right() const { return { Row, Col + 1 }; }
 };
@@ -55,8 +58,8 @@ union GemLocation
 inline bool operator == (const GemLocation& x, const GemLocation& y) { return x.Value == y.Value; }
 inline bool operator != (const GemLocation& x, const GemLocation& y) { return x.Value != y.Value; }
 
-inline GemLocation operator - (const GemLocation& x, const GemLocation& y) { return { y.Row - x.Row, y.Col - x.Col }; }
-inline GemLocation operator + (const GemLocation& x, const GemLocation& y) { return { y.Row + x.Row, y.Col + x.Col }; }
+inline GemLocation operator - (const GemLocation& x, const GemLocation& y) { return { x.Row - y.Row, x.Col - y.Col }; }
+inline GemLocation operator + (const GemLocation& x, const GemLocation& y) { return { x.Row + y.Row, x.Col + y.Col }; }
 
 class GemLocationIterator
 {
@@ -70,6 +73,9 @@ public:
     GemLocationIterator(const GemLocation& from, const GemLocation& to) :
         m_From(from), m_To(to), m_Current(from), m_Offset(to - from)
     {
+        assert(m_Offset.Row >= 0);
+        assert(m_Offset.Col >= 0);
+
         if (m_Offset.Row > 1)
         {
             // Only along row.
@@ -86,15 +92,15 @@ public:
     }
 
     inline GemLocation Current() const { return m_Current; }
-    inline bool IsColumn() const { return m_From.Row == m_To.Row; }
+    inline bool IsColumn() const { return m_From.Col == m_To.Col; }
 
     inline void Reset() { m_Current = m_From; }
 
     inline bool Next() 
     {
-        assert(m_Current != m_To);
+        assert(m_Current != m_To + m_Offset);
         m_Current = m_Current + m_Offset;
-        return m_Current != m_To;
+        return m_Current != m_To + m_Offset;
     }
 };
 
@@ -136,8 +142,8 @@ struct GemsBoardChange
     static GemsBoardChange CreateCascade(GemLocation from, GemLocation to)
     {
         // Should only be from above.
-        assert(from.Col < to.Col);
-        assert(from.Row == to.Row);
+        assert(from.Col == to.Col);
+        assert(from.Row > to.Row);
         return { ChangeType::Cascade, from, to };
     }
 
@@ -146,11 +152,11 @@ struct GemsBoardChange
         auto difference = to - from;
 
         // Only along row.
-        if (difference.Row > 1)
+        if (difference.Row > 0)
             assert(difference.Col == 0);
 
         // Only along col.
-        if (difference.Col > 1)
+        if (difference.Col > 0)
             assert(difference.Row == 0);
 
         return { ChangeType::Cascade, from, to };
@@ -174,6 +180,20 @@ struct GemsBoardState
          && location.Row < Rows
          && location.Col > 0 
          && location.Col < Cols;
+    }
+
+    std::string ToString() const
+    {
+        std::string str = "";
+
+        for (int r = Rows - 1; r >= 0; r--)
+        {
+            for (int c = 0; c < Cols; c++)
+                str +=  GemsConstants::Tokens[(int)m_Colors[r][c]];
+            str += '\n';
+        }
+
+        return std::move(str);
     }
 };
 
@@ -199,9 +219,8 @@ struct GemsLogic
             case ChangeType::Clear:
             {
                 auto iter = change.Clear.Iterator();
-                outNextState[iter.Current()] = GemColor::None;
-                while (iter.Next())
-                    outNextState[iter.Current()];
+                do { outNextState[iter.Current()] = GemColor::None; } 
+                while (iter.Next());
                 return true;
             }
 
@@ -211,14 +230,13 @@ struct GemsLogic
                 return true;
 
             case ChangeType::None:
+            default:
                 return false;
         }
     }
 
     static int GetSideEffects(const GemsBoardState& currentState, GemsBoardChange change, std::vector<GemsBoardChange>& outSideEffects)
     {
-        outSideEffects.clear();
-
         switch (change.Type)
         {
             case ChangeType::Clear:
@@ -267,11 +285,15 @@ struct GemsLogic
 
                 sideEffect.Cascade.From = change.Cascade.From.Above();
                 sideEffect.Cascade.To = change.Cascade.From;
+
+                outSideEffects.push_back(sideEffect);
+                return 1;
             }
 
             case ChangeType::Swap:
             case ChangeType::Spawn:
             case ChangeType::None:
+            default:
                 return 0;        
         }
     }

@@ -13,6 +13,7 @@ using namespace DirectX;
 #include <vector>
 #include <random>
 #include <ctime>
+#include <queue>
 
 #include "GemsBoardView.hpp"
 
@@ -56,18 +57,18 @@ int main(int argc, char** argv)
 
     SDL_assert(nullptr != window);
 
-    const auto kNumQuads = 4096;
+    const auto kNumQuads = 256;
     const auto kQuadSize = 2 * 32.0f;
+
+    GemsBoardState boardState;
+    GemsBoardState boardState_1;
 
     std::vector<QuadObject> quads;
     quads.reserve(kNumQuads);
     
-    std::random_device randomDevice;
-    std::mt19937 generator(randomDevice());
-    std::uniform_real_distribution<> positionDistribution(-0.5f, 0.5f);
-    std::uniform_int_distribution<> colorDistribution(0xffaaaaaa, 0xffffffff);
-
-    GemsBoardState boardState;
+    //std::random_device randomDevice;
+    //std::mt19937 generator(randomDevice());
+    std::mt19937 generator(0);
     std::uniform_int_distribution<> gemColorDistribution(1, (int)GemColor::Count - 1);
 
     for (int r = 0; r < boardState.Rows; r++)
@@ -188,6 +189,12 @@ int main(int argc, char** argv)
     uint32_t lastMS = 0;
     float rotationAngle = 0.0f;
 
+    std::vector<GemsBoardChange> changes;
+    std::vector<GemsBoardChange> changesToForward;
+
+    changes.reserve(64);
+    changesToForward.reserve(64);
+
     while (!quit)
     {
         while (SDL_PollEvent(&event))
@@ -218,17 +225,53 @@ int main(int argc, char** argv)
         auto elapsedMS = currentMS - lastMS;
         lastMS = currentMS;
 
+        //std::uniform_int_distribution<> rowDistribution(0, boardState.Rows);
+        //std::uniform_int_distribution<> colDistribution(0, boardState.Cols);
+
+        GemsBoardChange clearChange = {};
+        clearChange.Type = ChangeType::Clear;
+        clearChange.Clear.From = { 3, 3 };
+        clearChange.Clear.To = { 3, 6 };
+
+        uint32_t n = 0;
+
+        changes.clear();
+        changes.push_back(clearChange);
+        changesToForward.clear();
+
+        while (changes.size() > 0)
+        {
+            auto change = changes[0];
+            changes.erase(changes.begin());
+
+            auto sideEffectsStartIdx = changes.size();
+            auto numSideEffects = GemsLogic::GetSideEffects(boardState, change, changes);
+
+            auto s0 = boardState.ToString();
+
+            boardState_1 = boardState;
+            GemsLogic::ApplyChange(boardState, change, boardState_1);
+            boardState = boardState_1;
+            changesToForward.push_back(change);
+
+            auto s1 = boardState.ToString();
+        }
+
         quads.clear();
         for (int r = 0; r < boardState.Rows; r++)
         {
             for (int c = 0; c < boardState.Cols; c++)
             {
+                auto color = boardState[{ r, c }];
+                if (color == GemColor::None)
+                    continue;
+
                 quads.emplace_back(QuadObject {
                     kQuadSize * (boardState.Cols - 1) * ((float)c / (boardState.Cols - 1) - 0.5f),
                     kQuadSize * (boardState.Rows - 1) * ((float)r / (boardState.Rows - 1) - 0.5f),
                     0.0f,
                     0.0f,//(float)positionDistribution(generator) * XM_PI,
-                    GemsConstants::Colors[(uint32_t)boardState[{ r, c }]]
+                    GemsConstants::Colors[(uint32_t)color]
                 });
             }
         }

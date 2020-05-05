@@ -152,6 +152,8 @@
   <ItemGroup>
     <ClInclude Include="GemsBoardView.hpp" />
     <ClInclude Include="Direct3D11.hpp" />
+    <ClInclude Include="SimpleMath.h" />
+    <ClInclude Include="Tween.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TrianglePixel.hlsl">
@@ -176,6 +178,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="SimpleMath.inl" />
     <None Include="VsOut.hlsli" />
   </ItemGroup>
   <ItemGroup>
