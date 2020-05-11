@@ -333,7 +333,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         data->dialog_width = IntMax( data->dialog_width, width_of_buttons + 2 * button_spacing );
         data->dialog_height = IntMax( data->dialog_height, ybuttons + 2 * button_height );
 
-        /* Location for first button. */
+        /* BoardLocation for first button. */
         if ( messageboxdata->flags & SDL_MESSAGEBOX_BUTTONS_RIGHT_TO_LEFT ) {
 			x = data->dialog_width - ( data->dialog_width - width_of_buttons ) / 2 - ( button_width + button_spacing );
 		} else {

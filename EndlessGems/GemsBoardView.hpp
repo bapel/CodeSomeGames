@@ -17,12 +17,12 @@ struct GemsConstants
 
 const Color GemsConstants::Colors[] = 
 {
-    Color(0), // 0,
-    Color(0xe1b23cff), // 0xffff0000,
-    Color(0xdd663cff), // 0xff00ff00,
-    Color(0x014025ff), // 0xff800080,
-    Color(0x067473ff), // 0xff0066ff,
-    Color(0x735c6eff)  // 0xff0000ff
+    ToColor(0), // 0,
+    ToColor(0xe1b23cff), // 0xffff0000,
+    ToColor(0xdd663cff), // 0xff00ff00,
+    ToColor(0x014025ff), // 0xff800080,
+    ToColor(0x067473ff), // 0xff0066ff,
+    ToColor(0x735c6eff)  // 0xff0000ff
 };
 
 const char GemsConstants::Tokens[] = { ' ', 'B', 'G', 'P', 'O', 'R' };
@@ -42,6 +42,8 @@ union GemLocation
 {
     int16_t Value;
     struct { int8_t Row, Col; };
+
+    GemLocation() = default;
 
     GemLocation(int row, int col)
     {

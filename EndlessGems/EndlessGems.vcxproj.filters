@@ -32,10 +32,19 @@
     <ClInclude Include="GemsBoardView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tween.hpp">
+    <ClInclude Include="Game\BoardChange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SimpleMath.h">
+    <ClInclude Include="Game\Constants.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Board.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Logic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,9 +59,6 @@
   <ItemGroup>
     <None Include="VsOut.hlsli">
       <Filter>Shaders</Filter>
-    </None>
-    <None Include="SimpleMath.inl">
-      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>

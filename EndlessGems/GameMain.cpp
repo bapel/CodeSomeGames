@@ -16,6 +16,8 @@ using namespace DirectX;
 #include <queue>
 
 #include "GemsBoardView.hpp"
+#include "SimpleMath.h"
+using Vector2 = DirectX::SimpleMath::Vector2;
 
 struct QuadObject
 {
@@ -35,8 +37,100 @@ struct TransformsBufferData
     XMMATRIX viewProj;
 };
 
+const auto kQuadSize = 2 * 32.0f;
+GemsBoardState boardState;
+
+float GemColToWorld(int c)
+{
+    return kQuadSize * (boardState.Cols - 1) * ((float)c / (boardState.Cols - 1) - 0.5f);
+}
+
+float GemRowToWorld(int r)
+{
+    return kQuadSize * (boardState.Rows - 1) * ((float)r / (boardState.Rows - 1) - 0.5f);
+}
+
+#include "Game\Logic.hpp"
+
+std::vector<Game::GemLocation::Coord> Game::Logic::m_RowsBuffer;
+
 int main(int argc, char** argv)
 {
+    {
+        using namespace Game;
+
+        Board board;
+        BoardChangeQueue changeQueue;
+
+        Logic::m_RowsBuffer.reserve(board.Count());
+
+        std::mt19937 g(0);
+        std::uniform_int_distribution<> d(1, (int)Game::GemColor::Count - 1);
+
+        for (auto r = 0; r < board.Rows(); r++)
+        {
+            for (auto c = 0; c < board.Cols(); c++)
+            {
+                auto spawn = BoardChange();
+                spawn.Type = BoardChangeType::Spawn;
+                spawn.Spawn.Location = { r, c };
+                spawn.Spawn.Color = (Game::GemColor)d(g);
+
+                changeQueue.PushBack(spawn);
+            }
+        }
+
+        while (changeQueue.NumRemaining() > 0)
+            Logic::ProcessQueue(&board, &changeQueue);
+
+        changeQueue.Clear();
+
+        auto boardStr = board.ToString();
+        printf("%s\n", boardStr.c_str());
+
+        {
+            auto clear = BoardChange();
+            clear.Type = BoardChangeType::Clear;
+
+            clear.Clear.ID = board[{ 2, 1 }].ID;
+            changeQueue.PushBack(clear);
+
+            clear.Clear.ID = board[{ 2, 2 }].ID;
+            changeQueue.PushBack(clear);
+
+            clear.Clear.ID = board[{ 2, 3 }].ID;
+            changeQueue.PushBack(clear);
+        }
+
+        while (changeQueue.NumRemaining() > 0)
+            Logic::ProcessQueue(&board, &changeQueue);
+
+        boardStr = board.ToString();
+        printf("%s\n", boardStr.c_str());
+
+        {
+            auto clear = BoardChange();
+            clear.Type = BoardChangeType::Clear;
+
+            clear.Clear.ID = board[{ 2, 2 }].ID;
+            changeQueue.PushBack(clear);
+
+            clear.Clear.ID = board[{ 3, 2 }].ID;
+            changeQueue.PushBack(clear);
+
+            clear.Clear.ID = board[{ 4, 2 }].ID;
+            changeQueue.PushBack(clear);
+        }
+
+        Logic::ProcessQueue(&board, &changeQueue);
+
+        while (changeQueue.NumRemaining() > 0)
+            Logic::ProcessQueue(&board, &changeQueue);
+
+        boardStr = board.ToString();
+        printf("%s\n", boardStr.c_str());
+    }
+
     SDL_assert(argc >= 1);
     const std::string kExePath(argv[0]);
     size_t offset = kExePath.find_last_of("\\");
@@ -57,14 +151,10 @@ int main(int argc, char** argv)
 
     SDL_assert(nullptr != window);
 
-    const auto kNumQuads = 256;
-    const auto kQuadSize = 2 * 32.0f;
-
-    GemsBoardState boardState;
     GemsBoardState boardState_1;
 
     std::vector<QuadObject> quads;
-    quads.reserve(kNumQuads);
+    quads.reserve(64);
     
     //std::random_device randomDevice;
     //std::mt19937 generator(randomDevice());
@@ -195,6 +285,17 @@ int main(int argc, char** argv)
     changes.reserve(64);
     changesToForward.reserve(64);
 
+    struct Transition
+    {
+        Vector2 From;
+        Vector2 To;
+        Vector2 Current;
+        GemLocation GemLocation;
+    };
+
+    std::vector<Transition> transitions;
+    transitions.reserve(64);
+
     while (!quit)
     {
         while (SDL_PollEvent(&event))
@@ -204,16 +305,41 @@ int main(int argc, char** argv)
                 quit = true;
                 break;
             }
-            else if (SDL_WINDOWEVENT == event.type)
+            else if (SDL_KEYDOWN == event.type)
             {
-                //switch (event.window.event) 
-                //{
-                //case SDL_WINDOWEVENT_RESIZED:
-                //    auto w = event.window.data1;
-                //    auto h = event.window.data2;
-                //    d3d11.OnWindowResized(w, h);
-                //    break;
-                //}
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_SPACE:
+                    {
+                        //std::uniform_int_distribution<> rowDistribution(0, boardState.Rows);
+                        //std::uniform_int_distribution<> colDistribution(0, boardState.Cols);
+
+                        GemsBoardChange clearChange = {};
+                        clearChange.Type = ChangeType::Clear;
+                        clearChange.Clear.From = { 3, 3 };
+                        clearChange.Clear.To = { 3, 6 };
+
+                        changes.clear();
+                        changes.push_back(clearChange);
+                        changesToForward.clear();
+
+                        while (changes.size() > 0)
+                        {
+                            auto change = changes[0];
+                            changes.erase(changes.begin());
+
+                            GemsLogic::GetSideEffects(boardState, change, changes);
+
+                            auto s0 = boardState.ToString();
+                            boardState_1 = boardState;
+                            GemsLogic::ApplyChange(boardState, change, boardState_1);
+                            boardState = boardState_1;
+                            auto s1 = boardState.ToString();
+
+                            changesToForward.push_back(change);
+                        }
+                    }
+                }
             }
         }
 
@@ -224,38 +350,6 @@ int main(int argc, char** argv)
         auto currentMS = SDL_GetTicks();
         auto elapsedMS = currentMS - lastMS;
         lastMS = currentMS;
-
-        //std::uniform_int_distribution<> rowDistribution(0, boardState.Rows);
-        //std::uniform_int_distribution<> colDistribution(0, boardState.Cols);
-
-        GemsBoardChange clearChange = {};
-        clearChange.Type = ChangeType::Clear;
-        clearChange.Clear.From = { 3, 3 };
-        clearChange.Clear.To = { 3, 6 };
-
-        uint32_t n = 0;
-
-        changes.clear();
-        changes.push_back(clearChange);
-        changesToForward.clear();
-
-        while (changes.size() > 0)
-        {
-            auto change = changes[0];
-            changes.erase(changes.begin());
-
-            auto sideEffectsStartIdx = changes.size();
-            auto numSideEffects = GemsLogic::GetSideEffects(boardState, change, changes);
-
-            auto s0 = boardState.ToString();
-
-            boardState_1 = boardState;
-            GemsLogic::ApplyChange(boardState, change, boardState_1);
-            boardState = boardState_1;
-            changesToForward.push_back(change);
-
-            auto s1 = boardState.ToString();
-        }
 
         quads.clear();
         for (int r = 0; r < boardState.Rows; r++)
@@ -272,7 +366,7 @@ int main(int argc, char** argv)
                     0.0f,
                     0.0f,//(float)positionDistribution(generator) * XM_PI,
                     GemsConstants::Colors[(uint32_t)color]
-                });
+                    });
             }
         }
 
@@ -290,7 +384,7 @@ int main(int argc, char** argv)
             DirectX::XMMatrixOrthographicLH(viewWidth, viewHeight, 0.0f, 1.0f)
         };
 
-        d3d11.FrameStart(window, 0x2a2b3eff);
+        d3d11.FrameStart(window, Color(0x2a2b3eff));
 
         const auto d3dContext = d3d11.GetDeviceContext();
 

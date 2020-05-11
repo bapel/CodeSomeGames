@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -70,22 +70,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -150,10 +150,13 @@
     <ClCompile Include="GameMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\BoardChange.hpp" />
+    <ClInclude Include="Game\Constants.hpp" />
+    <ClInclude Include="Game\Board.hpp" />
+    <ClInclude Include="Game\Logic.hpp" />
     <ClInclude Include="GemsBoardView.hpp" />
     <ClInclude Include="Direct3D11.hpp" />
-    <ClInclude Include="SimpleMath.h" />
-    <ClInclude Include="Tween.hpp" />
+    <ClInclude Include="SimpleMath.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TrianglePixel.hlsl">
@@ -178,7 +181,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SimpleMath.inl" />
     <None Include="VsOut.hlsli" />
   </ItemGroup>
   <ItemGroup>

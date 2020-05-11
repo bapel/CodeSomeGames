@@ -8,6 +8,8 @@
 #include <vector>
 #include <array>
 
+#include "SimpleMath.hpp"
+
 #define D3D_OK(__call__)\
     SDL_assert(S_OK == (__call__))
 
@@ -15,35 +17,6 @@ template <class T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 struct SDL_Window;
-
-union Color
-{
-    uint32_t Value;
-    struct { uint8_t R, G, B, A; };
-
-    Color() : Value(0x000000ff) {}
-
-    Color(uint32_t hex) 
-    {
-        R = (hex & 0xff000000) >> 24;
-        G = (hex & 0x00ff0000) >> 16;
-        B = (hex & 0x0000ff00) >>  8;
-        A = (hex & 0x000000ff);
-    }
-
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r), G(g), B(b), A(a) {}
-
-    std::array<float, 4> ToFloats() const 
-    {
-        return
-        {
-            (float)R / 255.0f,
-            (float)G / 255.0f,
-            (float)B / 255.0f,
-            (float)A / 255.0f
-        };
-    }
-};
 
 class Direct3D11
 {
