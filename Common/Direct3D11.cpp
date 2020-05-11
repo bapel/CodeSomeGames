@@ -8,20 +8,16 @@
 #include <SDL_image.h>
 #include <SDL_rwops.h>
 
-#include <vector>
-#include <memory>
-#include <stdio.h>
-
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
 
-void Direct3D11::Init(SDL_Window* window)
+void Common::Direct3D11::Init(SDL_Window* window)
 {
     SDL_assert(nullptr != window);
 
     SDL_SysWMinfo info = {};
     SDL_GetVersion(&info.version);
     SDL_assert(SDL_GetWindowWMInfo(window, &info));
-    SDL_GetWindowSize(window, &_windowWidth, &_windowHeight);
+    SDL_GetWindowSize(window, &m_WindowWidth, &m_WindowHeight);
 
     HWND hwnd = info.info.win.window;
 
@@ -36,8 +32,8 @@ void Direct3D11::Init(SDL_Window* window)
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     swapChainDesc.BufferCount = 2;
-    swapChainDesc.BufferDesc.Width = _windowWidth;
-    swapChainDesc.BufferDesc.Height = _windowHeight;
+    swapChainDesc.BufferDesc.Width = m_WindowWidth;
+    swapChainDesc.BufferDesc.Height = m_WindowHeight;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -62,86 +58,86 @@ void Direct3D11::Init(SDL_Window* window)
         numFeatureLevels,
         D3D11_SDK_VERSION,
         &swapChainDesc,
-        _swapChain.GetAddressOf(),
-        _device.GetAddressOf(),
-        &_featureLevel,
-        _context.GetAddressOf()));
+        m_SwapChain.GetAddressOf(),
+        m_Device.GetAddressOf(),
+        &m_FeatureLevel,
+        m_DeviceContext.GetAddressOf()));
 
     ComPtr<ID3D11Texture2D> backBuffer;
-    D3D_OK(_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
-    D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
+    D3D_OK(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
+    D3D_OK(m_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_BackBufferView.GetAddressOf()));
 }
 
-void Direct3D11::OnWindowResized(int w, int h)
+void Common::Direct3D11::OnWindowResized(int w, int h)
 {
-    _context->ClearState();
-    _backBufferView->Release();
+    m_DeviceContext->ClearState();
+    m_BackBufferView->Release();
     // _depthStencilView->Release();
 
-    D3D_OK(_swapChain->ResizeBuffers(2, w, h, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+    D3D_OK(m_SwapChain->ResizeBuffers(2, w, h, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 
     ComPtr<ID3D11Texture2D> backBuffer;
-    D3D_OK(_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
-    D3D_OK(_device->CreateRenderTargetView(backBuffer.Get(), nullptr, _backBufferView.GetAddressOf()));
+    D3D_OK(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
+    D3D_OK(m_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_BackBufferView.GetAddressOf()));
 
-    _windowWidth = w;
-    _windowHeight = h;
+    m_WindowWidth = w;
+    m_WindowHeight = h;
 }
 
-void Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
+void Common::Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
 {
     SDL_assert(nullptr != window);
 
-    _context->ClearState();
+    m_DeviceContext->ClearState();
 
     {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
-        if (w != _windowWidth || h != _windowHeight)
+        if (w != m_WindowWidth || h != m_WindowHeight)
             OnWindowResized(w, h);
     }
 
-    _context->ClearRenderTargetView(_backBufferView.Get(), clearColor);
+    m_DeviceContext->ClearRenderTargetView(m_BackBufferView.Get(), clearColor);
     // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
 
     D3D11_VIEWPORT viewport = {};
-    viewport.Width = (float)_windowWidth;
-    viewport.Height = (float)_windowHeight;
+    viewport.Width = (float)m_WindowWidth;
+    viewport.Height = (float)m_WindowHeight;
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 
-    _context->RSSetViewports(1, &viewport);
-    _context->OMSetRenderTargets(1, _backBufferView.GetAddressOf(), nullptr);
+    m_DeviceContext->RSSetViewports(1, &viewport);
+    m_DeviceContext->OMSetRenderTargets(1, m_BackBufferView.GetAddressOf(), nullptr);
 }
 
-void Direct3D11::FrameEnd()
+void Common::Direct3D11::FrameEnd()
 {
-    D3D_OK(_swapChain->Present(0, 0));
+    D3D_OK(m_SwapChain->Present(0, 0));
 }
 
-ComPtr<ID3D11VertexShader> Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode)
+ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode)
 {
     std::vector<char>& buffer = outByteCode;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
 
     ID3D11VertexShader* shader = nullptr;
-    D3D_OK(_device->CreateVertexShader(buffer.data(), buffer.size(), nullptr, &shader));
+    D3D_OK(m_Device->CreateVertexShader(buffer.data(), buffer.size(), nullptr, &shader));
     return shader;
 }
 
-ComPtr<ID3D11PixelShader> Direct3D11::CreatePixelShaderFromFile(const std::string& path)
+ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const std::string& path)
 {
     std::vector<char> buffer;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
 
     ID3D11PixelShader* shader = nullptr;
-    D3D_OK(_device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
+    D3D_OK(m_Device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
     return shader;
 }
 
-ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView)
+ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView)
 {
     auto sprite = IMG_Load(path.c_str());
     SDL_assert(nullptr != sprite);
@@ -178,11 +174,11 @@ ComPtr<ID3D11Texture2D> Direct3D11::CreateTextureFromFile(const std::string& pat
     data.SysMemSlicePitch = sprite->w * sprite->h * 4;
 
     ID3D11Texture2D* texture = nullptr;
-    D3D_OK(_device->CreateTexture2D(&desc, &data, &texture));
+    D3D_OK(m_Device->CreateTexture2D(&desc, &data, &texture));
     SDL_FreeSurface(sprite);
 
     if (outView != nullptr)
-        D3D_OK(_device->CreateShaderResourceView(texture, nullptr, outView));
+        D3D_OK(m_Device->CreateShaderResourceView(texture, nullptr, outView));
 
     return texture;
 }

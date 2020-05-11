@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SimpleMath.hpp"
+#include <SimpleMath.hpp>
 
 namespace Game
 {
