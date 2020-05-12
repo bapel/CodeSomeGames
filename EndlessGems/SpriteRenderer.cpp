@@ -91,6 +91,9 @@ void SpriteRenderer::Draw(Vector2 position, Vector2 scale, Color tint)
 
 void SpriteRenderer::End(ID3D11DeviceContext* d3dContext)
 {
+    if (m_Sprites.empty())
+        return;
+
     D3D11_MAPPED_SUBRESOURCE mappedInstanceBuffer;
     d3dContext->Map(m_InstancesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);
     memcpy(mappedInstanceBuffer.pData, m_Sprites.data(), m_Sprites.size() * sizeof(Sprite));

@@ -26,90 +26,42 @@ struct TransformsBufferData
 
 const auto kQuadSize = 2 * 32.0f;
 
-//float GemColToWorld(int c)
-//{
-//    return kQuadSize * (boardState.Cols - 1) * ((float)c / (boardState.Cols - 1) - 0.5f);
-//}
-//
-//float GemRowToWorld(int r)
-//{
-//    return kQuadSize * (boardState.Rows - 1) * ((float)r / (boardState.Rows - 1) - 0.5f);
-//}
-
 int main(int argc, char** argv)
 {
-    using namespace Game;
+    Game::Board board;
+    Game::BoardChangeQueue changeQueue;
 
-    Board board;
-    BoardChangeQueue changeQueue;
+    //Logic::m_RowsBuffer.reserve(board.Count());
 
-    Logic::m_RowsBuffer.reserve(board.Count());
+    //changeQueue.Clear();
 
-    std::mt19937 g(0);
-    std::uniform_int_distribution<> d(1, (int)Game::GemColor::Count - 1);
+    //auto boardStr = board.ToString();
+    //printf("%s\n", boardStr.c_str());
 
-    for (auto r = 0; r < board.Rows(); r++)
-    {
-        for (auto c = 0; c < board.Cols(); c++)
-        {
-            auto spawn = BoardChange();
-            spawn.Type = BoardChangeType::Spawn;
-            spawn.Spawn.Location = { r, c };
-            spawn.Spawn.Color = (Game::GemColor)d(g);
+    //boardStr = board.ToString();
+    //printf("%s\n", boardStr.c_str());
 
-            changeQueue.PushBack(spawn);
-        }
-    }
+    //{
+    //    auto clear = BoardChange();
+    //    clear.Type = BoardChangeType::Clear;
 
-    while (changeQueue.NumRemaining() > 0)
-        Logic::ProcessQueue(&board, &changeQueue);
+    //    clear.Clear.ID = board[{ 2, 2 }].ID;
+    //    changeQueue.PushBack(clear);
 
-    changeQueue.Clear();
+    //    clear.Clear.ID = board[{ 3, 2 }].ID;
+    //    changeQueue.PushBack(clear);
 
-    auto boardStr = board.ToString();
-    printf("%s\n", boardStr.c_str());
+    //    clear.Clear.ID = board[{ 4, 2 }].ID;
+    //    changeQueue.PushBack(clear);
+    //}
 
-    {
-        auto clear = BoardChange();
-        clear.Type = BoardChangeType::Clear;
+    //Logic::ProcessQueue(&board, &changeQueue);
 
-        clear.Clear.ID = board[{ 2, 1 }].ID;
-        changeQueue.PushBack(clear);
+    //while (changeQueue.NumRemaining() > 0)
+    //    Logic::ProcessQueue(&board, &changeQueue);
 
-        clear.Clear.ID = board[{ 2, 2 }].ID;
-        changeQueue.PushBack(clear);
-
-        clear.Clear.ID = board[{ 2, 3 }].ID;
-        changeQueue.PushBack(clear);
-    }
-
-    while (changeQueue.NumRemaining() > 0)
-        Logic::ProcessQueue(&board, &changeQueue);
-
-    boardStr = board.ToString();
-    printf("%s\n", boardStr.c_str());
-
-    {
-        auto clear = BoardChange();
-        clear.Type = BoardChangeType::Clear;
-
-        clear.Clear.ID = board[{ 2, 2 }].ID;
-        changeQueue.PushBack(clear);
-
-        clear.Clear.ID = board[{ 3, 2 }].ID;
-        changeQueue.PushBack(clear);
-
-        clear.Clear.ID = board[{ 4, 2 }].ID;
-        changeQueue.PushBack(clear);
-    }
-
-    Logic::ProcessQueue(&board, &changeQueue);
-
-    while (changeQueue.NumRemaining() > 0)
-        Logic::ProcessQueue(&board, &changeQueue);
-
-    boardStr = board.ToString();
-    printf("%s\n", boardStr.c_str());
+    //boardStr = board.ToString();
+    //printf("%s\n", boardStr.c_str());
 
     SDL_assert(argc >= 1);
     const std::string kExePath(argv[0]);
@@ -161,6 +113,26 @@ int main(int argc, char** argv)
     uint32_t lastMS = 0;
     float rotationAngle = 0.0f;
 
+    struct BoardChangeAnimation
+    {
+        Game::BoardChange Change;
+        float CurrentValue;
+        float FinalValue;
+        float Speed;
+
+        BoardChangeAnimation()
+        {
+            Change.Type = Game::BoardChangeType::None;
+            CurrentValue = 1.0f;
+            FinalValue = 1.0f;
+            Speed = 0.0f;
+        }
+    };
+
+    std::vector<BoardChangeAnimation> animations;
+
+    animations.resize(board.Count());
+
     while (!quit)
     {
         while (SDL_PollEvent(&event))
@@ -174,9 +146,84 @@ int main(int argc, char** argv)
             {
                 switch (event.key.keysym.sym)
                 {
-                    case SDLK_SPACE:
+                    case SDLK_1:
                     {
+                        std::mt19937 g(0);
+                        std::uniform_int_distribution<> d(1, (int)Game::GemColor::Count - 1);
+
+                        for (auto r = 0; r < board.Rows(); r++)
+                        {
+                            for (auto c = 0; c < board.Cols(); c++)
+                            {
+                                auto spawn = Game::BoardChange();
+                                spawn.Type = Game::BoardChangeType::Spawn;
+                                spawn.Spawn.Location = { r, c };
+                                spawn.Spawn.Color = (Game::GemColor)d(g);
+
+                                changeQueue.PushBack(spawn);
+                            }
+                        }
+
+                        while (changeQueue.NumRemaining() > 0)
+                            Game::Logic::ProcessQueue(&board, &changeQueue);
+
+                        for (const auto& change : changeQueue.GetChanges())
+                        {
+                            switch (change.Type)
+                            {
+                                case Game::BoardChangeType::Spawn:
+                                {
+                                    auto id = board[change.Spawn.Location].ID;
+                                    auto& spawnAnimation = animations[id];
+
+                                    spawnAnimation.Change = change;
+                                    spawnAnimation.CurrentValue = 0.0f;
+                                    spawnAnimation.FinalValue = 1.0f;
+                                    spawnAnimation.Speed = 2.0f;
+                                    
+                                    break;
+                                }
+                            }
+                        }
+
                         break;
+                    }
+
+                    case SDLK_2:
+                    {
+                        auto clear = Game::BoardChange();
+                        clear.Type = Game::BoardChangeType::Clear;
+
+                        clear.Clear.ID = board[{ 2, 1 }].ID;
+                        changeQueue.PushBack(clear);
+
+                        clear.Clear.ID = board[{ 2, 2 }].ID;
+                        changeQueue.PushBack(clear);
+
+                        clear.Clear.ID = board[{ 2, 3 }].ID;
+                        changeQueue.PushBack(clear);
+
+                        while (changeQueue.NumRemaining() > 0)
+                            Game::Logic::ProcessQueue(&board, &changeQueue);
+
+                        for (const auto& change : changeQueue.GetChanges())
+                        {
+                            switch (change.Type)
+                            {
+                            case Game::BoardChangeType::Spawn:
+                            {
+                                auto id = board[change.Spawn.Location].ID;
+                                auto& spawnAnimation = animations[id];
+
+                                spawnAnimation.Change = change;
+                                spawnAnimation.CurrentValue = 0.0f;
+                                spawnAnimation.FinalValue = 1.0f;
+                                spawnAnimation.Speed = 2.0f;
+
+                                break;
+                            }
+                            }
+                        }
                     }
                 }
             }
@@ -229,24 +276,41 @@ int main(int argc, char** argv)
         UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
         d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
 
-        for (auto r = 0; r < board.Rows(); r++)
+        for (auto i = 0; i < board.Count(); i++)
         {
-            for (auto c = 0; c < board.Cols(); c++)
+            auto gem = board[i];
+
+            if (gem.ID != -1)
             {
-                auto gem = board[{ r, c }];
+                auto c = gem.Location.Col;
+                auto r = gem.Location.Row;
 
-                if (gem.ID != -1)
+                auto x = kQuadSize * (board.Cols() - 1) * ((float)c / (board.Cols() - 1) - 0.5f);
+                auto y = kQuadSize * (board.Rows() - 1) * ((float)r / (board.Rows() - 1) - 0.5f);
+
+                Vector2 position { x, y };
+                Vector2 scale { kQuadSize, kQuadSize };
+                Color color = Game::Constants::GetGemDisplayColor(gem.Color);
+
+                auto& animation = animations[gem.ID];
+                auto& change = animation.Change;
+
+                switch (change.Type)
                 {
-                    Vector2 position
+                    case Game::BoardChangeType::Spawn:
                     {
-                        kQuadSize * (board.Cols() - 1) * ((float)c / (board.Cols() - 1) - 0.5f),
-                        kQuadSize * (board.Rows() - 1) * ((float)r / (board.Rows() - 1) - 0.5f),
-                    };
+                        animation.CurrentValue += animation.Speed * elapsedMS / 1000.0f;
 
-                    Color color = Game::Constants::GetGemDisplayColor(gem.Color);
+                        if (animation.CurrentValue >= animation.FinalValue)
+                            animation = BoardChangeAnimation();
+                        else
+                            scale *= animation.CurrentValue;
 
-                    spriteRenderer.Draw(position, { kQuadSize, kQuadSize }, color);
+                        break;
+                    }
                 }
+
+                spriteRenderer.Draw(position, scale, color);
             }
         }
 
