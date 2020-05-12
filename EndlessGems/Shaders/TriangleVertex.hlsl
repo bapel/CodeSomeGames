@@ -7,7 +7,8 @@ cbuffer TransformsBuffer : register(b0)
 }
 
 /* vertex attributes go here to input to the vertex shader */
-struct vs_in {
+struct vs_in 
+{
     float4 position_local : POSITION;
     float2 uv : TEXCOORD;
     float4 quad_data : QUAD_DATA;

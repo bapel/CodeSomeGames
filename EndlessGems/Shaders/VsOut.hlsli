@@ -4,3 +4,10 @@ struct vs_out {
     float2 uv : TEXCOORD;
     float4 color : COLOR;
 };
+
+struct SpriteVSOutput
+{
+    float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD;
+    float4 SpriteTint : COLOR;
+};

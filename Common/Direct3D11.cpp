@@ -117,7 +117,7 @@ void Common::Direct3D11::FrameEnd()
     D3D_OK(m_SwapChain->Present(0, 0));
 }
 
-ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode)
+ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const
 {
     std::vector<char>& buffer = outByteCode;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
@@ -127,7 +127,7 @@ ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const 
     return shader;
 }
 
-ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const std::string& path)
+ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const std::string& path) const
 {
     std::vector<char> buffer;
     SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);

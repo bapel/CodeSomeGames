@@ -4,6 +4,7 @@
 #include "Constants.hpp"
 
 #include <vector>
+#include <string>
 
 namespace Game
 {
