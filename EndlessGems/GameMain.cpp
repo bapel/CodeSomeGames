@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     SpriteRenderer spriteRenderer;
     spriteRenderer.Init(&d3d11, kShadersBasePath);
 
-    const auto d3dDevice = d3d11.GetDevice();
+    const auto d3dDevice = d3d11.GetDevice().Get();
 
     ComPtr<ID3D11Buffer> transformsBuffer;
 
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
         d3dContext->OMSetBlendState(blendState.Get(), nullptr, 0xffffffff);
         d3dContext->RSSetState(rasterizerState.Get());
 
-        spriteRenderer.Begin(d3dContext);
+        spriteRenderer.Begin(d3dContext.Get());
 
         D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
         d3dContext->Map(transformsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
@@ -316,7 +316,7 @@ int main(int argc, char** argv)
             }
         }
 
-        spriteRenderer.End(d3dContext);
+        spriteRenderer.End(d3dContext.Get());
 
         d3d11.FrameEnd();
     }
