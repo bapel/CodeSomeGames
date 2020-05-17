@@ -75,10 +75,7 @@ class Match3Game final : public SDLGame
         m_D3D11.FrameEnd();
     }
 
-    void OnDestroy()
-    {
-        m_SpriteRenderer.Shutdown();
-    }
+    void OnDestroy() { }
 
     ComPtr<ID3D11SamplerState> InitPixellySamplerState(ID3D11Device* d3dDevice)
     {
