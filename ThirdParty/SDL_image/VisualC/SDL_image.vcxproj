@@ -125,8 +125,9 @@
     </Link>
     <Bscmake />
     <PostBuildEvent>
-      <Command>copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
-copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"</Command>
+      <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -160,7 +161,6 @@ copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\
     <PostBuildEvent>
       <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
 copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
-copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
 copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -190,8 +190,9 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </Link>
     <Bscmake />
     <PostBuildEvent>
-      <Command>copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
-copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"</Command>
+      <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -220,8 +221,9 @@ copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\
     </Link>
     <Bscmake />
     <PostBuildEvent>
-      <Command>copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
-copy "C:\Projects\Games\CodeSomeGames\ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"</Command>
+      <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
