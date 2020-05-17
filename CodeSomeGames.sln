@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EASTL", "EASTL\EASTL.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SparseArray", "SparseArray\SparseArray.vcxproj", "{E3AE60CF-76B7-4B45-B90C-8E723C46AC23}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Match3", "Match3\Match3.vcxproj", "{589D729B-67C5-43C3-9AA3-D151DE8C5663}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -123,6 +125,14 @@ Global
 		{E3AE60CF-76B7-4B45-B90C-8E723C46AC23}.Release|x64.Build.0 = Release|x64
 		{E3AE60CF-76B7-4B45-B90C-8E723C46AC23}.Release|x86.ActiveCfg = Release|Win32
 		{E3AE60CF-76B7-4B45-B90C-8E723C46AC23}.Release|x86.Build.0 = Release|Win32
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Debug|x64.ActiveCfg = Debug|x64
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Debug|x64.Build.0 = Debug|x64
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Debug|x86.ActiveCfg = Debug|Win32
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Debug|x86.Build.0 = Debug|Win32
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Release|x64.ActiveCfg = Release|x64
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Release|x64.Build.0 = Release|x64
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Release|x86.ActiveCfg = Release|Win32
+		{589D729B-67C5-43C3-9AA3-D151DE8C5663}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
