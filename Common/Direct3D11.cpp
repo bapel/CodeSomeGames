@@ -45,9 +45,9 @@ void Common::Direct3D11::Init(SDL_Window* window)
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     UINT deviceCreateFlags = 0;
-#if _DEBUG
+// #if _DEBUG
     deviceCreateFlags = D3D11_CREATE_DEVICE_DEBUG;
-#endif
+// #endif
 
     D3D_OK(D3D11CreateDeviceAndSwapChain(
         0, // Default adapter
@@ -120,7 +120,13 @@ void Common::Direct3D11::FrameEnd()
 ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const
 {
     std::vector<char>& buffer = outByteCode;
-    SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
+    auto bytes = ReadBinaryFile(path.c_str(), buffer);
+    
+    if (bytes == 0)
+    {
+        SDL_Log("Failed to load Vertex Shader: path");
+        return nullptr;
+    }
 
     ID3D11VertexShader* shader = nullptr;
     D3D_OK(m_Device->CreateVertexShader(buffer.data(), buffer.size(), nullptr, &shader));
@@ -130,7 +136,13 @@ ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const 
 ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const std::string& path) const
 {
     std::vector<char> buffer;
-    SDL_assert(ReadBinaryFile(path.c_str(), buffer) > 0);
+    auto bytes = ReadBinaryFile(path.c_str(), buffer);
+
+    if (bytes == 0)
+    {
+        SDL_Log("Failed to load Pixel Shader: path");
+        return nullptr;
+    }
 
     ID3D11PixelShader* shader = nullptr;
     D3D_OK(m_Device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
@@ -201,6 +213,14 @@ ComPtr<ID3D11Buffer> Common::Direct3D11::CreateConstantsBuffer(size_t structSize
     D3D_OK(m_Device->CreateBuffer(&constantsBufferDesc, nullptr, constantsBuffer.GetAddressOf()));
 
     return constantsBuffer;
+}
+
+void Common::Direct3D11::UpdateBufferData(const ComPtr<ID3D11Buffer>& buffer, const void* data, size_t size) const
+{
+    D3D11_MAPPED_SUBRESOURCE mappedConstantsBuffer;
+    m_DeviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedConstantsBuffer);
+    memcpy(mappedConstantsBuffer.pData, data, size);
+    m_DeviceContext->Unmap(buffer.Get(), 0);
 }
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer)
