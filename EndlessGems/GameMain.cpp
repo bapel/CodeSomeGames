@@ -5,7 +5,7 @@
 #include <SDL_image.h>
 
 #include <Direct3D11.hpp>
-#include <SimpleMath.hpp>
+#include <VectorMath.hpp>
 
 #include <stdio.h>
 #include <string>
@@ -30,6 +30,8 @@ int main(int argc, char** argv)
 {
     Game::Board board;
     Game::BoardChangeQueue changeQueue;
+
+    //const auto& vec_2 = soa.Get<2>();
 
     //Logic::m_RowsBuffer.reserve(board.Count());
 
@@ -146,85 +148,85 @@ int main(int argc, char** argv)
             {
                 switch (event.key.keysym.sym)
                 {
-                    case SDLK_1:
+                case SDLK_1:
+                {
+                    std::mt19937 g(0);
+                    std::uniform_int_distribution<> d(1, (int)Game::GemColor::Count - 1);
+
+                    for (auto r = 0; r < board.Rows(); r++)
                     {
-                        std::mt19937 g(0);
-                        std::uniform_int_distribution<> d(1, (int)Game::GemColor::Count - 1);
-
-                        for (auto r = 0; r < board.Rows(); r++)
+                        for (auto c = 0; c < board.Cols(); c++)
                         {
-                            for (auto c = 0; c < board.Cols(); c++)
-                            {
-                                auto spawn = Game::BoardChange();
-                                spawn.Type = Game::BoardChangeType::Spawn;
-                                spawn.Spawn.Location = { r, c };
-                                spawn.Spawn.Color = (Game::GemColor)d(g);
+                            auto spawn = Game::BoardChange();
+                            spawn.Type = Game::BoardChangeType::Spawn;
+                            spawn.Spawn.Location = { r, c };
+                            spawn.Spawn.Color = (Game::GemColor)d(g);
 
-                                changeQueue.PushBack(spawn);
-                            }
+                            changeQueue.PushBack(spawn);
                         }
-
-                        while (changeQueue.NumRemaining() > 0)
-                            Game::Logic::ProcessQueue(&board, &changeQueue);
-
-                        for (const auto& change : changeQueue.GetChanges())
-                        {
-                            switch (change.Type)
-                            {
-                                case Game::BoardChangeType::Spawn:
-                                {
-                                    auto id = board[change.Spawn.Location].ID;
-                                    auto& spawnAnimation = animations[id];
-
-                                    spawnAnimation.Change = change;
-                                    spawnAnimation.CurrentValue = 0.0f;
-                                    spawnAnimation.FinalValue = 1.0f;
-                                    spawnAnimation.Speed = 2.0f;
-                                    
-                                    break;
-                                }
-                            }
-                        }
-
-                        break;
                     }
 
-                    case SDLK_2:
+                    while (changeQueue.NumRemaining() > 0)
+                        Game::Logic::ProcessQueue(&board, &changeQueue);
+
+                    for (const auto& change : changeQueue.GetChanges())
                     {
-                        auto clear = Game::BoardChange();
-                        clear.Type = Game::BoardChangeType::Clear;
-
-                        clear.Clear.ID = board[{ 2, 1 }].ID;
-                        changeQueue.PushBack(clear);
-
-                        clear.Clear.ID = board[{ 2, 2 }].ID;
-                        changeQueue.PushBack(clear);
-
-                        clear.Clear.ID = board[{ 2, 3 }].ID;
-                        changeQueue.PushBack(clear);
-
-                        while (changeQueue.NumRemaining() > 0)
-                            Game::Logic::ProcessQueue(&board, &changeQueue);
-
-                        for (const auto& change : changeQueue.GetChanges())
+                        switch (change.Type)
                         {
-                            switch (change.Type)
-                            {
-                            case Game::BoardChangeType::Spawn:
-                            {
-                                auto id = board[change.Spawn.Location].ID;
-                                auto& spawnAnimation = animations[id];
+                        case Game::BoardChangeType::Spawn:
+                        {
+                            auto id = board[change.Spawn.Location].ID;
+                            auto& spawnAnimation = animations[id];
 
-                                spawnAnimation.Change = change;
-                                spawnAnimation.CurrentValue = 0.0f;
-                                spawnAnimation.FinalValue = 1.0f;
-                                spawnAnimation.Speed = 2.0f;
+                            spawnAnimation.Change = change;
+                            spawnAnimation.CurrentValue = 0.0f;
+                            spawnAnimation.FinalValue = 1.0f;
+                            spawnAnimation.Speed = 2.0f;
 
-                                break;
-                            }
-                            }
+                            break;
+                        }
                         }
                     }
+
+                    break;
+                }
+
+                case SDLK_2:
+                {
+                    auto clear = Game::BoardChange();
+                    clear.Type = Game::BoardChangeType::Clear;
+
+                    clear.Clear.ID = board[{ 2, 1 }].ID;
+                    changeQueue.PushBack(clear);
+
+                    clear.Clear.ID = board[{ 2, 2 }].ID;
+                    changeQueue.PushBack(clear);
+
+                    clear.Clear.ID = board[{ 2, 3 }].ID;
+                    changeQueue.PushBack(clear);
+
+                    while (changeQueue.NumRemaining() > 0)
+                        Game::Logic::ProcessQueue(&board, &changeQueue);
+
+                    for (const auto& change : changeQueue.GetChanges())
+                    {
+                        switch (change.Type)
+                        {
+                        case Game::BoardChangeType::Spawn:
+                        {
+                            auto id = board[change.Spawn.Location].ID;
+                            auto& spawnAnimation = animations[id];
+
+                            spawnAnimation.Change = change;
+                            spawnAnimation.CurrentValue = 0.0f;
+                            spawnAnimation.FinalValue = 1.0f;
+                            spawnAnimation.Speed = 2.0f;
+
+                            break;
+                        }
+                        }
+                    }
+                }
                 }
             }
         }
@@ -241,11 +243,11 @@ int main(int argc, char** argv)
         float viewWidth, viewHeight;
 
         SDL_GetWindowSize(window, &w, &h);
-        
+
         viewWidth = w;
         viewHeight = h;
 
-        TransformsBufferData transformsBufferData = 
+        TransformsBufferData transformsBufferData =
         {
             Matrix::CreateRotationZ(rotationAngle),
             Matrix::CreateOrthographic(viewWidth, viewHeight, 0.0f, 1.0f)
@@ -297,17 +299,17 @@ int main(int argc, char** argv)
 
                 switch (change.Type)
                 {
-                    case Game::BoardChangeType::Spawn:
-                    {
-                        animation.CurrentValue += animation.Speed * elapsedMS / 1000.0f;
+                case Game::BoardChangeType::Spawn:
+                {
+                    animation.CurrentValue += animation.Speed * elapsedMS / 1000.0f;
 
-                        if (animation.CurrentValue >= animation.FinalValue)
-                            animation = BoardChangeAnimation();
-                        else
-                            scale *= animation.CurrentValue;
+                    if (animation.CurrentValue >= animation.FinalValue)
+                        animation = BoardChangeAnimation();
+                    else
+                        scale *= animation.CurrentValue;
 
-                        break;
-                    }
+                    break;
+                }
                 }
 
                 spriteRenderer.Draw(position, scale, color);
@@ -315,7 +317,7 @@ int main(int argc, char** argv)
         }
 
         spriteRenderer.End(d3dContext);
-        
+
         d3d11.FrameEnd();
     }
 

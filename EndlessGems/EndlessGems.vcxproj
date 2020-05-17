@@ -70,22 +70,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ECS.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="Game\Logic.cpp" />
     <ClCompile Include="SpriteRenderer.cpp" />

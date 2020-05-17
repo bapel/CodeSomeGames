@@ -18,10 +18,10 @@
     <ClInclude Include="Direct3D11.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SimpleMath.hpp">
+    <ClInclude Include="ComPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComPtr.hpp">
+    <ClInclude Include="VectorMath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

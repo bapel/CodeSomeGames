@@ -1,0 +1,2 @@
+C:/Projects/Games/CodeSomeGames/ThirdParty/EABase/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/EABase/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

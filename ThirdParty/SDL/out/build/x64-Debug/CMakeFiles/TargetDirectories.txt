@@ -1,0 +1,9 @@
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/SDL2-static.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/SDL2main.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/install/local.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/install.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/SDL2.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/uninstall.dir
+C:/Projects/Games/CodeSomeGames/ThirdParty/SDL/out/build/x64-Debug/CMakeFiles/list_install_components.dir
