@@ -1,8 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-
-
 #include "ComPtr.hpp"
 #include "VectorMath.hpp"
 
@@ -11,8 +8,12 @@
 #include <vector>
 #include <string>
 
+#ifdef _DEBUG
 #define D3D_OK(__call__)\
     SDL_assert(S_OK == (__call__))
+#else
+#define D3D_OK(__call__) __call__
+#endif
 
 struct SDL_Window;
 
@@ -37,13 +38,20 @@ namespace Common {
         void FrameStart(SDL_Window* window, Color clearColor);
         void FrameEnd();
 
-        IDXGISwapChain* GetSwapchain() const { return m_SwapChain.Get(); }
-        ID3D11Device* GetDevice() const { return m_Device.Get(); }
-        ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext.Get(); }
+        inline IDXGISwapChain* GetSwapchain() const { return m_SwapChain.Get(); }
+        inline ID3D11Device* GetDevice() const { return m_Device.Get(); }
+        inline ID3D11DeviceContext* GetDeviceContext() const { return m_DeviceContext.Get(); }
 
         ComPtr<ID3D11VertexShader> CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const;
         ComPtr<ID3D11PixelShader> CreatePixelShaderFromFile(const std::string& path) const;
 
-        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView);
+        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView) const;
+        ComPtr<ID3D11Buffer> CreateConstantsBuffer(size_t structSize) const;
+
+        template <class StructType> 
+        inline ComPtr<ID3D11Buffer> CreateConstantsBuffer() const
+        {
+            return CreateConstantsBuffer(sizeof(StructType));
+        }
     };
 }

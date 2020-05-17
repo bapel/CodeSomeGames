@@ -16,7 +16,7 @@ void Common::Direct3D11::Init(SDL_Window* window)
 
     SDL_SysWMinfo info = {};
     SDL_GetVersion(&info.version);
-    SDL_assert(SDL_GetWindowWMInfo(window, &info));
+    SDL_GetWindowWMInfo(window, &info);
     SDL_GetWindowSize(window, &m_WindowWidth, &m_WindowHeight);
 
     HWND hwnd = info.info.win.window;
@@ -137,13 +137,18 @@ ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const st
     return shader;
 }
 
-ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView)
+ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView) const
 {
     auto sprite = IMG_Load(path.c_str());
-    SDL_assert(nullptr != sprite);
+
+    if (nullptr == sprite)
+    {
+        SDL_Log("Image load failed: %s", path.c_str());
+        return nullptr;
+    }
 
     auto formatName = SDL_GetPixelFormatName(sprite->format->format);
-    SDL_Log("%s: %s", path.c_str(), formatName);
+    SDL_Log("Image loaded: %s Format: %s", path.c_str(), formatName);
 
     DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
     switch (sprite->format->format)
@@ -181,6 +186,21 @@ ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::str
         D3D_OK(m_Device->CreateShaderResourceView(texture, nullptr, outView));
 
     return texture;
+}
+
+ComPtr<ID3D11Buffer> Common::Direct3D11::CreateConstantsBuffer(size_t structSize) const
+{
+    ComPtr<ID3D11Buffer> constantsBuffer;
+
+    D3D11_BUFFER_DESC constantsBufferDesc = {};
+    constantsBufferDesc.ByteWidth = (UINT)structSize;
+    constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    D3D_OK(m_Device->CreateBuffer(&constantsBufferDesc, nullptr, constantsBuffer.GetAddressOf()));
+
+    return constantsBuffer;
 }
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer)
