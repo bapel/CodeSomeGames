@@ -33,18 +33,17 @@ namespace m3
             }
 
             // Make with an inverted y-axis
-            static void MakeInverted(const void* data, size_t dataSize, Board* outBoard)
+            static void CreateInverted(const void* data, size_t dataSize, Board* outBoard)
             {
                 assert(dataSize >= sizeof(m_Array));
 
-                // @Todo: Copy whole rows
-                auto ptr = (T*)data;
-                for (auto i = 0; i < outBoard->Count(); i++)
-                {
-                    auto r = (outBoard->Rows() - 1) - (i / outBoard->Cols());
-                    auto c = i % outBoard->Cols();
+                const auto rowSize = sizeof(T) * outBoard->Cols();
 
-                    (*outBoard)(r, c) = ptr[i];
+                for (auto r = 0; r < outBoard->Rows(); r++)
+                {
+                    auto src = (T*)data + (r * outBoard->Cols());
+                    auto dst = &(*outBoard)((outBoard->Rows() - 1) - r, 0);
+                    memcpy(dst, src, rowSize);
                 }
             }
 
@@ -93,3 +92,52 @@ namespace m3
         struct { col_t Col; row_t Row_0, Row_1; } Col_1;
     };
 }
+
+#ifdef CatchAvailable__
+
+#pragma region Rows/Cols
+#define _0
+#define _1
+#define _2
+#define _3
+#define _4
+#define _5
+#define _6
+#define _7
+#define _8
+#define _9
+#define ___01234567
+#pragma endregion
+
+TEST_CASE("Inverted board creation", "[board]")
+{
+    using namespace m3;
+
+    const int Rows = 5;
+    const int Cols = 8;
+
+    const char colors_[] = 
+        ___01234567
+        _4"BROGYBRO"
+        _3"OBROGYBR"
+        _2"ROBROGYB"
+        _1"BROBROGY"
+        _0"YBROBROG";
+
+    using GemColors = private_::Board<gem_color_t, Rows, Cols>;
+
+    GemColors colors;
+    GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
+
+    const char invertedColors[] = 
+        ___01234567
+        _0"YBROBROG"
+        _1"BROBROGY"
+        _2"ROBROGYB"
+        _3"OBROGYBR"
+        _4"BROGYBRO";
+
+    REQUIRE(0 == SDL_memcmp(&colors, invertedColors, sizeof(colors)));
+}
+
+#endif

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "m3Types.hpp"
-using namespace m3;
 
 namespace m3
 {
@@ -89,22 +88,10 @@ namespace m3
 
 #ifdef CatchAvailable__
 
-#pragma region Rows/Cols
-#define _0
-#define _1
-#define _2
-#define _3
-#define _4
-#define _5
-#define _6
-#define _7
-#define _8
-#define _9
-#define ___01234567
-#pragma endregion
-
 TEST_CASE("Matching functions", "[matching]")
 {
+    using namespace m3;
+
     SECTION("Should find no matches")
     {
         const int Rows = 5;
@@ -118,10 +105,10 @@ TEST_CASE("Matching functions", "[matching]")
             _1"BROBROGY"
             _0"YBROBROG";
 
-        using GemColors = private_::Board<gem_color_t, Rows, Cols>;
+        using GemColors = m3::private_::Board<gem_color_t, Rows, Cols>;
 
         GemColors colors;
-        GemColors::MakeInverted(colors_, sizeof(colors_), &colors);
+        GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
 
         for (auto i = 0; i < colors.Count(); i++)
         {
@@ -156,7 +143,7 @@ TEST_CASE("Matching functions", "[matching]")
         using GemColors = private_::Board<gem_color_t, Rows, Cols>;
 
         GemColors colors;
-        GemColors::MakeInverted(colors_, sizeof(colors_), &colors);
+        GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
 
         auto r = 2;
         auto c = 2;

@@ -231,11 +231,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
+    <ClInclude Include="m3Match.hpp" />
     <ClInclude Include="m3Types.hpp" />
     <ClInclude Include="m3Logic.hpp" />
     <ClInclude Include="Match3BoardView.hpp" />
     <ClInclude Include="SpriteRenderer.hpp" />
-    <ClInclude Include="Table.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\SpritePS.hlsl">
