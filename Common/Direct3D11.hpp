@@ -24,6 +24,8 @@ namespace Common {
     class Direct3D11
     {
     private:
+        SDL_Window* m_Window;
+
         ComPtr<ID3D11Device> m_Device;
         ComPtr<ID3D11Debug> m_Debug;
         ComPtr<ID3D11DeviceContext> m_DeviceContext;
@@ -42,8 +44,11 @@ namespace Common {
 
         void Init(SDL_Window* window, bool debug = true);
         void OnWindowResized(int w, int h);
-        void FrameStart(SDL_Window* window, Color clearColor);
-        void FrameEnd();
+        void BeginFrame();
+        void BeginRender();
+        void ClearBackBuffer(Color clearColor);
+        void ClearDepthBuffer(float depth);
+        void EndFrame();
 
         inline const ComPtr<IDXGISwapChain>& GetSwapchain() const { return m_SwapChain; }
         inline const ComPtr<ID3D11Device>& GetDevice() const { return m_Device; }
@@ -55,7 +60,8 @@ namespace Common {
         ComPtr<ID3D11VertexShader> CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const;
         ComPtr<ID3D11PixelShader> CreatePixelShaderFromFile(const std::string& path) const;
 
-        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ComPtr<ID3D11ShaderResourceView>& outView) const;
+        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path) const;
+        ComPtr<ID3D11ShaderResourceView> CreateShaderResourceView(const ComPtr<ID3D11Texture2D> texture) const;
 
         ComPtr<ID3D11Buffer> CreateConstantsBuffer(size_t structSize) const;
         void UpdateBufferData(const ComPtr<ID3D11Buffer>& buffer, const void* data, size_t size) const;

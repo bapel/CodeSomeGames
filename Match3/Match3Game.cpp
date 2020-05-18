@@ -1,6 +1,8 @@
 #include <SDLGame.hpp>
 #include "SpriteRenderer.hpp"
 
+#include <array>
+
 struct CameraConstantsBuffer
 {
     Matrix model;
@@ -27,7 +29,9 @@ class Match3Game final : public SDLGame
         m_D3D11.SetDebugName(m_CameraConstantsBuffer.Get(), "CameraConstantsBuffer");
 
         auto spritePath = "Sprites//gem_grey_square.png";
-        m_SpriteTexture = m_D3D11.CreateTextureFromFile(spritePath, m_SpriteResourceView);
+        m_SpriteTexture = m_D3D11.CreateTextureFromFile(spritePath);
+        m_SpriteResourceView = m_D3D11.CreateShaderResourceView(m_SpriteTexture);
+        m_D3D11.SetDebugName(m_SpriteResourceView, spritePath);
 
         const auto d3dDevice = m_D3D11.GetDevice().Get();
 
@@ -45,15 +49,17 @@ class Match3Game final : public SDLGame
     {
         CameraConstantsBuffer cameraConstantBufferData =
         {
-            Matrix::CreateRotationX(0), // @Todo. Matrix::Identity is undefined???
+            Matrix::CreateRotationX(0.0f), // @Todo. Matrix::Identity is undefined???
             Matrix::CreateOrthographic(viewportWidth, viewportHeight, 0.0f, 1.0f)
         };
 
-        m_D3D11.UpdateBufferData(m_CameraConstantsBuffer.Get(), &cameraConstantBufferData);
+        m_D3D11.UpdateBufferData(m_CameraConstantsBuffer.Get(), cameraConstantBufferData);
 
         const auto d3dContext = m_D3D11.GetDeviceContext();
 
-        m_D3D11.FrameStart(m_Window, Color(0x2a2b3eff));
+        m_D3D11.BeginFrame();
+        m_D3D11.BeginRender();
+        m_D3D11.ClearBackBuffer(Color(0x2a2b3eff));
 
         d3dContext->OMSetBlendState(m_TransparentSpriteBlendState.Get(), nullptr, 0xffffffff);
         d3dContext->RSSetState(m_DefaultRasterizerState.Get());
@@ -72,9 +78,10 @@ class Match3Game final : public SDLGame
         d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
 
         m_SpriteRenderer.SetSampler(m_PixellySamplerState);
+        m_SpriteRenderer.Draw({ 0.0f, 0.0f }, { 100.0f, 100.0f }, Color(1.0f, 1.0f, 1.0f, 1.0f));
 
         m_SpriteRenderer.End();
-        m_D3D11.FrameEnd();
+        m_D3D11.EndFrame();
     }
 
     void OnDestroy() 

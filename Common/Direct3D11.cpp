@@ -21,6 +21,8 @@ void Common::Direct3D11::Init(SDL_Window* window, bool debug)
 {
     SDL_assert(nullptr != window);
 
+    m_Window = window;
+
     SDL_SysWMinfo info = {};
     SDL_GetVersion(&info.version);
     SDL_GetWindowWMInfo(window, &info);
@@ -103,21 +105,19 @@ void Common::Direct3D11::OnWindowResized(int w, int h)
     m_WindowHeight = h;
 }
 
-void Common::Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
+void Common::Direct3D11::BeginFrame()
 {
-    SDL_assert(nullptr != window);
+    int w, h;
+    SDL_GetWindowSize(m_Window, &w, &h);
+    if (w != m_WindowWidth || h != m_WindowHeight)
+        OnWindowResized(w, h);
+}
 
-    m_DeviceContext->ClearState();
-
-    {
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
-        if (w != m_WindowWidth || h != m_WindowHeight)
-            OnWindowResized(w, h);
-    }
-
-    m_DeviceContext->ClearRenderTargetView(m_BackBufferView.Get(), clearColor);
-    // _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
+// @Todo. Except a render target view.
+// @Todo. Except and use a depth stencil view.
+void Common::Direct3D11::BeginRender()
+{
+    m_DeviceContext->OMSetRenderTargets(1, m_BackBufferView.GetAddressOf(), nullptr);
 
     D3D11_VIEWPORT viewport = {};
     viewport.Width = (float)m_WindowWidth;
@@ -128,10 +128,17 @@ void Common::Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
     viewport.MaxDepth = 1.0f;
 
     m_DeviceContext->RSSetViewports(1, &viewport);
-    m_DeviceContext->OMSetRenderTargets(1, m_BackBufferView.GetAddressOf(), nullptr);
 }
 
-void Common::Direct3D11::FrameEnd()
+void Common::Direct3D11::ClearBackBuffer(Color clearColor)
+{
+    m_DeviceContext->ClearRenderTargetView(m_BackBufferView.Get(), clearColor);
+}
+
+// @Todo. deoth buffer clear.
+// _context->ClearDepthStencilView(_depthStencilView.Get(), 0, 1.0f, 0);
+
+void Common::Direct3D11::EndFrame()
 {
     D3D_OK(m_SwapChain->Present(0, 0));
     m_DeviceContext->ClearState();
@@ -172,7 +179,7 @@ ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const st
     return shader;
 }
 
-ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ComPtr<ID3D11ShaderResourceView>& outView) const
+ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path) const
 {
     auto sprite = IMG_Load(path.c_str());
 
@@ -216,15 +223,15 @@ ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::str
     ComPtr<ID3D11Texture2D> texture = nullptr;
     D3D_OK(m_Device->CreateTexture2D(&desc, &data, texture.GetAddressOf()));
     SetDebugName(texture, path);
-    
-    if (outView && texture)
-    {
-        D3D_OK(m_Device->CreateShaderResourceView(texture.Get(), nullptr, outView.GetAddressOf()));
-        SetDebugName(outView.Get(), path);
-    }
-
     SDL_FreeSurface(sprite);
     return texture;
+}
+
+ComPtr<ID3D11ShaderResourceView> Common::Direct3D11::CreateShaderResourceView(const ComPtr<ID3D11Texture2D> texture) const
+{
+    ComPtr<ID3D11ShaderResourceView> view = nullptr;
+    D3D_OK(m_Device->CreateShaderResourceView(texture.Get(), nullptr, view.GetAddressOf()));
+    return view;
 }
 
 ComPtr<ID3D11Buffer> Common::Direct3D11::CreateConstantsBuffer(size_t structSize) const

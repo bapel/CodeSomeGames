@@ -103,8 +103,8 @@ int main(int argc, char** argv)
 
     D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
 
-    ComPtr<ID3D11ShaderResourceView> spriteResourceView;
-    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png", spriteResourceView);
+    auto spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png");
+    auto spriteResourceView = d3d11.CreateShaderResourceView(spriteTexture);
 
     ComPtr<ID3D11SamplerState> samplerState = InitSamplerState(d3dDevice);
     ComPtr<ID3D11BlendState> blendState = InitBlendState(d3dDevice);
@@ -253,7 +253,9 @@ int main(int argc, char** argv)
             Matrix::CreateOrthographic(viewWidth, viewHeight, 0.0f, 1.0f)
         };
 
-        d3d11.FrameStart(window, Color(0x2a2b3eff));
+        d3d11.BeginFrame();
+        d3d11.BeginRender();
+        d3d11.ClearBackBuffer(Color(0x2a2b3eff));
 
         const auto d3dContext = d3d11.GetDeviceContext();
 
@@ -318,7 +320,7 @@ int main(int argc, char** argv)
 
         spriteRenderer.End(d3dContext.Get());
 
-        d3d11.FrameEnd();
+        d3d11.EndFrame();
     }
 
     SDL_DestroyWindow(window);
