@@ -24,18 +24,23 @@ namespace Common {
     class Direct3D11
     {
     private:
-        ComPtr<IDXGISwapChain> m_SwapChain;
         ComPtr<ID3D11Device> m_Device;
-        D3D_FEATURE_LEVEL m_FeatureLevel = D3D_FEATURE_LEVEL_1_0_CORE;
+        ComPtr<ID3D11Debug> m_Debug;
         ComPtr<ID3D11DeviceContext> m_DeviceContext;
+
+        ComPtr<IDXGISwapChain> m_SwapChain;
         ComPtr<ID3D11RenderTargetView> m_BackBufferView;
         ComPtr<ID3D11DepthStencilView> m_DepthStencilView;
+        
+        D3D_FEATURE_LEVEL m_FeatureLevel = D3D_FEATURE_LEVEL_1_0_CORE;
 
         int m_WindowWidth = 0;
         int m_WindowHeight = 0;
 
     public:
-        void Init(SDL_Window* window);
+        ~Direct3D11();
+
+        void Init(SDL_Window* window, bool debug = true);
         void OnWindowResized(int w, int h);
         void FrameStart(SDL_Window* window, Color clearColor);
         void FrameEnd();

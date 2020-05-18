@@ -10,7 +10,16 @@
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
 
-void Common::Direct3D11::Init(SDL_Window* window)
+Common::Direct3D11::~Direct3D11()
+{
+    if (m_Debug)
+    {
+        m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+        m_Debug->Release();
+    }
+}
+
+void Common::Direct3D11::Init(SDL_Window* window, bool debug)
 {
     SDL_assert(nullptr != window);
 
@@ -45,9 +54,8 @@ void Common::Direct3D11::Init(SDL_Window* window)
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
     UINT deviceCreateFlags = 0;
-// #if _DEBUG
-    deviceCreateFlags = D3D11_CREATE_DEVICE_DEBUG;
-// #endif
+    if (debug)
+        deviceCreateFlags = D3D11_CREATE_DEVICE_DEBUG;
 
     D3D_OK(D3D11CreateDeviceAndSwapChain(
         0, // Default adapter
@@ -62,6 +70,9 @@ void Common::Direct3D11::Init(SDL_Window* window)
         m_Device.GetAddressOf(),
         &m_FeatureLevel,
         m_DeviceContext.GetAddressOf()));
+
+    if (debug)
+        D3D_OK(m_Device->QueryInterface(IID_PPV_ARGS(m_Debug.GetAddressOf())));
 
     ComPtr<ID3D11Texture2D> backBuffer;
     D3D_OK(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
