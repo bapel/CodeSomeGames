@@ -10,7 +10,7 @@ class SDLGame
 protected:
     Common::Direct3D11 m_D3D11;
     std::string m_ShadersPath;
-    SDL_Window* m_Window;
+    SDL_Window* m_Window = nullptr;
     
 public:
     virtual ~SDLGame() {};
@@ -26,7 +26,7 @@ public:
     virtual void OnKeyUp(SDL_Keycode keyCode) {};
 };
 
-#define RunGame(Game__)\
+#define Game__(in_Game__)\
     int main(int argc, char** argv) {\
-        return Game__().Run(argc, argv);\
+        return in_Game__().Run(argc, argv);\
     }
