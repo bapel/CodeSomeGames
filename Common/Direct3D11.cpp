@@ -86,7 +86,7 @@ void Common::Direct3D11::Init(SDL_Window* window, bool debug)
 void Common::Direct3D11::SetDebugName(ID3D11DeviceChild* child, const std::string& name) const
 {
     if (m_Debug && (name.size() > 0))
-        child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
+        child->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)name.size(), name.c_str());
 }
 
 void Common::Direct3D11::OnWindowResized(int w, int h)
