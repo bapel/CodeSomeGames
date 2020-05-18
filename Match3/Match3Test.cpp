@@ -10,7 +10,8 @@
 #include "m3Board.hpp"
 #include "m3Match.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     // global setup...
     int result = Catch::Session().run( argc, argv );
     // global clean-up...

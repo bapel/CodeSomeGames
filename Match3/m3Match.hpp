@@ -5,6 +5,12 @@
 
 namespace m3
 {
+    struct Matches
+    {
+        RowSpan Row_0, Row_1;
+        ColSpan Col_0, Col_1;
+    };
+
     template <class T, class Values>
     inline row_t GetMatchingRowsInCol_U(row_t r, col_t c, const T& value, const Values& values)
     {
