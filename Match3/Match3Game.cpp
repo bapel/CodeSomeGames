@@ -22,10 +22,12 @@ class Match3Game final : public SDLGame
         // Load resources.
 
         m_SpriteRenderer.Init(m_D3D11, m_ShadersPath);
+
         m_CameraConstantsBuffer = m_D3D11.CreateConstantsBuffer<CameraConstantsBuffer>();
+        m_D3D11.SetDebugName(m_CameraConstantsBuffer.Get(), "CameraConstantsBuffer");
 
         auto spritePath = "Sprites//gem_grey_square.png";
-        m_SpriteTexture = m_D3D11.CreateTextureFromFile(spritePath, m_SpriteResourceView.GetAddressOf());
+        m_SpriteTexture = m_D3D11.CreateTextureFromFile(spritePath, m_SpriteResourceView);
 
         const auto d3dDevice = m_D3D11.GetDevice().Get();
 
@@ -47,7 +49,7 @@ class Match3Game final : public SDLGame
             Matrix::CreateOrthographic(viewportWidth, viewportHeight, 0.0f, 1.0f)
         };
 
-        m_D3D11.UpdateBufferData(m_CameraConstantsBuffer, &cameraConstantBufferData);
+        m_D3D11.UpdateBufferData(m_CameraConstantsBuffer.Get(), &cameraConstantBufferData);
 
         const auto d3dContext = m_D3D11.GetDeviceContext();
 
@@ -65,9 +67,9 @@ class Match3Game final : public SDLGame
         UINT numShaderResourceViews = sizeof(shaderResourceViews) / sizeof(ID3D11ShaderResourceView*);
         d3dContext->PSSetShaderResources(0, numShaderResourceViews, shaderResourceViews);
 
-        //ID3D11SamplerState* samplerStates[] = { m_PixellySamplerState.Get() };
-        //UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
-        //d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
+        ID3D11SamplerState* samplerStates[] = { m_PixellySamplerState.Get() };
+        UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
+        d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
 
         m_SpriteRenderer.SetSampler(m_PixellySamplerState);
 
@@ -75,7 +77,8 @@ class Match3Game final : public SDLGame
         m_D3D11.FrameEnd();
     }
 
-    void OnDestroy() { }
+    void OnDestroy() 
+    { }
 
     ComPtr<ID3D11SamplerState> InitPixellySamplerState(ID3D11Device* d3dDevice)
     {
@@ -127,7 +130,4 @@ class Match3Game final : public SDLGame
     }
 };
 
-int main(int argc, char** argv)
-{
-    return Run<Match3Game>(argc, argv);
-}
+RunGame(Match3Game)

@@ -25,11 +25,7 @@ public:
     virtual void OnKeyUp(SDL_Keycode keyCode) {};
 };
 
-template <class GameType>
-int Run(int argc, char** argv)
-{
-    auto* app = new GameType();
-    auto r = app->Run(argc, argv);
-    delete app;
-    return r;
-}
+#define RunGame(Game__)\
+    int main(int argc, char** argv) {\
+        return Game__().Run(argc, argv);\
+    }

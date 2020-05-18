@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     D3D_OK(d3dDevice->CreateBuffer(&constantsBufferDesc, nullptr, transformsBuffer.GetAddressOf()));
 
     ComPtr<ID3D11ShaderResourceView> spriteResourceView;
-    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png", spriteResourceView.GetAddressOf());
+    ComPtr<ID3D11Texture2D> spriteTexture = d3d11.CreateTextureFromFile("Sprites//gem_grey_square.png", spriteResourceView);
 
     ComPtr<ID3D11SamplerState> samplerState = InitSamplerState(d3dDevice);
     ComPtr<ID3D11BlendState> blendState = InitBlendState(d3dDevice);

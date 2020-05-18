@@ -49,10 +49,13 @@ namespace Common {
         inline const ComPtr<ID3D11Device>& GetDevice() const { return m_Device; }
         inline const ComPtr<ID3D11DeviceContext>& GetDeviceContext() const { return m_DeviceContext; }
 
+        void SetDebugName(ID3D11DeviceChild* child, const std::string& name) const;
+        template <class T> inline void SetDebugName(ComPtr<T>& ptr, const std::string& name) const;
+
         ComPtr<ID3D11VertexShader> CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const;
         ComPtr<ID3D11PixelShader> CreatePixelShaderFromFile(const std::string& path) const;
 
-        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView) const;
+        ComPtr<ID3D11Texture2D> CreateTextureFromFile(const std::string& path, ComPtr<ID3D11ShaderResourceView>& outView) const;
 
         ComPtr<ID3D11Buffer> CreateConstantsBuffer(size_t structSize) const;
         void UpdateBufferData(const ComPtr<ID3D11Buffer>& buffer, const void* data, size_t size) const;
@@ -60,6 +63,12 @@ namespace Common {
         template <class StructType> inline ComPtr<ID3D11Buffer> CreateConstantsBuffer() const;
         template <class StructType> inline void UpdateBufferData(const ComPtr<ID3D11Buffer>& buffer, const StructType& data);
     };
+
+    template <class T> 
+    inline void Direct3D11::SetDebugName(ComPtr<T>& ptr, const std::string& name) const
+    {
+        SetDebugName(ptr.Get(), name);
+    }
 
     template <class StructType> 
     inline ComPtr<ID3D11Buffer> Direct3D11::CreateConstantsBuffer() const

@@ -156,7 +156,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Match3.cpp" />
+    <ClCompile Include="Match3Game.cpp" />
     <ClCompile Include="SDLGame.cpp" />
     <ClCompile Include="SpriteRenderer.cpp" />
   </ItemGroup>

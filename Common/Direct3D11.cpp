@@ -2,6 +2,7 @@
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -13,10 +14,7 @@ size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
 Common::Direct3D11::~Direct3D11()
 {
     if (m_Debug)
-    {
-        m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-        m_Debug->Release();
-    }
+        m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_IGNORE_INTERNAL);
 }
 
 void Common::Direct3D11::Init(SDL_Window* window, bool debug)
@@ -30,7 +28,8 @@ void Common::Direct3D11::Init(SDL_Window* window, bool debug)
 
     HWND hwnd = info.info.win.window;
 
-    D3D_FEATURE_LEVEL featureLevels[] = {
+    D3D_FEATURE_LEVEL featureLevels[] = 
+    {
         D3D_FEATURE_LEVEL_11_0,
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_12_0,
@@ -77,6 +76,15 @@ void Common::Direct3D11::Init(SDL_Window* window, bool debug)
     ComPtr<ID3D11Texture2D> backBuffer;
     D3D_OK(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf()));
     D3D_OK(m_Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_BackBufferView.GetAddressOf()));
+
+    SetDebugName(backBuffer.Get(), "SwapChain BackBuffer Texture");
+    SetDebugName(m_BackBufferView.Get(), "SwapChain BackBuffer RTV");
+}
+
+void Common::Direct3D11::SetDebugName(ID3D11DeviceChild* child, const std::string& name) const
+{
+    if (m_Debug && (name.size() > 0))
+        child->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 }
 
 void Common::Direct3D11::OnWindowResized(int w, int h)
@@ -126,6 +134,8 @@ void Common::Direct3D11::FrameStart(SDL_Window* window, Color clearColor)
 void Common::Direct3D11::FrameEnd()
 {
     D3D_OK(m_SwapChain->Present(0, 0));
+    m_DeviceContext->ClearState();
+    m_DeviceContext->Flush();
 }
 
 ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const std::string& path, std::vector<char>& outByteCode) const
@@ -139,8 +149,9 @@ ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const 
         return nullptr;
     }
 
-    ID3D11VertexShader* shader = nullptr;
+    ComPtr<ID3D11VertexShader> shader = nullptr;
     D3D_OK(m_Device->CreateVertexShader(buffer.data(), buffer.size(), nullptr, &shader));
+    SetDebugName(shader, path);
     return shader;
 }
 
@@ -155,12 +166,13 @@ ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const st
         return nullptr;
     }
 
-    ID3D11PixelShader* shader = nullptr;
+    ComPtr<ID3D11PixelShader> shader = nullptr;
     D3D_OK(m_Device->CreatePixelShader(buffer.data(), buffer.size(), nullptr, &shader));
+    SetDebugName(shader, path);
     return shader;
 }
 
-ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ID3D11ShaderResourceView** outView) const
+ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path, ComPtr<ID3D11ShaderResourceView>& outView) const
 {
     auto sprite = IMG_Load(path.c_str());
 
@@ -201,28 +213,30 @@ ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::str
     data.SysMemPitch = sprite->pitch;
     data.SysMemSlicePitch = sprite->w * sprite->h * 4;
 
-    ID3D11Texture2D* texture = nullptr;
-    D3D_OK(m_Device->CreateTexture2D(&desc, &data, &texture));
+    ComPtr<ID3D11Texture2D> texture = nullptr;
+    D3D_OK(m_Device->CreateTexture2D(&desc, &data, texture.GetAddressOf()));
+    SetDebugName(texture, path);
+    
+    if (outView && texture)
+    {
+        D3D_OK(m_Device->CreateShaderResourceView(texture.Get(), nullptr, outView.GetAddressOf()));
+        SetDebugName(outView.Get(), path);
+    }
+
     SDL_FreeSurface(sprite);
-
-    if (outView != nullptr)
-        D3D_OK(m_Device->CreateShaderResourceView(texture, nullptr, outView));
-
     return texture;
 }
 
 ComPtr<ID3D11Buffer> Common::Direct3D11::CreateConstantsBuffer(size_t structSize) const
 {
-    ComPtr<ID3D11Buffer> constantsBuffer;
-
     D3D11_BUFFER_DESC constantsBufferDesc = {};
     constantsBufferDesc.ByteWidth = (UINT)structSize;
     constantsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     constantsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
+    ComPtr<ID3D11Buffer> constantsBuffer;
     D3D_OK(m_Device->CreateBuffer(&constantsBufferDesc, nullptr, constantsBuffer.GetAddressOf()));
-
     return constantsBuffer;
 }
 
