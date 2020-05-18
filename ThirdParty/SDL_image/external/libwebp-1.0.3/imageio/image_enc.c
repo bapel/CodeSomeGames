@@ -67,7 +67,7 @@ static HRESULT CreateOutputStream(const char* out_file_name,
                              STGM_WRITE | STGM_CREATE, stream));
   }
   if (FAILED(hr)) {
-    _ftprintf(stderr, _T("Error opening output file %s (%08lx)\n"),
+    _ftprintf(stderr, m_T("Error opening output file %s (%08lx)\n"),
               (const LPTSTR)out_file_name, hr);
   }
   return hr;

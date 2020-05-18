@@ -114,7 +114,7 @@ static HRESULT OpenInputStream(const char* filename, IStream** stream) {
   }
 
   if (FAILED(hr)) {
-    _ftprintf(stderr, _T("Error opening input file %s (%08lx)\n"),
+    _ftprintf(stderr, m_T("Error opening input file %s (%08lx)\n"),
               (const LPTSTR)filename, hr);
   }
   return hr;

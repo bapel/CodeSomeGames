@@ -1,6 +1,7 @@
 #pragma once
 
 #include "m3Types.hpp"
+#include "m3Board.hpp"
 
 namespace m3
 {
@@ -105,7 +106,7 @@ TEST_CASE("Matching functions", "[matching]")
             _1"BROBROGY"
             _0"YBROBROG";
 
-        using GemColors = m3::private_::Board<gem_color_t, Rows, Cols>;
+        using GemColors = m3::Board<gem_color_t, Rows, Cols>;
 
         GemColors colors;
         GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
@@ -140,7 +141,7 @@ TEST_CASE("Matching functions", "[matching]")
             _1"BRBBROGY"
             _0"YBROBROG";
 
-        using GemColors = private_::Board<gem_color_t, Rows, Cols>;
+        using GemColors = Board<gem_color_t, Rows, Cols>;
 
         GemColors colors;
         GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
