@@ -1,8 +1,9 @@
 #pragma once
 
 #include <SDL.h>
-#include <Direct3D11.hpp>
 #include <string>
+
+#include "Direct3D11.hpp"
 
 class SDLGame
 {

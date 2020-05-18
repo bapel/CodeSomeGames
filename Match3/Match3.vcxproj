@@ -157,11 +157,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Match3Game.cpp" />
-    <ClCompile Include="SDLGame.cpp" />
     <ClCompile Include="SpriteRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDLGame.hpp" />
     <ClInclude Include="SpriteRenderer.hpp" />
   </ItemGroup>
   <ItemGroup>

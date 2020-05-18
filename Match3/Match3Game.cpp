@@ -1,4 +1,4 @@
-#include "SDLGame.hpp"
+#include <SDLGame.hpp>
 #include "SpriteRenderer.hpp"
 
 struct CameraConstantsBuffer

@@ -157,10 +157,12 @@
   <ItemGroup>
     <ClInclude Include="ComPtr.hpp" />
     <ClInclude Include="Direct3D11.hpp" />
+    <ClInclude Include="SDLGame.hpp" />
     <ClInclude Include="VectorMath.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D11.cpp" />
+    <ClCompile Include="SDLGame.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

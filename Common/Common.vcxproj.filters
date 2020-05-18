@@ -24,9 +24,15 @@
     <ClInclude Include="VectorMath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SDLGame.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
