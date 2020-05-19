@@ -4,8 +4,9 @@
 
 namespace m3
 {
-    using row_t = int8_t;
-    using col_t = int8_t;
+    // These could be 8 bits, but then they would show up as chars in the debugger.
+    using row_t = int16_t;
+    using col_t = int16_t;
 
     using count_t = uint16_t;
 

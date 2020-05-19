@@ -12,6 +12,7 @@ namespace m3
     {
         static_assert(eastl::is_pod<T>::value);
         using Array = eastl::array<T, R * C>;
+        using Type = T;
 
         Array m_Array;
 
@@ -33,7 +34,7 @@ namespace m3
 
             for (auto r = 0; r < outBoard->Rows(); r++)
             {
-                auto src = (T*)data + (r * outBoard->Cols());
+                auto src = (T*)data + (outBoard->Cols() * r);
                 auto dst = &(*outBoard)((outBoard->Rows() - 1) - r, 0);
                 memcpy(dst, src, rowSize);
             }

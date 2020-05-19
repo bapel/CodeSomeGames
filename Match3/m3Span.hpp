@@ -10,6 +10,8 @@ namespace m3
         T m_T;
         S m_0, m_1;
 
+        Span() = default;
+
         Span(T r, S s0, S s1) : 
             m_T(r), m_0(s0), m_1(s1) 
         { 
@@ -60,6 +62,7 @@ namespace m3
 
     struct RowSpan : Span<row_t, col_t>
     {
+        RowSpan() = default;
         RowSpan(row_t r, col_t c0, col_t c1) : 
             Span<row_t, col_t>(r, c0, c1)
         { }
@@ -71,6 +74,7 @@ namespace m3
 
     struct ColSpan : Span<col_t, row_t>
     {
+        ColSpan() = default;
         ColSpan(col_t c, row_t r0, row_t r1) : 
             Span<col_t, row_t>(c, r0, r1)
         { }
@@ -82,6 +86,33 @@ namespace m3
 }
 
 #ifdef CatchAvailable__
+
+namespace Catch 
+{
+    using namespace m3;
+
+    template<>
+    struct StringMaker<RowSpan> 
+    {
+        static std::string convert(const RowSpan rs) 
+        {
+            std::ostringstream stream;
+            stream << "RowSpan (" << rs.Row() << ", " << rs.Col_0() << ", " << rs.Col_1() << ")";
+            return stream.str();
+        }
+    };
+
+    template<>
+    struct StringMaker<ColSpan> 
+    {
+        static std::string convert(const ColSpan cs) 
+        {
+            std::ostringstream stream;
+            stream << "ColSpan (" << cs.Col() << ", " << cs.Row_0() << ", " << cs.Row_1() << ")";
+            return stream.str();
+        }
+    };
+}
 
 TEMPLATE_TEST_CASE("Span overlap", "[span]", m3::RowSpan, m3::ColSpan)
 {
