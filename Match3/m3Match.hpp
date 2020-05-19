@@ -1,6 +1,6 @@
 #pragma once
 
-#include "m3Types.hpp"
+#include "m3Span.hpp"
 #include "m3Board.hpp"
 
 namespace m3

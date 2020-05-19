@@ -1,5 +1,6 @@
 #pragma once
 
+#include "m3Types.hpp"
 #include <EASTL\array.h>
 #include <EASTL\type_traits.h>
 

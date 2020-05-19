@@ -233,6 +233,7 @@
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="m3Board.hpp" />
     <ClInclude Include="m3Match.hpp" />
+    <ClInclude Include="m3Span.hpp" />
     <ClInclude Include="m3Types.hpp" />
     <ClInclude Include="m3Logic.hpp" />
     <ClInclude Include="Match3BoardView.hpp" />
