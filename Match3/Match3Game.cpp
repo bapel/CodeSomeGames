@@ -1,7 +1,11 @@
 #define NOMINMAX
 
 #include <SDLGame.hpp>
+
+#include "m3Board.hpp"
 #include "m3BoardView.hpp"
+
+#include <EASTL\vector.h>
 
 struct CameraConstantsBuffer
 {
@@ -11,22 +15,36 @@ struct CameraConstantsBuffer
 
 class Match3Game final : public SDLGame
 {
-    m3::BoardView m_BoardView;
     ComPtr<ID3D11Buffer> m_CameraConstantsBuffer;
+
+    static const auto BoardRows = 12;
+    static const auto BoardCols = 8;
+    using Board = m3::Board<m3::gem_id_t, BoardRows, BoardCols>;
+
+    m3::BoardView m_BoardView;
+
+    eastl::vector<m3::gem_id_t> m_GemIds;
+    eastl::vector<m3::row_t> m_GemRows;
+    eastl::vector<m3::col_t> m_GemCols;
+    eastl::vector<m3::gem_color_t> m_GemColors;
+
+    Board m_Board;
+
+    std::tuple<int, int> GetDesiredWindowSize()
+    {
+        return 
+        {
+            16.0f + 64.0f * BoardCols, 
+            16.0f + 64.0f * BoardRows 
+        };
+    }
     
     void OnCreate() 
     {
-        // Load resources.
-
-        m_BoardView.Init(m_D3D11, m_ShadersPath);
-
         m_CameraConstantsBuffer = m_D3D11.CreateConstantsBuffer<CameraConstantsBuffer>();
         m_D3D11.SetDebugName(m_CameraConstantsBuffer.Get(), "CameraConstantsBuffer");
 
-        const auto d3dDevice = m_D3D11.GetDevice().Get();
-
-        // Init game.
-        // @Todo.
+        m_BoardView.Init(m_D3D11, m_ShadersPath);
     }
 
     void OnUpdate(double dtSeconds) { }
@@ -46,12 +64,14 @@ class Match3Game final : public SDLGame
 
         m_D3D11.BeginFrame();
         m_D3D11.BeginRender();
-        m_D3D11.ClearBackBuffer(Color(0x2a2b3eff));
+        m_D3D11.ClearBackBuffer(Color(0.5f, 0.5f, 0.5f, 1.0f));
 
         ID3D11Buffer* constantsBuffers[] = { m_CameraConstantsBuffer.Get() };
         d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
 
-        m_BoardView.Render();
+        m_BoardView.BeginRender();
+        m_BoardView.RenderBackground(m_Board.Rows(), m_Board.Cols());
+        m_BoardView.EndRender();
         
         m_D3D11.EndFrame();
     }

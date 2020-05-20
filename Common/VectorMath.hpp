@@ -8,3 +8,6 @@ using Vector3 = DirectX::SimpleMath::Vector3;
 using Vector4 = DirectX::SimpleMath::Vector4;
 using Matrix = DirectX::SimpleMath::Matrix;
 using Quaternion = DirectX::SimpleMath::Quaternion;
+
+const float Pi = DirectX::XM_PI;
+const float TwoPi = DirectX::XM_2PI;

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "SpriteRenderer.hpp"
 #include <WICTextureLoader.h>
+#include "SpriteRenderer.hpp"
+
+#include "m3Board.hpp"
 
 namespace m3
 {
@@ -37,7 +39,7 @@ namespace m3
             m_TransparentSpriteBlendState = InitTransparentSpriteBlendState(d3dDevice);
         }
 
-        inline void Render()
+        void BeginRender()
         {
             // Enable transparency.
             m_DeviceContext->OMSetBlendState(m_TransparentSpriteBlendState.Get(), nullptr, 0xffffffff);
@@ -54,13 +56,41 @@ namespace m3
             };
 
             UINT numSRVs = sizeof(shaderResourceViews) / sizeof(ID3D11ShaderResourceView*);
-            m_DeviceContext->PSSetShaderResources(0, numSRVs, shaderResourceViews);
+            m_DeviceContext->PSSetShaderResources(0, numSRVs, shaderResourceViews);   
 
             m_SpriteRenderer.Begin();
+        }
 
-            m_SpriteRenderer.Draw({   0.0f, 0.0f }, { 100.0f, 100.0f }, Color(1, 1, 1, 1), 0);
-            m_SpriteRenderer.Draw({ 110.0f, 0.0f }, { 100.0f, 100.0f }, Color(1, 1, 1, 1), 1);
+        void RenderBackground(const int rows, const int cols)
+        {
+            const Vector2 scale = { 64.0f, 64.0f };
+            const Vector2 origin = -0.5f * scale * Vector2(cols - 1, rows - 1);
+            const float rotations[] = {
+                TwoPi * 0.0f, 
+                TwoPi * 0.25f, 
+                TwoPi * 0.5f, 
+                TwoPi * 0.0f
+            };
 
+            for (auto i = 0; i < rows * cols; i++)
+            {
+                auto r = i / cols;
+                auto c = i % cols;
+                auto position = origin + scale * Vector2(c, r);
+                auto tint = Color(1, 1, 1, 1);
+
+                m_SpriteRenderer.Draw(position, scale, rotations[i % 4], tint, 1);
+            }
+        }
+
+        void RenderGems()
+        {
+            const Vector2 scale = { 64.0f, 64.0f };
+            m_SpriteRenderer.Draw({ 0.0f, 0.0f }, scale, Color(1, 1, 1, 1), 0);
+        }
+
+        inline void EndRender()
+        {
             m_SpriteRenderer.End();
         }
 
