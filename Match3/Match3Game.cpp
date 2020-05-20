@@ -1,7 +1,7 @@
 #define NOMINMAX
 
 #include <SDLGame.hpp>
-#include "Match3BoardView.hpp"
+#include "m3BoardView.hpp"
 
 struct CameraConstantsBuffer
 {
@@ -11,7 +11,7 @@ struct CameraConstantsBuffer
 
 class Match3Game final : public SDLGame
 {
-    Match3BoardView m_BoardView;
+    m3::BoardView m_BoardView;
     ComPtr<ID3D11Buffer> m_CameraConstantsBuffer;
     
     void OnCreate() 
@@ -51,10 +51,8 @@ class Match3Game final : public SDLGame
         ID3D11Buffer* constantsBuffers[] = { m_CameraConstantsBuffer.Get() };
         d3dContext->VSSetConstantBuffers(0, 1, constantsBuffers);
 
-        m_BoardView.Begin();
-        m_BoardView.RenderGem({ 0.0f, 0.0f }, { 100.0f, 100.0f }, Color(1, 1, 1, 1));
-        m_BoardView.End();
-
+        m_BoardView.Render();
+        
         m_D3D11.EndFrame();
     }
 

@@ -195,9 +195,9 @@ ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::str
     DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
     switch (sprite->format->format)
     {
-    case SDL_PIXELFORMAT_ABGR8888:
-        format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        break;
+        case SDL_PIXELFORMAT_ABGR8888:
+            format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            break;
     }
 
     // Unsupported format.

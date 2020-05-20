@@ -14,16 +14,19 @@ const SpriteVertex vertices[] =
     { {  0.5f,  0.5f, }, { 1.0f, 0.0f } }
 };
 
+#define append_elem__ D3D11_APPEND_ALIGNED_ELEMENT
+
 const D3D11_INPUT_ELEMENT_DESC spriteElementDescs[] = 
 {
     // Vertex.
     { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,       0, 0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
-    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, append_elem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
 
     // Instance.                                         
     { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,       1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,       1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_TINT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,       1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_TINT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,           1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 };
 
 void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, uint32_t numInstances)
@@ -78,25 +81,6 @@ void SpriteRenderer::Begin()
     d3dContext->PSSetShader(m_PixelShader.Get(), nullptr, 0);
     d3dContext->IASetInputLayout(m_InputLayout.Get());
     d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-}
-
-void SpriteRenderer::SetSampler(const ComPtr<ID3D11SamplerState> sampler)
-{
-    auto d3dContext = m_DeviceContext.Get();
-    ID3D11SamplerState* samplerStates[] = { sampler.Get() };
-    UINT numSamplerStates = sizeof(samplerStates) / sizeof(ID3D11SamplerState*);
-    d3dContext->PSSetSamplers(0, numSamplerStates, samplerStates);
-}
-
-void SpriteRenderer::Draw(Vector2 position, Vector2 scale, Color tint)
-{
-    InstanceData sprite;
-
-    sprite.Position = position;
-    sprite.Scale = scale;
-    sprite.Tint = tint;
-
-    m_SpriteInstances.push_back(sprite);
 }
 
 void SpriteRenderer::End()

@@ -1,11 +1,22 @@
 #include "SDLGame.hpp"
 
+#include <wrl\wrappers\corewrappers.h>
+#pragma comment(lib, "RuntimeObject.lib")
+
 #include <SDL_assert.h>
 #include <SDL_image.h>
 #include <SDL_events.h>
 
 int SDLGame::Run(int argc, char** argv)
 {
+    #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+    Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+    SDL_assert_release(SUCCEEDED(initialize));
+    #else
+    HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+    SDL_assert_release(SUCCEEDED(hr));
+    #endif
+
     SDL_assert_release(0 == SDL_Init(0));
 
     SDL_assert_release(argc >= 1);

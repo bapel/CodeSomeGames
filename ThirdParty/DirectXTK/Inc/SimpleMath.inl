@@ -142,10 +142,10 @@ inline RECT Rectangle::Union(const RECT& rcta, const RECT& rctb) noexcept
 
 
 /****************************************************************************
-*
-* Vector2
-*
-****************************************************************************/
+ *
+ * Vector2
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -717,10 +717,10 @@ inline void Vector2::TransformNormal(const Vector2* varray, size_t count, const 
 
 
 /****************************************************************************
-*
-* Vector3
-*
-****************************************************************************/
+ *
+ * Vector3
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -1306,10 +1306,10 @@ inline void Vector3::TransformNormal(const Vector3* varray, size_t count, const 
 
 
 /****************************************************************************
-*
-* Vector4
-*
-****************************************************************************/
+ *
+ * Vector4
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -1899,10 +1899,10 @@ inline void Vector4::Transform(const Vector4* varray, size_t count, const Matrix
 
 
 /****************************************************************************
-*
-* Matrix
-*
-****************************************************************************/
+ *
+ * Matrix
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -1922,9 +1922,9 @@ inline bool Matrix::operator == (const Matrix& M) const noexcept
     XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
 
     return (XMVector4Equal(x1, y1)
-        && XMVector4Equal(x2, y2)
-        && XMVector4Equal(x3, y3)
-        && XMVector4Equal(x4, y4)) != 0;
+            && XMVector4Equal(x2, y2)
+            && XMVector4Equal(x3, y3)
+            && XMVector4Equal(x4, y4)) != 0;
 }
 
 inline bool Matrix::operator != (const Matrix& M) const noexcept
@@ -1941,9 +1941,9 @@ inline bool Matrix::operator != (const Matrix& M) const noexcept
     XMVECTOR y4 = XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(&M._41));
 
     return (XMVector4NotEqual(x1, y1)
-        || XMVector4NotEqual(x2, y2)
-        || XMVector4NotEqual(x3, y3)
-        || XMVector4NotEqual(x4, y4)) != 0;
+            || XMVector4NotEqual(x2, y2)
+            || XMVector4NotEqual(x3, y3)
+            || XMVector4NotEqual(x4, y4)) != 0;
 }
 
 //------------------------------------------------------------------------------
@@ -2743,10 +2743,10 @@ inline Matrix Matrix::Transform(const Matrix& M, const Quaternion& rotation) noe
 
 
 /****************************************************************************
-*
-* Plane
-*
-****************************************************************************/
+ *
+ * Plane
+ *
+ ****************************************************************************/
 
 inline Plane::Plane(const Vector3& point1, const Vector3& point2, const Vector3& point3) noexcept
 {
@@ -2875,10 +2875,10 @@ inline Plane Plane::Transform(const Plane& plane, const Quaternion& rotation) no
 
 
 /****************************************************************************
-*
-* Quaternion
-*
-****************************************************************************/
+ *
+ * Quaternion
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -3217,10 +3217,10 @@ inline Quaternion Quaternion::Concatenate(const Quaternion& q1, const Quaternion
 
 
 /****************************************************************************
-*
-* Color
-*
-****************************************************************************/
+ *
+ * Color
+ *
+ ****************************************************************************/
 
 inline Color::Color(const DirectX::PackedVector::XMCOLOR& Packed) noexcept
 {
@@ -3540,10 +3540,10 @@ inline Color Color::Lerp(const Color& c1, const Color& c2, float t) noexcept
 
 
 /****************************************************************************
-*
-* Ray
-*
-****************************************************************************/
+ *
+ * Ray
+ *
+ ****************************************************************************/
 
 //-----------------------------------------------------------------------------
 // Comparision operators
@@ -3624,10 +3624,10 @@ inline bool Ray::Intersects(const Plane& plane, _Out_ float& Dist) const noexcep
 
 
 /****************************************************************************
-*
-* Viewport
-*
-****************************************************************************/
+ *
+ * Viewport
+ *
+ ****************************************************************************/
 
 //------------------------------------------------------------------------------
 // Comparision operators
@@ -3636,15 +3636,15 @@ inline bool Ray::Intersects(const Plane& plane, _Out_ float& Dist) const noexcep
 inline bool Viewport::operator == (const Viewport& vp) const noexcept
 {
     return (x == vp.x && y == vp.y
-        && width == vp.width && height == vp.height
-        && minDepth == vp.minDepth && maxDepth == vp.maxDepth);
+            && width == vp.width && height == vp.height
+            && minDepth == vp.minDepth && maxDepth == vp.maxDepth);
 }
 
 inline bool Viewport::operator != (const Viewport& vp) const noexcept
 {
     return (x != vp.x || y != vp.y
-        || width != vp.width || height != vp.height
-        || minDepth != vp.minDepth || maxDepth != vp.maxDepth);
+            || width != vp.width || height != vp.height
+            || minDepth != vp.minDepth || maxDepth != vp.maxDepth);
 }
 
 //------------------------------------------------------------------------------

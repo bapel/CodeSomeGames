@@ -14,6 +14,7 @@ struct SpriteVSInput
     float2 SpritePos : SPRITE_POS;
     float2 SpriteScale : SPRITE_SCALE;
     float4 SpriteTint : SPRITE_TINT;
+    uint SpriteId : SPRITE_ID;
 };
 
 SpriteVSOutput main(SpriteVSInput input) 
@@ -25,6 +26,7 @@ SpriteVSOutput main(SpriteVSInput input)
     output.Position = mul(ViewProjection, float4(outPosition, 0.0, 1.0));
     output.TexCoord = input.TexCoord;
     output.SpriteTint = input.SpriteTint;
+    output.SpriteId = input.SpriteId;
 
     return output;
 }

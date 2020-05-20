@@ -32,9 +32,6 @@
     <ClInclude Include="SpriteRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Match3BoardView.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="catch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -51,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="m3Span.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="m3BoardView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
