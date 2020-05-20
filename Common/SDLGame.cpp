@@ -9,13 +9,13 @@
 
 int SDLGame::Run(int argc, char** argv)
 {
-    #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
     Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
     SDL_assert_release(SUCCEEDED(initialize));
-    #else
+#else
     HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
     SDL_assert_release(SUCCEEDED(hr));
-    #endif
+#endif
 
     SDL_assert_release(0 == SDL_Init(0));
 
@@ -30,11 +30,13 @@ int SDLGame::Run(int argc, char** argv)
     if (IMG_INIT_PNG != (flags & IMG_INIT_PNG))
         SDL_Log("Failed to load **png** module");
 
+    auto [width, height] = GetDesiredWindowSize();
+
     m_Window = SDL_CreateWindow(
         "Bejeweled Clone",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        1024, 768,
+        width, height,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 
     SDL_assert_release(nullptr != m_Window);

@@ -15,6 +15,8 @@ protected:
 public:
     virtual ~SDLGame() {};
 
+    virtual std::tuple<int, int> GetDesiredWindowSize() { return { 1024, 768 }; }
+
     int Run(int argc, char** argv);
 
     virtual void OnCreate() = 0;
