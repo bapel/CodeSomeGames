@@ -58,15 +58,20 @@ int SDLGame::Run(int argc, char** argv)
                 quit = true;
                 break;
             }
-            else if (SDL_KEYDOWN == event.type)
+
+            switch (event.type)
             {
-                OnKeyDown(event.key.keysym.sym);
-                break;
-            }
-            else if (SDL_KEYUP == event.type)
-            {
-                OnKeyUp(event.key.keysym.sym);
-                break;
+                case SDL_KEYDOWN: 
+                    OnKeyDown(event.key.keysym.sym); 
+                    break;
+
+                case SDL_KEYUP: 
+                    OnKeyUp(event.key.keysym.sym); 
+                    break;
+
+                case SDL_MOUSEMOTION: 
+                    OnMouseMove(event.motion.x, event.motion.y);
+                    break;
             }
         }
 

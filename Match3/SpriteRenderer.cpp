@@ -30,7 +30,7 @@ const D3D11_INPUT_ELEMENT_DESC spriteElementDescs[] =
     { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,           1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 };
 
-void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, uint32_t numMaxSprites)
+void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numMaxSprites)
 {
     std::vector<char> vsByteCode;
 
@@ -65,7 +65,7 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
     InitInstancesBuffer(numMaxSprites);
 }
 
-void SpriteRenderer::InitInstancesBuffer(const uint32_t& numInstances)
+void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
 {
     D3D11_BUFFER_DESC instanceBufferDesc = {};
     instanceBufferDesc.ByteWidth = (UINT)(sizeof(InstanceData) * numInstances);

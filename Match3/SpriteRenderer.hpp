@@ -24,11 +24,11 @@ private:
 
     const static uint16_t MaxNumSpriteIds = 8;
     std::vector<InstanceData> m_SpriteInstances;
-    uint32_t m_MaxSprites;
+    size_t m_MaxSprites = 100;
 
 public:
-    void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, uint32_t numInstances = 100);
-    void InitInstancesBuffer(const uint32_t& numInstances);
+    void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numInstances = 100);
+    void InitInstancesBuffer(size_t numInstances);
 
     void Begin();
     void End();

@@ -10,8 +10,6 @@ namespace m3
         T m_T;
         S m_0, m_1;
 
-        Span() = default;
-
         Span(T r, S s0, S s1) : 
             m_T(r), m_0(s0), m_1(s1) 
         { 

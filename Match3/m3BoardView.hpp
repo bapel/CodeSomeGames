@@ -10,6 +10,8 @@ namespace m3
     class BoardView
     {
     private:
+        const float m_SpriteSize;
+
         SpriteRenderer m_SpriteRenderer;
         ComPtr<ID3D11DeviceContext> m_DeviceContext;
         ComPtr<ID3D11SamplerState> m_PixellySamplerState;
@@ -21,6 +23,8 @@ namespace m3
         ComPtr<ID3D11ShaderResourceView> m_TileSpriteSRV;
 
     public:
+        BoardView(float spriteSize) : m_SpriteSize(spriteSize) {}
+
         void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath)
         {
             m_SpriteRenderer.Init(d3d11, shadersBasePath);
@@ -29,7 +33,7 @@ namespace m3
             const auto d3dDevice = d3d11.GetDevice().Get();
             const auto d3dContext = m_DeviceContext.Get();
 
-            DirectX::CreateWICTextureFromFile(d3dDevice, d3dContext, L"Sprites//gem_grey_square.png", 
+            DirectX::CreateWICTextureFromFile(d3dDevice, d3dContext, L"Sprites//gem_sprite.png", 
                 m_GemSpriteTex2D.GetAddressOf(), m_GemSpriteSRV.GetAddressOf());
 
             DirectX::CreateWICTextureFromFile(d3dDevice, d3dContext, L"Sprites//bg_tile.png", 
@@ -61,10 +65,10 @@ namespace m3
             m_SpriteRenderer.Begin();
         }
 
-        void RenderBackground(const int rows, const int cols)
+        void RenderBackground(int rows, int cols, float spriteScale)
         {
-            const Vector2 scale = { 64.0f, 64.0f };
-            const Vector2 origin = -0.5f * scale * Vector2(cols - 1, rows - 1);
+            const Vector2 scale = { spriteScale, spriteScale };
+            const Vector2 origin = -0.5f * scale * Vector2((float)cols - 1, (float)rows - 1);
             const float rotations[] = {
                 TwoPi * 0.0f, 
                 TwoPi * 0.25f, 
@@ -76,17 +80,38 @@ namespace m3
             {
                 auto r = i / cols;
                 auto c = i % cols;
-                auto position = origin + scale * Vector2(c, r);
+                auto position = origin + scale * Vector2((float)c, (float)r);
                 auto tint = Color(1, 1, 1, 1);
 
                 m_SpriteRenderer.Draw(position, scale, rotations[i % 4], tint, 1);
             }
         }
 
-        void RenderGems()
+        inline Color ToColor(m3::gem_color_t col)
         {
-            const Vector2 scale = { 64.0f, 64.0f };
-            m_SpriteRenderer.Draw({ 0.0f, 0.0f }, scale, Color(1, 1, 1, 1), 0);
+            switch (col)
+            {
+                case 'B': return Color(0, 1, 0, 1); break;
+                case 'R': return Color(1, 0, 0, 1); break;
+                case 'O': return Color(1, 0.5f, 0, 1); break;
+                case 'G': return Color(0, 0, 1, 1); break;
+                case 'Y': return Color(1, 1, 0, 1); break;
+            }
+
+            return Color(0, 0, 0, 0);
+        }
+
+        template <class T>
+        void RenderGems(const T& data, int rows, int cols)
+        {
+            for (auto i = 0; i < data.Count(); i++)
+            {
+                auto position = data.GetPosition(i);
+                auto scale = Vector2 { data.GetScale(i), data.GetScale(i) };
+                auto tint = ToColor(data.GetColor(i));
+
+                m_SpriteRenderer.Draw(position, scale, tint, 0);
+            }
         }
 
         inline void EndRender()

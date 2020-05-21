@@ -26,6 +26,7 @@ public:
 
     virtual void OnKeyDown(SDL_Keycode keyCode) {};
     virtual void OnKeyUp(SDL_Keycode keyCode) {};
+    virtual void OnMouseMove(int x, int y) {};
 };
 
 #define Game__(in_Game__)\
