@@ -235,7 +235,6 @@
   <ItemGroup>
     <ClInclude Include="catch.hpp" />
     <ClInclude Include="m3Board.hpp" />
-    <ClInclude Include="m3GemData.hpp" />
     <ClInclude Include="m3GemPool.hpp" />
     <ClInclude Include="m3Match.hpp" />
     <ClInclude Include="m3Span.hpp" />

@@ -47,6 +47,7 @@ namespace m3
         inline count_t Index(row_t r, col_t c) const 
         { 
             assert(IsWithinBounds(r, c));
+            // return c * Rows() + r; 
             return r * Cols() + c; 
         }
 

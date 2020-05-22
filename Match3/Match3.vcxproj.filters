@@ -56,9 +56,6 @@
     <ClInclude Include="m3GemPool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="m3GemData.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\SpritePS.hlsl">
