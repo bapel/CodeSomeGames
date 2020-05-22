@@ -221,9 +221,9 @@ private:
             Tween sa1 = { 0.0f, 1.0f, 0.0f, 400, 200 };
             Tween sa2 = { 0.0f, 1.0f, 0.0f, 600, 200 };
 
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(4, 3)]);
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(4, 4)]);
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(4, 5)]);
+            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 2)]);
+            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 3)]);
+            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 4)]);
 
             m_DespawnTweens.push_back(sa0);
             m_DespawnTweens.push_back(sa1);
