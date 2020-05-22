@@ -10,8 +10,6 @@ namespace m3
     class BoardView
     {
     private:
-        const float m_SpriteSize;
-
         SpriteRenderer m_SpriteRenderer;
         ComPtr<ID3D11DeviceContext> m_DeviceContext;
         ComPtr<ID3D11SamplerState> m_PixellySamplerState;
@@ -23,7 +21,7 @@ namespace m3
         ComPtr<ID3D11ShaderResourceView> m_TileSpriteSRV;
 
     public:
-        BoardView(float spriteSize) : m_SpriteSize(spriteSize) {}
+        BoardView() = default;
 
         void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath)
         {
@@ -101,14 +99,17 @@ namespace m3
             return Color(0, 0, 0, 0);
         }
 
-        template <class T>
-        void RenderGems(const T& data, int rows, int cols)
+        void RenderGems(
+            const Vector2* positions, 
+            const Vector2* scales, 
+            const m3::gem_color_t* colors,
+            size_t count)
         {
-            for (auto i = 0; i < data.Count(); i++)
+            for (auto i = 0; i < count; i++)
             {
-                auto position = data.GetPosition(i);
-                auto scale = Vector2 { data.GetScale(i), data.GetScale(i) };
-                auto tint = ToColor(data.GetColor(i));
+                auto position = positions[i];
+                auto scale = scales[i];
+                auto tint = ToColor(colors[i]);
 
                 m_SpriteRenderer.Draw(position, scale, tint, 0);
             }
