@@ -35,7 +35,36 @@ struct CameraConstantsBuffer
     Matrix viewProj;
 };
 
+enum EaseType
+{
+    InBack,
+    OutBounce
+};
+
 // Order of members is to make it convenient to debug.
+inline float EaseInBack(float x) 
+{
+    const auto c1 = 1.70158f;
+    const auto c3 = c1 + 1;
+    return c3 * x * x * x - c1 * x * x;
+}
+
+inline float EaseOutBounce(float x) 
+{
+    const auto n1 = 7.5625f;
+    const auto d1 = 2.75f;
+
+    if (x < 1 / d1) {
+        return n1 * x * x;
+    } else if (x < 2.0f / d1) {
+        return n1 * (x -= 1.5f / d1) * x + 0.75f;
+    } else if (x < 2.5f / d1) {
+        return n1 * (x -= 2.25f / d1) * x + 0.9375f;
+    } else {
+        return n1 * (x -= 2.625f / d1) * x + 0.984375f;
+    }
+}
+
 struct Tween
 {
     float ElapsedMs;
@@ -43,6 +72,7 @@ struct Tween
     float Value_1;
     float DelayMs;
     float DurationMs;
+    EaseType EaseType = InBack;
 
     inline bool Completed() const { return (ElapsedMs - DelayMs) >= DurationMs; }
 
@@ -51,6 +81,13 @@ struct Tween
         auto t = ElapsedMs - DelayMs;
         t = eastl::max(t, 0.0f) / DurationMs;
         t = eastl::clamp(t, 0.0f, 1.0f);
+
+        switch (EaseType)
+        {
+            case InBack: t = EaseInBack(t); break;
+            case OutBounce: t = EaseOutBounce(t); break;
+        }
+
         return Value_0 + t * (Value_1 - Value_0);
     }
 };
@@ -66,7 +103,7 @@ private:
     std::mt19937 m_RandGenerator;
     std::uniform_int_distribution<uint16_t> m_ColorDistribution;
     m3::GemPool m_GemPool;
-
+    
     // Board data.
     using Board = m3::Board<m3::GemId, BoardRows, BoardCols>;
 
@@ -119,6 +156,7 @@ private:
             m3::Col c = i % m_Board.Cols().m_I;
             auto id = m_GemPool.GetOrCreateGem();
             auto index = (uint32_t)m_GemRows.size();
+            auto color = RandomGemColor();
 
             m_Board(r, c) = id;
             m_IdToIndex.insert(id);
@@ -126,7 +164,7 @@ private:
             m_GemIds.push_back(id);
             m_GemRows.push_back(r);
             m_GemCols.push_back(c);
-            m_GemColors.push_back(RandomGemColor());
+            m_GemColors.push_back(color);
         }
 
         m_GemPositions.resize(m_GemRows.size());
@@ -182,7 +220,7 @@ private:
             m_FallTweens.size() == 0 && 
             m_FallDstIndices.size() == 0)
         {
-            FindAndClearFromWholeBoard();
+            // FindAndClearFromWholeBoard();
         }
     }
 
@@ -471,6 +509,7 @@ private:
             m_FallDstIndices.size() > 0)
         {
             m_FallDstIndices.clear();
+            FindAndClearFromWholeBoard();
         }
     }
 
@@ -517,6 +556,7 @@ private:
                 fall.Value_0 = r.m_I;
                 fall.Value_1 = (r - dr).m_I;
                 fall.DurationMs = dr * 500;
+                fall.EaseType = OutBounce;
 
                 m_FallDstIndices.push_back(index);
                 m_FallTweens.push_back(fall);
