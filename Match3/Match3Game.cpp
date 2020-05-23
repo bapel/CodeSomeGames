@@ -111,7 +111,7 @@ private:
         m_BoardView.Init(m_D3D11, m_ShadersPath);
 
         // Create and place random colored gems.
-        for (auto i = 0; i < m_Board.Count(); i++)
+        for (auto i = 0U; i < m_Board.Count(); i++)
         {
             auto r = i / m_Board.Cols().m_I;
             auto c = i % m_Board.Cols().m_I;

@@ -17,8 +17,6 @@ namespace m3
             struct { ColSpan Col_0, Col_1; };
             struct { ColSpan Col_D, Col_U; };
         };
-
-        Matches() = default;
     };
 
     template <class T, class Values>
@@ -181,10 +179,10 @@ TEST_CASE("Matching functions", "[matching]")
         GemColors colors;
         GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
 
-        for (auto i = 0; i < colors.Count(); i++)
+        for (auto i = 0U; i < colors.Count(); i++)
         {
-            auto r = i / colors.Cols();
-            auto c = i % colors.Cols();
+            auto r = i / colors.Cols().m_I;
+            auto c = i % colors.Cols().m_I;
             auto cl = colors(r, c);
 
             DYNAMIC_SECTION("Match check (" << r << ", " << c << ")")

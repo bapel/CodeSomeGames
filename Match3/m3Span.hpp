@@ -10,6 +10,7 @@ namespace m3
         T m_T;
         U m_0, m_1;
 
+        Span() = default;
         Span(T r, U s0, U s1) : 
             m_T(r), m_0(s0), m_1(s1) 
         { 
@@ -98,7 +99,7 @@ namespace Catch
         static std::string convert(const RowSpan rs) 
         {
             std::ostringstream stream;
-            stream << "RowSpan (" << rs.Row() << ", " << rs.Col_0() << ", " << rs.Col_1() << ")";
+            stream << "RowSpan (" << rs.Row().m_I << ", " << rs.Col_0().m_I << ", " << rs.Col_1().m_I << ")";
             return stream.str();
         }
     };
@@ -109,7 +110,7 @@ namespace Catch
         static std::string convert(const ColSpan cs) 
         {
             std::ostringstream stream;
-            stream << "ColSpan (" << cs.Col() << ", " << cs.Row_0() << ", " << cs.Row_1() << ")";
+            stream << "ColSpan (" << cs.Col().m_I << ", " << cs.Row_0().m_I << ", " << cs.Row_1().m_I << ")";
             return stream.str();
         }
     };

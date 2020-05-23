@@ -4,7 +4,7 @@
 #define CatchAvailable__
 
 #include <SDL.h>
-#include "catch.hpp"
+#include <catch.hpp>
 
 #include "m3Board.hpp"
 #include "m3Match.hpp"

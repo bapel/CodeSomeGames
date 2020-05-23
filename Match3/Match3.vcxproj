@@ -98,32 +98,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -239,7 +239,6 @@
     <ClCompile Include="SpriteRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
     <ClInclude Include="m3Board.hpp" />
     <ClInclude Include="m3GemPool.hpp" />
     <ClInclude Include="m3Match.hpp" />

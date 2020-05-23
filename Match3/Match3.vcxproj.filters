@@ -32,9 +32,6 @@
     <ClInclude Include="SpriteRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="catch.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="m3Types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

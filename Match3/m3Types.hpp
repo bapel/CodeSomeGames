@@ -7,14 +7,14 @@
 namespace m3
 {
     template <class T>
-    struct Int_t
+    struct Int
     {
         static_assert(eastl::is_integral<T>());
 
         T m_I;
 
-        Int_t() : m_I(0) {}
-        Int_t(const T& i) : m_I(i) {}
+        Int() = default;
+        Int(const T& i) : m_I(i) {}
     };
 
     #define UnaryOp__(T__, Op__)\
@@ -41,8 +41,8 @@ namespace m3
         BinaryOp__(bool, T__, !=)
 
     // These could be 8 bits, but then they would show up as chars in the debugger.
-    struct Row : public Int_t<int16_t> { Row() = default; Row(int i) : Int_t<int16_t>(i) {} };
-    struct Col : public Int_t<int16_t> { Col() = default; Col(int i) : Int_t<int16_t>(i) {} };
+    struct Row : public Int<int16_t> { Row() = default; Row(int i) : Int<int16_t>(i) {} };
+    struct Col : public Int<int16_t> { Col() = default; Col(int i) : Int<int16_t>(i) {} };
 
     DeclareOps__(Row);
     DeclareOps__(Col);
@@ -51,8 +51,6 @@ namespace m3
     #undef BinaryOp__
     #undef DeclareOps__
     
-    using count_t = uint16_t;
-
     using gem_id_t = uint16_t;
     constexpr gem_id_t InvalidGemId = eastl::numeric_limits<gem_id_t>::max();
     

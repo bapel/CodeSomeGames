@@ -30,21 +30,21 @@ namespace m3
         {
             assert(dataSize >= sizeof(m_Array));
 
-            const auto rowSize = sizeof(T) * outBoard->Cols();
+            const auto rowSize = sizeof(T) * outBoard->Cols().m_I;
 
-            for (auto r = 0; r < outBoard->Rows(); r++)
+            for (auto r = 0; r < outBoard->Rows().m_I; r++)
             {
-                auto src = (T*)data + (outBoard->Cols() * r);
-                auto dst = &(*outBoard)((outBoard->Rows() - 1) - r, 0);
+                auto src = (T*)data + (outBoard->Cols().m_I * r);
+                auto dst = &(*outBoard)((outBoard->Rows().m_I - 1) - r, 0);
                 memcpy(dst, src, rowSize);
             }
         }
 
         inline Row Rows() const { return R; }
         inline Col Cols() const { return C; }
-        inline count_t Count() const { return R * C; }
+        inline uint32_t Count() const { return R * C; }
 
-        inline count_t Index(Row r, Col c) const 
+        inline uint32_t Index(Row r, Col c) const 
         { 
             assert(IsWithinBounds(r, c));
             // return c * Rows() + r; 
