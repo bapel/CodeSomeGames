@@ -24,6 +24,7 @@ namespace m3
     #define IntType__(T__, I__)\
         struct T__ : public Int_<I__> { T__() = default; T__(int i) : Int_<I__>(i) {} }
 
+    // @Todo: Not in use. Keep?
     #define UnaryOp__(T__, Op__)\
         inline T__ operator Op__ (const T__& a) { return Op__(a.m_I); }
 
@@ -32,31 +33,50 @@ namespace m3
         inline R__ operator Op__ (const int& a, const T__& b) { return a Op__ b.m_I; }\
         inline R__ operator Op__ (const T__& a, const int& b) { return a.m_I Op__ b; }
 
-    #define DeclareOps__(T__)\
+    #define AllOps__(T__)\
         BinaryOp__(T__, T__, +)\
         BinaryOp__(T__, T__, -)\
         BinaryOp__(T__, T__, *)\
         BinaryOp__(T__, T__, /)\
         BinaryOp__(T__, T__, %)\
-        BinaryOp__(T__, T__, &)\
-        BinaryOp__(T__, T__, |)\
         BinaryOp__(bool, T__, <)\
         BinaryOp__(bool, T__, >)\
         BinaryOp__(bool, T__, <=)\
         BinaryOp__(bool, T__, >=)\
         BinaryOp__(bool, T__, ==)\
         BinaryOp__(bool, T__, !=)
+        /*BinaryOp__(T__, T__, &)\
+        BinaryOp__(T__, T__, |)*/
 
+    // These are distinct types to help avoid bugs related to mixing them up.
     IntType__(GemId, uint16_t);
     IntType__(GemColor, uint8_t);
+
+    // These could be 8 bits, but then they show up as char in the debugger.
+    IntType__(Row, int16_t);
+    IntType__(Col, int16_t);
     
+    // Id and Color only require comparison ops.
     BinaryOp__(bool, GemId, ==)
     BinaryOp__(bool, GemId, !=)
     BinaryOp__(bool, GemColor, ==)
     BinaryOp__(bool, GemColor, !=)
 
-    const GemId InvalidGemId = eastl::numeric_limits<uint16_t>::max();
-    
+    // Row and Col require all ops.
+    AllOps__(Row);
+    AllOps__(Col);
+
+    #undef AllOps__
+    #undef UnaryOp__
+    #undef BinaryOp__
+    #undef IntType__
+}
+
+// Constants, invalid values and pre-defined colors.
+namespace m3
+{
+    const GemId InvalidGemId = 0xFF;//eastl::numeric_limits<uint16_t>::max();
+
     const GemColor InvalidColor = ' ';
     const GemColor Blue = GemColor('B');
     const GemColor Red = GemColor('R');
@@ -66,19 +86,6 @@ namespace m3
 
     const GemColor GemColors[] = 
     { InvalidColor, Blue, Red, Orange, Green, Yellow };
-
-    // These could be 8 bits, but then they would show up as char in the debugger.
-    // Also these are distinct types to help avoid bugs related to mixing them up.
-    IntType__(Row, int16_t);
-    IntType__(Col, int16_t);
-
-    DeclareOps__(Row);
-    DeclareOps__(Col);
-
-    #undef UnaryOp__
-    #undef BinaryOp__
-    #undef DeclareOps__
-    #undef IntType__
 }
 
 namespace eastl
