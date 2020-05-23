@@ -40,21 +40,21 @@ namespace m3
             }
         }
 
-        inline row_t Rows() const { return R; }
-        inline col_t Cols() const { return C; }
+        inline Row Rows() const { return R; }
+        inline Col Cols() const { return C; }
         inline count_t Count() const { return R * C; }
 
-        inline count_t Index(row_t r, col_t c) const 
+        inline count_t Index(Row r, Col c) const 
         { 
             assert(IsWithinBounds(r, c));
             // return c * Rows() + r; 
-            return r * Cols() + c; 
+            return r.m_I * Cols().m_I + c.m_I;
         }
 
-        inline       T& operator() (row_t r, col_t c)       { return m_Array[Index(r, c)]; }
-        inline const T& operator() (row_t r, col_t c) const { return m_Array[Index(r, c)]; }
+        inline       T& operator() (Row r, Col c)       { return m_Array[Index(r, c)]; }
+        inline const T& operator() (Row r, Col c) const { return m_Array[Index(r, c)]; }
 
-        inline bool IsWithinBounds(row_t r, col_t c) const
+        inline bool IsWithinBounds(Row r, Col c) const
         {
             return r >= 0 && r < Rows() && c >= 0 && c < Cols();
         }

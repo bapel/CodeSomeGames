@@ -22,7 +22,7 @@ namespace m3
     };
 
     template <class T, class Values>
-    inline row_t GetMatchingRowsInCol_U(row_t r, col_t c, const T& value, const Values& values)
+    inline Row GetMatchingRowsInCol_U(Row r, Col c, const T& value, const Values& values)
     {
         while (values.IsWithinBounds(r + 1, c) && (values(r + 1, c) == value)) 
             r = r + 1;
@@ -30,7 +30,7 @@ namespace m3
     }
 
     template <class T, class Values>
-    inline row_t GetMatchingRowsInCol_D(row_t r, col_t c, const T& value, const Values& values)
+    inline Row GetMatchingRowsInCol_D(Row r, Col c, const T& value, const Values& values)
     {
         while (values.IsWithinBounds(r - 1, c) && (values(r - 1, c) == value)) 
             r = r - 1;
@@ -38,7 +38,7 @@ namespace m3
     }
 
     template <class T, class Values>
-    inline col_t GetMatchingColsInRow_L(row_t r, col_t c, const T& value, const Values& values)
+    inline Col GetMatchingColsInRow_L(Row r, Col c, const T& value, const Values& values)
     {
         while (values.IsWithinBounds(r, c - 1) && (values(r, c - 1) == value)) 
             c = c - 1;
@@ -46,7 +46,7 @@ namespace m3
     }
 
     template <class T, class Values>
-    inline col_t GetMatchingColsInRow_R(row_t r, col_t c, const T& value, const Values& values)
+    inline Col GetMatchingColsInRow_R(Row r, Col c, const T& value, const Values& values)
     {
         while (values.IsWithinBounds(r, c + 1) && (values(r, c + 1) == value)) 
             c = c + 1;
@@ -71,7 +71,7 @@ namespace m3
         0,0                             0,0
     */
     template <class Values>
-    Matches GetMatchesForSwap_Col(col_t c, row_t r0, row_t r1, const Values& values)
+    Matches GetMatchesForSwap_Col(Col c, Row r0, Row r1, const Values& values)
     {
         assert(r0 < r1);
 
@@ -121,7 +121,7 @@ namespace m3
         0,0                                    0,0
     */
     template <class Values>
-    Matches GetMatchesForSwap_Row(row_t r, col_t c0, col_t c1, const Values& values)
+    Matches GetMatchesForSwap_Row(Row r, Col c0, Col c1, const Values& values)
     {
         assert(c0 < c1);
 

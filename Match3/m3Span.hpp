@@ -4,24 +4,24 @@
 
 namespace m3
 {
-    template <class T, class S>
+    template <class T, class U>
     struct Span
     {
         T m_T;
-        S m_0, m_1;
+        U m_0, m_1;
 
-        Span(T r, S s0, S s1) : 
+        Span(T r, U s0, U s1) : 
             m_T(r), m_0(s0), m_1(s1) 
         { 
             assert(m_0 <= m_1); 
         }
 
         // Inclusive.
-        inline S Count() const { return m_1 - m_0 + 1; }
+        inline U Count() const { return m_1 - m_0 + 1; }
 
-        inline bool Contains(S s) const { return s >= m_0 && s <= m_1; }
+        inline bool Contains(U s) const { return s >= m_0 && s <= m_1; }
 
-        inline S operator[] (S s) const 
+        inline U operator[] (U s) const 
         {
             assert(Contains(s));
             return m_0 + s;
@@ -43,8 +43,8 @@ namespace m3
     };
 
     // Does not care if m_T is different.
-    template <class T, class S>
-    bool HasOverlap(const Span<T, S>& a, const Span<T, S>& b)
+    template <class T, class U>
+    bool HasOverlap(const Span<T, U>& a, const Span<T, U>& b)
     {
         return a.Contains(b.m_0) || a.Contains(b.m_1);
     }
@@ -58,28 +58,31 @@ namespace m3
         return { a.m_T, SDL_min(a.m_0, b.m_0), SDL_max(a.m_1, b.m_1) };
     }
 
-    struct RowSpan : Span<row_t, col_t>
+    using Row_ = Row;
+    using Col_ = Col;
+
+    struct RowSpan : Span<Row, Col>
     {
         RowSpan() = default;
-        RowSpan(row_t r, col_t c0, col_t c1) : 
-            Span<row_t, col_t>(r, c0, c1)
+        RowSpan(Row r, Col c0, Col c1) : 
+            Span<Row_, Col>(r, c0, c1)
         { }
 
-        inline row_t Row() const { return m_T; }
-        inline col_t Col_0() const { return m_0; }
-        inline col_t Col_1() const { return m_1; }
+        inline Row Row() const { return m_T; }
+        inline Col Col_0() const { return m_0; }
+        inline Col Col_1() const { return m_1; }
     };
 
-    struct ColSpan : Span<col_t, row_t>
+    struct ColSpan : Span<Col_, Row>
     {
         ColSpan() = default;
-        ColSpan(col_t c, row_t r0, row_t r1) : 
-            Span<col_t, row_t>(c, r0, r1)
+        ColSpan(Col c, Row r0, Row r1) : 
+            Span<Col_, Row>(c, r0, r1)
         { }
 
-        inline row_t Row_0() const { return m_0; }
-        inline col_t Row_1() const { return m_1; }
-        inline col_t Col() const { return m_T; }
+        inline Row Row_0() const { return m_0; }
+        inline Row Row_1() const { return m_1; }
+        inline Col Col() const { return m_T; }
     };
 }
 

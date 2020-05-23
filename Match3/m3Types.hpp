@@ -2,13 +2,55 @@
 
 #include <cstdint>
 #include <EASTL\numeric_limits.h>
+#include <EASTL\type_traits.h>
 
 namespace m3
 {
-    // These could be 8 bits, but then they would show up as chars in the debugger.
-    using row_t = int16_t;
-    using col_t = int16_t;
+    template <class T>
+    struct Int_t
+    {
+        static_assert(eastl::is_integral<T>());
 
+        T m_I;
+
+        Int_t() : m_I(0) {}
+        Int_t(const T& i) : m_I(i) {}
+    };
+
+    #define UnaryOp__(T__, Op__)\
+        inline T__ operator Op__ (const T__& a) { return Op__(a.m_I); }
+            
+    #define BinaryOp__(R__, T__, Op__)\
+        inline R__ operator Op__ (const T__& a, const T__& b) { return a.m_I Op__ b.m_I; }\
+        inline R__ operator Op__ (const int& a, const T__& b) { return a Op__ b.m_I; }\
+        inline R__ operator Op__ (const T__& a, const int& b) { return a.m_I Op__ b; }
+
+    #define DeclareOps__(T__)\
+        BinaryOp__(T__, T__, +)\
+        BinaryOp__(T__, T__, -)\
+        BinaryOp__(T__, T__, *)\
+        BinaryOp__(T__, T__, /)\
+        BinaryOp__(T__, T__, %)\
+        BinaryOp__(T__, T__, &)\
+        BinaryOp__(T__, T__, |)\
+        BinaryOp__(bool, T__, <)\
+        BinaryOp__(bool, T__, >)\
+        BinaryOp__(bool, T__, <=)\
+        BinaryOp__(bool, T__, >=)\
+        BinaryOp__(bool, T__, ==)\
+        BinaryOp__(bool, T__, !=)
+
+    // These could be 8 bits, but then they would show up as chars in the debugger.
+    struct Row : public Int_t<int16_t> { Row() = default; Row(int i) : Int_t<int16_t>(i) {} };
+    struct Col : public Int_t<int16_t> { Col() = default; Col(int i) : Int_t<int16_t>(i) {} };
+
+    DeclareOps__(Row);
+    DeclareOps__(Col);
+
+    #undef UnaryOp__
+    #undef BinaryOp__
+    #undef DeclareOps__
+    
     using count_t = uint16_t;
 
     using gem_id_t = uint16_t;
@@ -19,7 +61,7 @@ namespace m3
 
     struct RowCol
     {
-        row_t Row;
-        col_t Column;
+        Row Row;
+        Col Column;
     };
 }

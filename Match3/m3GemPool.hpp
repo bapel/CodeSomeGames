@@ -53,6 +53,8 @@ namespace m3
         eastl::tuple<eastl::vector<Ts> ...> m_DataArrays;
 
     public:
+        GemPool1() : m_Board() {}
+
         template <class T>
         inline eastl::vector<T>& DataArray()
         { return eastl::get<eastl::vector<T>, eastl::vector<Ts> ...>(m_DataArrays); }
@@ -61,7 +63,7 @@ namespace m3
         inline const eastl::vector<T>& DataArray() const
         { return eastl::get<eastl::vector<T>, eastl::vector<Ts> ...>(m_DataArrays); }
 
-        IdIndex CreateGem(row_t r, col_t c, gem_color_t color)
+        IdIndex CreateGem(Row r, Col c, gem_color_t color)
         {
             auto id = m_GemIds.size();
             auto index = id;
@@ -79,8 +81,8 @@ namespace m3
         void ReleaseGem(Id id)
         {
             auto index = m_IdToIndex[id];
-            auto r = DataArray<row_t>()[index];
-            auto c = DataArray<col_t>()[index];
+            auto r = DataArray<Row>()[index];
+            auto c = DataArray<Col>()[index];
 
             eastl::swap(m_GemIds[index], m_GemIds[m_GemIds.size() - 1]);
             m_NumAliveGems--;

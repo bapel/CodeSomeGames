@@ -24,7 +24,7 @@ namespace Common {
     class Direct3D11
     {
     private:
-        SDL_Window* m_Window;
+        SDL_Window* m_Window = nullptr;
 
         ComPtr<ID3D11Device> m_Device;
         ComPtr<ID3D11Debug> m_Debug;

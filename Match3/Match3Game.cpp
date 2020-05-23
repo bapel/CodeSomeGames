@@ -63,7 +63,7 @@ private:
 
     // Game data.
     using Id = m3::gem_id_t;
-    using Index = size_t;
+    using Index = uint32_t;
     struct IdIndex { Id Id; Index Index; };
     using Board = m3::Board<Id, BoardRows, BoardCols>;
 
@@ -75,8 +75,8 @@ private:
     Board m_Board;
     eastl::hash_map<Id, Index> m_IdToIndex;
     eastl::vector<Id> m_GemIds;
-    eastl::vector<m3::row_t> m_GemRows;
-    eastl::vector<m3::col_t> m_GemCols;
+    eastl::vector<m3::Row> m_GemRows;
+    eastl::vector<m3::Col> m_GemCols;
     eastl::vector<m3::gem_color_t> m_GemColors;
 
     // Computed stuff.
@@ -84,9 +84,9 @@ private:
     eastl::vector<Vector2> m_GemScales;
 
     // Tweens.
-    eastl::vector<size_t> m_DespawnDstIndices;
+    eastl::vector<uint32_t> m_DespawnDstIndices;
     eastl::vector<Tween> m_DespawnTweens;
-    eastl::vector<size_t> m_FallDstIndices;
+    eastl::vector<uint32_t> m_FallDstIndices;
     eastl::vector<Tween> m_FallTweens;
 
 private:
@@ -101,6 +101,10 @@ private:
 
     void OnCreate() override final
     {
+        m3::Row r1, r2;
+
+        auto r = r1 <= r2;
+
         m_CameraConstantsBuffer = m_D3D11.CreateConstantsBuffer<CameraConstantsBuffer>();
         m_D3D11.SetDebugName(m_CameraConstantsBuffer.Get(), "CameraConstantsBuffer");
 
@@ -109,10 +113,10 @@ private:
         // Create and place random colored gems.
         for (auto i = 0; i < m_Board.Count(); i++)
         {
-            auto r = i / m_Board.Cols();
-            auto c = i % m_Board.Cols();
+            auto r = i / m_Board.Cols().m_I;
+            auto c = i % m_Board.Cols().m_I;
             auto id = m_GemPool.GetOrCreateGem();
-            auto index = m_GemRows.size();
+            auto index = (uint32_t)m_GemRows.size();
 
             m_Board(r, c) = id;
             m_IdToIndex.insert(id);
@@ -162,8 +166,8 @@ private:
         /*
         for (auto i = 0; i < m_Board.Count(); i++)
         {
-            m3::row_t r = i / m_Board.Cols();
-            m3::col_t c = i % m_Board.Cols();
+            m3::Row r = i / m_Board.Cols();
+            m3::Col c = i % m_Board.Cols();
             auto color = m_Board(c, r);
 
             auto rl = m3::RowSpan { r, c, m3::GetMatchingColsInRow_L(r, c, color, m_Board) };
@@ -185,15 +189,16 @@ private:
         */
     }
 
+    // @Todo: float instead of double is okay?
     void OnUpdate(double dtSeconds) override final
     {
         using namespace m3;
 
         auto rows = m_Board.Rows();
         auto cols = m_Board.Cols();
-        auto origin = -0.5f * SpriteSize * Vector2((float)cols - 1, (float)rows - 1);
+        auto origin = -0.5f * SpriteSize * Vector2((float)cols.m_I - 1, (float)rows.m_I - 1);
 
-        UpdateDespawnTweens(dtSeconds);
+        UpdateDespawnTweens((float)dtSeconds);
 
         if (m_DespawnTweens.size() == 0 
          && m_DespawnDstIndices.size() > 0)
@@ -203,7 +208,7 @@ private:
             DestroyGemsAndCreateFalls();
         }
 
-        UpdateFallTweens(dtSeconds);
+        UpdateFallTweens((float)dtSeconds);
     }
 
     // @Todo. Get width and height from Direct3D11?
@@ -230,7 +235,7 @@ private:
         auto cols = m_Board.Cols();
 
         m_BoardView.BeginRender();
-        m_BoardView.RenderBackground(rows, cols, SpriteSize);
+        m_BoardView.RenderBackground(rows.m_I, cols.m_I, SpriteSize);
         m_BoardView.RenderGems(m_GemPositions.data(), m_GemScales.data(), m_GemColors.data(), m_GemPositions.size());
         m_BoardView.EndRender();
 
@@ -248,11 +253,11 @@ private:
         return m3::GemColors[m_ColorDistribution(m_RandGenerator)];
     }
 
-    inline Vector2 Position(m3::row_t r, m3::col_t c, float spriteSize)
+    inline Vector2 Position(m3::Row r, m3::Col c, float spriteSize)
     {
         const auto cr = Vector2((float)BoardCols - 1, (float)BoardRows - 1);
         const auto origin = -0.5f * spriteSize * cr;
-        return origin + spriteSize * Vector2((float)c, (float)r);
+        return origin + spriteSize * Vector2((float)c.m_I, (float)r.m_I);
     }
 
     inline float GemY(float ny, float spriteSize)
@@ -262,7 +267,7 @@ private:
         return origin + spriteSize * ny;
     }
 
-    void DespawnGem(m3::row_t r, m3::col_t c)
+    void DespawnGem(m3::Row r, m3::Col c)
     {
         auto id = m_Board(r, c);
         auto idx = m_IdToIndex[id];
@@ -278,7 +283,7 @@ private:
         m_DespawnTweens.push_back(despawnTween);
     }
 
-    void UpdateDespawnTweens(double dtSeconds)
+    void UpdateDespawnTweens(float dtSeconds)
     {
         eastl::vector<size_t> despawnIndicesToRemove = {};
 
@@ -289,7 +294,7 @@ private:
             auto scale = m_DespawnTweens[i].Evaluate() * SpriteSize;
 
             m_GemScales[dst] = { scale, scale };
-            m_DespawnTweens[i].ElapsedMs += dtSeconds * 1000.0;
+            m_DespawnTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
             if (m_DespawnTweens[i].Completed())
                 despawnIndicesToRemove.push_back(i);
@@ -336,9 +341,9 @@ private:
             m_FallDstIndices[i] = m_IdToIndex[m_FallDstIndices[i]];
     }
 
-    void UpdateFallTweens(double dtSeconds)
+    void UpdateFallTweens(float dtSeconds)
     {
-        eastl::vector<size_t> fallIndicesToRemove = {};
+        eastl::vector<uint32_t> fallIndicesToRemove = {};
 
         // Run fall tweens and update gem position.
         for (auto i = 0; i < m_FallTweens.size(); i++)
@@ -347,7 +352,7 @@ private:
             auto y = m_FallTweens[i].Evaluate();
 
             m_GemPositions[dst].y = GemY(y, SpriteSize);
-            m_FallTweens[i].ElapsedMs += dtSeconds * 1000.0;
+            m_FallTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
             if (m_FallTweens[i].Completed())
                 fallIndicesToRemove.push_back(i);
@@ -390,17 +395,17 @@ private:
         m_GemScales.erase_unsorted(m_GemScales.begin() + index);
     }
 
-    void MakeGemsFall(m3::row_t r0, m3::row_t rDst, m3::col_t c)
+    void MakeGemsFall(m3::Row r0, m3::Row rDst, m3::Col c)
     {
-        for (auto r = r0; r < m_Board.Rows(); r++)
+        for (auto r = r0; r < m_Board.Rows(); r = r + 1)
         {
             auto id = m_Board(r, c);
             auto index = m_IdToIndex[id];
 
             Tween fall = {};
 
-            fall.Value_0 = r;
-            fall.Value_1 = rDst;
+            fall.Value_0 = r.m_I;
+            fall.Value_1 = rDst.m_I;
             fall.DurationMs = 500;
 
             m_Board(rDst, c) = m_Board(r, c);
@@ -411,12 +416,13 @@ private:
             m_FallDstIndices.push_back(id);
             m_FallTweens.push_back(fall);
 
-            rDst++;
+            rDst = rDst + 1;
         }
     }
 
 public:
     Match3Game() :
+        m_Board(),
         m_RandGenerator(0),
         m_ColorDistribution(1, sizeof(m3::GemColors) - 1)
     {}
