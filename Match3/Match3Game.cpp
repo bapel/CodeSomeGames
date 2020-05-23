@@ -106,7 +106,7 @@ private:
 
         m_BoardView.Init(m_D3D11, m_ShadersPath);
 
-        // Create and place random gems.
+        // Create and place random colored gems.
         for (auto i = 0; i < m_Board.Count(); i++)
         {
             auto r = i / m_Board.Cols();
@@ -129,7 +129,7 @@ private:
         // Init position and scale of all gems.
         for (auto i = 0; i < m_GemPositions.size(); i++)
         {
-            auto r = m_GemRows[i];
+            auto r = m_GemRows[i]; 
             auto c = m_GemCols[i];
             auto position = Position(r, c, SpriteSize);
             auto scale = SpriteSize;
@@ -140,21 +140,9 @@ private:
 
         // destroy a few gems.
         {
-            Tween sa0 = { 0.0f, 1.0f, 0.0f, 200, 200 };
-            Tween sa1 = { 0.0f, 1.0f, 0.0f, 400, 200 };
-            Tween sa2 = { 0.0f, 1.0f, 0.0f, 600, 200 };
-
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 2)]);
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 3)]);
-            m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(3, 4)]);
-
-            //m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(0, 2)]);
-            //m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(1, 2)]);
-            //m_DespawnDstIndices.push_back(m_IdToIndex[m_Board(2, 2)]);
-
-            m_DespawnTweens.push_back(sa0);
-            m_DespawnTweens.push_back(sa1);
-            m_DespawnTweens.push_back(sa2);
+            DespawnGem(3, 2);
+            DespawnGem(3, 3);
+            DespawnGem(3, 4);
         }
 
         /*
@@ -272,6 +260,22 @@ private:
         const auto cr = (float)BoardRows - 1;
         const auto origin = -0.5f * spriteSize * cr;
         return origin + spriteSize * ny;
+    }
+
+    void DespawnGem(m3::row_t r, m3::col_t c)
+    {
+        auto id = m_Board(r, c);
+        auto idx = m_IdToIndex[id];
+        
+        Tween despawnTween = {};
+
+        despawnTween.Value_0 = 1.0f;
+        despawnTween.Value_1 = 0.0f;
+        despawnTween.DelayMs = 200;
+        despawnTween.ElapsedMs = 200;
+
+        m_DespawnDstIndices.push_back(idx);
+        m_DespawnTweens.push_back(despawnTween);
     }
 
     void UpdateDespawnTweens(double dtSeconds)
