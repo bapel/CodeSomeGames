@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="m3::GemId">
+        <DisplayString>{{ I={m_I} }}</DisplayString>
+    </Type>
+    <Type Name="m3::GemColor">
+        <DisplayString>{{ I={m_I} }}</DisplayString>
+    </Type>
     <Type Name="m3::Row">
         <DisplayString>{{ I={m_I} }}</DisplayString>
     </Type>
