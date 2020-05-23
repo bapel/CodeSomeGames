@@ -67,4 +67,7 @@
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="m3Types.natvis" />
+  </ItemGroup>
 </Project>

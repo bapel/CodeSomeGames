@@ -11,6 +11,7 @@
 #include <EASTL\vector.h>
 #include <EASTL\hash_map.h>
 #include <EASTL\algorithm.h>
+#include <EASTL\hash_set.h>
 
 #include <random>
 
@@ -66,6 +67,7 @@ private:
     using Index = uint32_t;
     struct IdIndex { Id Id; Index Index; };
     using Board = m3::Board<Id, BoardRows, BoardCols>;
+    using BoardColors = m3::Board<m3::gem_color_t, BoardRows, BoardCols>;
 
     std::mt19937 m_RandGenerator;
     std::uniform_int_distribution<uint16_t> m_ColorDistribution;
@@ -88,6 +90,10 @@ private:
     eastl::vector<Tween> m_DespawnTweens;
     eastl::vector<uint32_t> m_FallDstIndices;
     eastl::vector<Tween> m_FallTweens;
+
+    // Temp buffers.
+    eastl::vector<uint32_t> m_DespawnIndicesToRemove;
+    eastl::vector<uint32_t> m_FallIndicesToRemove;
 
 private:
     std::tuple<int, int> GetDesiredWindowSize() override final
@@ -156,69 +162,100 @@ private:
                 +------+------+------+
             0,0                       
         */
+        /*
+        eastl::hash_set<Id> idsToRemove;
+
         for (auto i = 0; i < m_Board.Count(); i++)
         {
             m3::Row r = i / m_Board.Cols().m_I;
             m3::Col c = i % m_Board.Cols().m_I;
-            auto color = m_Board(r, c);
+
+            auto colors = [this](m3::Row r, m3::Col c) { return this->GetColor(r, c); };
+            auto color = colors(r, c);
             if (color == m3::InvalidColor)
                 continue;
 
-            //auto rl = m3::RowSpan { r, c, m3::GetMatchingColsInRow_L(r, c, color, GetColor) };
-            //auto rr = m3::RowSpan { r, m3::GetMatchingColsInRow_R(r, c, color, GetColor), c };
-            //auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, GetColor) };
-            //auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, GetColor), r };
+            auto rl = m3::RowSpan { r, m3::GetMatchingColsInRow_L(r, c, color, colors), c };
+            auto rr = m3::RowSpan { r, c, m3::GetMatchingColsInRow_R(r, c, color, colors, BoardRows - 1) };
+            auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, colors, BoardCols - 1) };
+            auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, colors), r };
 
-            //if (rl.Count() >= 3)
-            //{
-            //    for (auto i = 0; i < rl.Count(); i++)
-            //    {
-            //        auto r_ = r;
-            //        auto c_ = rl[i];
-            //        auto id = m_Board(r_, c_);
-            //        RemoveGemById(id);
-            //    }
-            //}
+            const auto n = 3;
 
-            //if (rr.Count() >= 3)
-            //{
-            //    for (auto i = 0; i < rr.Count(); i++)
-            //    {
-            //        auto r_ = r;
-            //        auto c_ = rr[i];
-            //        auto id = m_Board(r_, c_);
-            //        RemoveGemById(id);
-            //    }
-            //}
+            if (rl.Count() >= n)
+            {
+                for (auto i = 0; i < rl.Count(); i++)
+                {
+                    auto r_ = r;
+                    auto c_ = rl[i];
+                    auto id = m_Board(r_, c_);
+                    //RemoveGemById(id);
+                    idsToRemove.insert(id);
+                }
+            }
 
-            //if (cu.Count() >= 3)
-            //{
-            //    for (auto i = 0; i < cu.Count(); i++)
-            //    {
-            //        auto r_ = cu[i];
-            //        auto c_ = c;
-            //        auto id = m_Board(r_, c_);
-            //        RemoveGemById(id);
-            //    }
-            //}
+            if (rr.Count() >= n)
+            {
+                for (auto i = 0; i < rr.Count(); i++)
+                {
+                    auto r_ = r;
+                    auto c_ = rr[i];
+                    auto id = m_Board(r_, c_);
+                    //RemoveGemById(id);
+                    idsToRemove.insert(id);
+                }
+            }
 
-            //if (cd.Count() >= 3)
-            //{
-            //    for (auto i = 0; i < cd.Count(); i++)
-            //    {
-            //        auto r_ = cd[i];
-            //        auto c_ = c;
-            //        auto id = m_Board(r_, c_);
-            //        RemoveGemById(id);
-            //    }
-            //}
+            if (cu.Count() >= n)
+            {
+                for (auto i = 0; i < cu.Count(); i++)
+                {
+                    auto r_ = cu[i];
+                    auto c_ = c;
+                    auto id = m_Board(r_, c_);
+                    //RemoveGemById(id);
+                    idsToRemove.insert(id);
+                }
+            }
+
+            if (cd.Count() >= n)
+            {
+                for (auto i = 0; i < cd.Count(); i++)
+                {
+                    auto r_ = cd[i];
+                    auto c_ = c;
+                    auto id = m_Board(r_, c_);
+                    //RemoveGemById(id);
+                    idsToRemove.insert(id);
+                }
+            }
         }
+
+        if (idsToRemove.size() > 0)
+        {
+            for (auto iter = idsToRemove.begin(); iter != idsToRemove.end(); iter++)
+                RemoveGemById(*iter);
+        }
+         */
 
         // @Todo: Remove test. 
         // Despawn a few gems.
         //DespawnGem(3, 2);
         //DespawnGem(3, 3);
         //DespawnGem(3, 4);
+        //DespawnGem(1, 1);
+        //DespawnGem(1, 2);
+        //DespawnGem(1, 3);
+        //DespawnGem(1, 2);
+        //DespawnGem(2, 2);
+        //DespawnGem(3, 2);
+    }
+
+    m3::gem_color_t GetColor(m3::Row r, m3::Col c)
+    {
+        auto id = m_Board(r, c);
+        auto index = m_IdToIndex.at(id);
+        return m_GemColors[index];
     }
 
     // @Todo: float instead of double is okay?
@@ -231,15 +268,6 @@ private:
         auto origin = -0.5f * SpriteSize * Vector2((float)cols.m_I - 1, (float)rows.m_I - 1);
 
         UpdateDespawnTweens((float)dtSeconds);
-
-        if (m_DespawnTweens.size() == 0 
-         && m_DespawnDstIndices.size() > 0)
-        {
-            // When all despawn animations are completed. 
-            // Destroy gems and make gems above them fall.
-            DestroyGemsAndCreateFalls();
-        }
-
         UpdateFallTweens((float)dtSeconds);
     }
 
@@ -309,7 +337,7 @@ private:
         despawnTween.Value_0 = 1.0f;
         despawnTween.Value_1 = 0.0f;
         despawnTween.DelayMs = 200;
-        despawnTween.ElapsedMs = 200;
+        despawnTween.DurationMs = 200;
 
         m_DespawnDstIndices.push_back(idx);
         m_DespawnTweens.push_back(despawnTween);
@@ -317,7 +345,7 @@ private:
 
     void UpdateDespawnTweens(float dtSeconds)
     {
-        eastl::vector<size_t> despawnIndicesToRemove = {};
+        m_DespawnIndicesToRemove.clear();
 
         // Run scale animations and update gem scale.
         for (auto i = 0; i < m_DespawnTweens.size(); i++)
@@ -329,16 +357,16 @@ private:
             m_DespawnTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
             if (m_DespawnTweens[i].Completed())
-                despawnIndicesToRemove.push_back(i);
+                m_DespawnIndicesToRemove.push_back(i);
         }
 
         // Erase completed despawn tweens.
         // @Todo. Optimize? This is a small enough array and probably okay.
         {
             auto numErased = 0;
-            for (auto i = 0; i < despawnIndicesToRemove.size(); i++)
+            for (auto i = 0; i < m_DespawnIndicesToRemove.size(); i++)
             {
-                auto indexToRemove = despawnIndicesToRemove[i] - numErased;
+                auto indexToRemove = m_DespawnIndicesToRemove[i] - numErased;
                 m_DespawnTweens.erase(m_DespawnTweens.begin() + indexToRemove);
                 auto dstIndex = m_DespawnDstIndices[indexToRemove];
                 m_DespawnDstIndices.erase(m_DespawnDstIndices.begin() + indexToRemove);
@@ -346,36 +374,61 @@ private:
                 numErased++;
             }
         }
-    }
 
-    void DestroyGemsAndCreateFalls()
-    {
-        // Convert indices to ids.
-        auto& despawnIds = m_DespawnDstIndices;
-        for (auto i = 0; i < m_DespawnDstIndices.size(); i++)
-            m_DespawnDstIndices[i] = m_GemIds[m_DespawnDstIndices[i]];
-
-        for (auto i = 0; i < despawnIds.size(); i++)
+        if (m_DespawnTweens.size() == 0 && 
+            m_DespawnDstIndices.size() > 0)
         {
-            auto id = despawnIds[i];
-            auto idx = m_IdToIndex[id];
-            auto r = m_GemRows[idx];
-            auto c = m_GemCols[idx];
+            // These are just for readability, and we want to avoid copying.
+            auto& despawnIds = m_DespawnDstIndices;
 
-            RemoveGemById(id);
-            MakeGemsFall(r + 1, r, c);
+            // Convert indices to ids.
+            for (auto i = 0; i < despawnIds.size(); i++)
+                despawnIds[i] = m_GemIds[m_DespawnDstIndices[i]];
+
+            // Destroy despawned gems.
+            // Also create a RowSpan above which gems will fall.
+            m3::RowSpan fallSpan;
+            {
+                auto id = despawnIds[0];
+                auto idx = m_IdToIndex[id];
+                auto r = m_GemRows[idx];
+                auto c = m_GemCols[idx];
+                fallSpan = { r, c, c };
+
+                RemoveGemById(id);
+
+                for (auto i = 1; i < despawnIds.size(); i++)
+                {
+                    id = despawnIds[i];
+                    idx = m_IdToIndex[id];
+                    r = m_GemRows[idx];
+                    c = m_GemCols[idx];
+
+                    fallSpan = 
+                    {
+                        eastl::min(fallSpan.Row(), r),
+                        eastl::min(fallSpan.Col_0(), c),
+                        eastl::max(fallSpan.Col_1(), c)
+                    };
+
+                    RemoveGemById(id);
+                }
+            }
+
+            for (auto i = 0; i < fallSpan.Count(); i++)
+            {
+                auto r = fallSpan.Row();
+                auto c = fallSpan[i];
+                MakeGemsFall(r, c);
+            }
+
+            m_DespawnDstIndices.clear();
         }
-
-        m_DespawnDstIndices.clear();
-
-        // Convert ids to indices.
-        for (auto i = 0; i < m_FallDstIndices.size(); i++)
-            m_FallDstIndices[i] = m_IdToIndex[m_FallDstIndices[i]];
     }
 
     void UpdateFallTweens(float dtSeconds)
     {
-        eastl::vector<uint32_t> fallIndicesToRemove = {};
+        m_FallIndicesToRemove.clear();
 
         // Run fall tweens and update gem position.
         for (auto i = 0; i < m_FallTweens.size(); i++)
@@ -387,16 +440,16 @@ private:
             m_FallTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
             if (m_FallTweens[i].Completed())
-                fallIndicesToRemove.push_back(i);
+                m_FallIndicesToRemove.push_back(i);
         }
 
         // Erase completed despawn tweens.
         // @Todo. Optimize? This is a small enough array and probably okay.
         {
             auto numErased = 0;
-            for (auto i = 0; i < fallIndicesToRemove.size(); i++)
+            for (auto i = 0; i < m_FallIndicesToRemove.size(); i++)
             {
-                auto indexToRemove = fallIndicesToRemove[i] - numErased;
+                auto indexToRemove = m_FallIndicesToRemove[i] - numErased;
                 m_FallTweens.erase(m_FallTweens.begin() + indexToRemove);
                 auto dstIndex = m_FallDstIndices[indexToRemove];
                 m_FallDstIndices.erase(m_FallDstIndices.begin() + indexToRemove);
@@ -427,26 +480,46 @@ private:
         m_GemScales.erase_unsorted(m_GemScales.begin() + index);
     }
 
-    void MakeGemsFall(m3::Row r0, m3::Row rDst, m3::Col c)
+    void MakeGemsFall(m3::Row r, m3::Col c)
     {
-        for (auto r = r0; r < m_Board.Rows(); r = r + 1)
+        // Skip to a hole.
+        while (m_Board(r, c) != m3::InvalidGemId)
+            r = r + 1;
+
+        auto rDst = r;
+        for (r = r + 1; r < m_Board.Rows(); r = r + 1)
         {
             auto id = m_Board(r, c);
             auto index = m_IdToIndex[id];
 
-            Tween fall = {};
-
-            fall.Value_0 = r.m_I;
-            fall.Value_1 = rDst.m_I;
-            fall.DurationMs = 500;
+            if (id == m3::InvalidGemId)
+                continue;
+            else if (m_Board(rDst, c) != m3::InvalidGemId)
+                continue;
 
             m_Board(rDst, c) = m_Board(r, c);
             m_Board(r, c) = m3::InvalidGemId;
-
             m_GemRows[index] = rDst;
 
-            m_FallDstIndices.push_back(id);
-            m_FallTweens.push_back(fall);
+            if (m_FallDstIndices.size() > 0 &&
+                *m_FallDstIndices.end() == index)
+            {
+                auto& fall = *m_FallTweens.end();
+
+                fall.Value_1 = rDst.m_I;
+                fall.DurationMs *= 2.0f;
+            }
+            else
+            {
+                Tween fall = {};
+
+                fall.Value_0 = r.m_I;
+                fall.Value_1 = rDst.m_I;
+                fall.DurationMs = 500;
+
+                m_FallDstIndices.push_back(index);
+                m_FallTweens.push_back(fall);
+            }
 
             rDst = rDst + 1;
         }

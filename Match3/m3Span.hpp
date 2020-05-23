@@ -24,7 +24,7 @@ namespace m3
 
         inline U operator[] (U s) const 
         {
-            assert(Contains(s));
+            assert(Contains(m_0 + s));
             return m_0 + s;
         }
 
