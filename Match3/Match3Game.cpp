@@ -162,6 +162,9 @@ private:
     m3::GemColor GetColor(m3::Row r, m3::Col c)
     {
         auto id = m_Board(r, c);
+        if (id == m3::InvalidGemId)
+            return m3::InvalidColor;
+
         auto index = m_IdToIndex.at(id);
         return m_GemColors[index];
     }
@@ -172,6 +175,15 @@ private:
         dtSeconds = eastl::clamp(dtSeconds, 0.0, 1.0 / 60.0);
         UpdateDespawnTweens((float)dtSeconds);
         UpdateFallTweens((float)dtSeconds);
+
+        // If no tweens are in progress, we look for more matches on the whole board.
+        if (m_DespawnTweens.size() == 0 &&
+            m_DespawnDstIndices.size() == 0 &&
+            m_FallTweens.size() == 0 && 
+            m_FallDstIndices.size() == 0)
+        {
+            FindAndClearFromWholeBoard();
+        }
     }
 
     // @Todo. Get width and height from Direct3D11?
@@ -455,10 +467,10 @@ private:
             }
         }
 
-        if (m_DespawnTweens.size() == 0 && 
-            m_DespawnDstIndices.size() > 0)
+        if (m_FallTweens.size() == 0 && 
+            m_FallDstIndices.size() > 0)
         {
-            
+            m_FallDstIndices.clear();
         }
     }
 
@@ -485,45 +497,30 @@ private:
 
     void MakeGemsFall(m3::Row r, m3::Col c)
     {
-        // Skip to a hole.
-        while (m_Board(r, c) != m3::InvalidGemId)
-            r = r + 1;
-
-        auto rDst = r;
-        for (r = r + 1; r < m_Board.Rows(); r = r + 1)
+        auto dr = 0;
+        for (; r < m_Board.Rows(); r = r + 1)
         {
             auto id = m_Board(r, c);
-            auto index = m_IdToIndex[id];
-
-            // Skip if we a hole is going to fall.
+            
             if (id == m3::InvalidGemId)
-                continue;
-
-            m_Board(rDst, c) = m_Board(r, c);
-            m_Board(r, c) = m3::InvalidGemId;
-            m_GemRows[index] = rDst;
-
-            if (m_FallDstIndices.size() > 0 &&
-                *m_FallDstIndices.end() == index)
+                dr++;
+            else if (dr > 0)
             {
-                auto& fall = *m_FallTweens.end();
+                auto index = m_IdToIndex[id];
 
-                fall.Value_1 = rDst.m_I;
-                fall.DurationMs *= 2.0f;
-            }
-            else
-            {
+                m_Board(r - dr, c) = m_Board(r, c);
+                m_Board(r, c) = m3::InvalidGemId;
+                m_GemRows[index] = r - dr;
+
                 Tween fall = {};
 
                 fall.Value_0 = r.m_I;
-                fall.Value_1 = rDst.m_I;
-                fall.DurationMs = 500;
+                fall.Value_1 = (r - dr).m_I;
+                fall.DurationMs = dr * 500;
 
                 m_FallDstIndices.push_back(index);
                 m_FallTweens.push_back(fall);
             }
-
-            rDst = rDst + 1;
         }
     }
 

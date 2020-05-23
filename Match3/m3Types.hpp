@@ -75,7 +75,7 @@ namespace m3
 // Constants, invalid values and pre-defined colors.
 namespace m3
 {
-    const GemId InvalidGemId = 0xFF;//eastl::numeric_limits<uint16_t>::max();
+    const GemId InvalidGemId = 0xFFFFFFFF;//eastl::numeric_limits<uint16_t>::max();
 
     const GemColor InvalidColor = ' ';
     const GemColor Blue = GemColor('B');

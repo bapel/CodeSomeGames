@@ -1,8 +1,9 @@
 #pragma once
 
+#include <EASTL\vector.h>
+
 #include <WICTextureLoader.h>
 #include "SpriteRenderer.hpp"
-
 #include "m3Board.hpp"
 
 namespace m3
