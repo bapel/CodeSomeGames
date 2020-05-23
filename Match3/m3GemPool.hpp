@@ -9,14 +9,17 @@ namespace m3
     class GemPool
     {
     private:
-        eastl::queue<gem_id_t> m_GemPool;
-        gem_id_t m_MaxGemId = 0;
+        eastl::queue<GemId> m_GemPool;
+        GemId m_MaxGemId = 0;
 
     public:
-        gem_id_t GetOrCreateGem()
+        GemId GetOrCreateGem()
         {
             if (m_GemPool.size() == 0)
-                return m_MaxGemId++;
+            {
+                m_MaxGemId.m_I++;
+                return m_MaxGemId;
+            }
 
             auto id = m_GemPool.front();
             m_GemPool.pop();
@@ -24,7 +27,7 @@ namespace m3
             return id;
         }
 
-        void ReleaseGem(gem_id_t id)
+        void ReleaseGem(GemId id)
         {
             m_GemPool.push(id);
         }
@@ -40,7 +43,7 @@ namespace m3
     class GemPool1
     {
     private:
-        using Id = m3::gem_id_t;
+        using Id = m3::GemId;
         using Index = size_t;
         struct IdIndex { Id Id; Index Index; };
         using Board = m3::Board<Id, R, C>;
@@ -63,7 +66,7 @@ namespace m3
         inline const eastl::vector<T>& DataArray() const
         { return eastl::get<eastl::vector<T>, eastl::vector<Ts> ...>(m_DataArrays); }
 
-        IdIndex CreateGem(Row r, Col c, gem_color_t color)
+        IdIndex CreateGem(Row r, Col c, GemColor color)
         {
             auto id = m_GemIds.size();
             auto index = id;

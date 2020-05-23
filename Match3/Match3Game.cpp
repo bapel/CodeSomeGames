@@ -25,8 +25,8 @@ void* __cdecl operator new[](size_t size, size_t align, size_t offset, const cha
     return new uint8_t[size];
 }
 
-static const auto BoardRows = 6;
-static const auto BoardCols = 6;
+static const auto BoardRows = 12;
+static const auto BoardCols = 8;
 static const auto SpriteSize = 64.0f;
 
 struct CameraConstantsBuffer
@@ -63,23 +63,19 @@ private:
     m3::BoardView m_BoardView;
 
     // Game data.
-    using Id = m3::gem_id_t;
-    using Index = uint32_t;
-    struct IdIndex { Id Id; Index Index; };
-    using Board = m3::Board<Id, BoardRows, BoardCols>;
-    using BoardColors = m3::Board<m3::gem_color_t, BoardRows, BoardCols>;
-
     std::mt19937 m_RandGenerator;
     std::uniform_int_distribution<uint16_t> m_ColorDistribution;
     m3::GemPool m_GemPool;
 
     // Board data.
+    using Board = m3::Board<m3::GemId, BoardRows, BoardCols>;
+
     Board m_Board;
-    eastl::hash_map<Id, Index> m_IdToIndex;
-    eastl::vector<Id> m_GemIds;
+    eastl::hash_map<m3::GemId, uint32_t> m_IdToIndex;
+    eastl::vector<m3::GemId> m_GemIds;
     eastl::vector<m3::Row> m_GemRows;
     eastl::vector<m3::Col> m_GemCols;
-    eastl::vector<m3::gem_color_t> m_GemColors;
+    eastl::vector<m3::GemColor> m_GemColors;
 
     // Computed stuff.
     eastl::vector<Vector2> m_GemPositions;
@@ -148,110 +144,22 @@ private:
             m_GemScales[i] = { scale, scale };
         }
 
-        /*
-                         c           
-                +------+------+------+
-                |      | cu   |      |
-                |      |      |      |
-                +------+------+------+
-              r | rl   |      | rr   |
-                |      |      |      |
-                +------+------+------+
-                |      | cd   |      |
-                |      |      |      |
-                +------+------+------+
-            0,0                       
-        */
-        /*
-        eastl::hash_set<Id> idsToRemove;
+        FindAndClearFromWholeBoard();
 
-        for (auto i = 0; i < m_Board.Count(); i++)
-        {
-            m3::Row r = i / m_Board.Cols().m_I;
-            m3::Col c = i % m_Board.Cols().m_I;
-
-            auto colors = [this](m3::Row r, m3::Col c) { return this->GetColor(r, c); };
-            auto color = colors(r, c);
-            if (color == m3::InvalidColor)
-                continue;
-
-            auto rl = m3::RowSpan { r, m3::GetMatchingColsInRow_L(r, c, color, colors), c };
-            auto rr = m3::RowSpan { r, c, m3::GetMatchingColsInRow_R(r, c, color, colors, BoardRows - 1) };
-            auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, colors, BoardCols - 1) };
-            auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, colors), r };
-
-            const auto n = 3;
-
-            if (rl.Count() >= n)
-            {
-                for (auto i = 0; i < rl.Count(); i++)
-                {
-                    auto r_ = r;
-                    auto c_ = rl[i];
-                    auto id = m_Board(r_, c_);
-                    //RemoveGemById(id);
-                    idsToRemove.insert(id);
-                }
-            }
-
-            if (rr.Count() >= n)
-            {
-                for (auto i = 0; i < rr.Count(); i++)
-                {
-                    auto r_ = r;
-                    auto c_ = rr[i];
-                    auto id = m_Board(r_, c_);
-                    //RemoveGemById(id);
-                    idsToRemove.insert(id);
-                }
-            }
-
-            if (cu.Count() >= n)
-            {
-                for (auto i = 0; i < cu.Count(); i++)
-                {
-                    auto r_ = cu[i];
-                    auto c_ = c;
-                    auto id = m_Board(r_, c_);
-                    //RemoveGemById(id);
-                    idsToRemove.insert(id);
-                }
-            }
-
-            if (cd.Count() >= n)
-            {
-                for (auto i = 0; i < cd.Count(); i++)
-                {
-                    auto r_ = cd[i];
-                    auto c_ = c;
-                    auto id = m_Board(r_, c_);
-                    //RemoveGemById(id);
-                    idsToRemove.insert(id);
-                }
-            }
-        }
-
-        if (idsToRemove.size() > 0)
-        {
-            for (auto iter = idsToRemove.begin(); iter != idsToRemove.end(); iter++)
-                RemoveGemById(*iter);
-        }
-         */
-
-        // @Todo: Remove test. 
-        // Despawn a few gems.
+         // @Todo: Remove test. 
+         // Despawn a few gems.
         //DespawnGem(3, 2);
         //DespawnGem(3, 3);
         //DespawnGem(3, 4);
-        //DespawnGem(1, 1);
-        //DespawnGem(1, 2);
-        //DespawnGem(1, 3);
+        //DespawnGem(2, 1);
+        //DespawnGem(2, 2);
+        //DespawnGem(2, 3);
         //DespawnGem(1, 2);
         //DespawnGem(2, 2);
         //DespawnGem(3, 2);
     }
 
-    m3::gem_color_t GetColor(m3::Row r, m3::Col c)
+    m3::GemColor GetColor(m3::Row r, m3::Col c)
     {
         auto id = m_Board(r, c);
         auto index = m_IdToIndex.at(id);
@@ -261,12 +169,7 @@ private:
     // @Todo: float instead of double is okay?
     void OnUpdate(double dtSeconds) override final
     {
-        using namespace m3;
-
-        auto rows = m_Board.Rows();
-        auto cols = m_Board.Cols();
-        auto origin = -0.5f * SpriteSize * Vector2((float)cols.m_I - 1, (float)rows.m_I - 1);
-
+        dtSeconds = eastl::clamp(dtSeconds, 0.0, 1.0 / 60.0);
         UpdateDespawnTweens((float)dtSeconds);
         UpdateFallTweens((float)dtSeconds);
     }
@@ -296,7 +199,7 @@ private:
 
         m_BoardView.BeginRender();
         m_BoardView.RenderBackground(rows.m_I, cols.m_I, SpriteSize);
-        m_BoardView.RenderGems(m_GemPositions.data(), m_GemScales.data(), m_GemColors.data(), m_GemPositions.size());
+        m_BoardView.RenderGems(m_GemPositions, m_GemScales, m_GemColors);
         m_BoardView.EndRender();
 
         m_D3D11.EndFrame();
@@ -308,7 +211,7 @@ private:
 
     // Internal functions.
 private: 
-    inline m3::gem_color_t RandomGemColor()
+    inline m3::GemColor RandomGemColor()
     {
         return m3::GemColors[m_ColorDistribution(m_RandGenerator)];
     }
@@ -325,6 +228,100 @@ private:
         const auto cr = (float)BoardRows - 1;
         const auto origin = -0.5f * spriteSize * cr;
         return origin + spriteSize * ny;
+    }
+
+    void FindAndClearFromWholeBoard()
+    {
+        /*
+                         c           
+                +------+------+------+
+                |      | cu   |      |
+                |      |      |      |
+                +------+------+------+
+              r | rl   |      | rr   |
+                |      |      |      |
+                +------+------+------+
+                |      | cd   |      |
+                |      |      |      |
+                +------+------+------+
+            0,0                       
+        */
+        eastl::hash_set<m3::GemId> idsToRemove;
+
+        for (auto i = 0; i < m_Board.Count(); i++)
+        {
+            m3::Row r = i / m_Board.Cols().m_I;
+            m3::Col c = i % m_Board.Cols().m_I;
+
+            auto colors = [this](m3::Row r, m3::Col c) { return this->GetColor(r, c); };
+            auto color = colors(r, c);
+            if (color == m3::InvalidColor)
+                continue;
+
+            auto rl = m3::RowSpan { r, m3::GetMatchingColsInRow_L(r, c, color, colors), c };
+            auto rr = m3::RowSpan { r, c, m3::GetMatchingColsInRow_R(r, c, color, colors, m_Board.Cols() - 1) };
+            auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, colors, m_Board.Rows() - 1) };
+            auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, colors), r };
+
+            const auto n = 3;
+
+            if (rl.Count() >= n)
+            {
+                for (auto i = 0; i < rl.Count(); i++)
+                {
+                    auto r = rl.Row();
+                    auto c = rl[i];
+                    auto id = m_Board(r, c);
+                    idsToRemove.insert(id);
+                }
+            }
+
+            if (rr.Count() >= n)
+            {
+                for (auto i = 0; i < rr.Count(); i++)
+                {
+                    auto r = rr.Row();
+                    auto c = rr[i];
+                    auto id = m_Board(r, c);
+                    idsToRemove.insert(id);
+                }
+            }
+
+            if (cu.Count() >= n)
+            {
+                for (auto i = 0; i < cu.Count(); i++)
+                {
+                    auto r = cu[i];
+                    auto c = cu.Col();
+                    auto id = m_Board(r, c);
+                    idsToRemove.insert(id);
+                }
+            }
+
+            if (cd.Count() >= n)
+            {
+                for (auto i = 0; i < cd.Count(); i++)
+                {
+                    auto r = cd[i];
+                    auto c = cu.Col();
+                    auto id = m_Board(r, c);
+                    idsToRemove.insert(id);
+                }
+            }
+        }
+
+        if (idsToRemove.size() > 0)
+        {
+            for (auto iter = idsToRemove.begin(); iter != idsToRemove.end(); iter++)
+            {
+                auto id = *iter;
+                auto idx = m_IdToIndex[id];
+                auto r = m_GemRows[idx];
+                auto c = m_GemCols[idx];
+
+                DespawnGem(r, c);
+            }
+        }
     }
 
     void DespawnGem(m3::Row r, m3::Col c)
@@ -383,7 +380,7 @@ private:
 
             // Convert indices to ids.
             for (auto i = 0; i < despawnIds.size(); i++)
-                despawnIds[i] = m_GemIds[m_DespawnDstIndices[i]];
+                despawnIds[i] = m_GemIds[m_DespawnDstIndices[i]].m_I;
 
             // Destroy despawned gems.
             // Also create a RowSpan above which gems will fall.
@@ -457,9 +454,15 @@ private:
                 numErased++;
             }
         }
+
+        if (m_DespawnTweens.size() == 0 && 
+            m_DespawnDstIndices.size() > 0)
+        {
+            
+        }
     }
 
-    void RemoveGemById(Id id)
+    void RemoveGemById(m3::GemId id)
     {
         auto index = m_IdToIndex.at(id);
         auto r = m_GemRows[index];
@@ -492,9 +495,8 @@ private:
             auto id = m_Board(r, c);
             auto index = m_IdToIndex[id];
 
+            // Skip if we a hole is going to fall.
             if (id == m3::InvalidGemId)
-                continue;
-            else if (m_Board(rDst, c) != m3::InvalidGemId)
                 continue;
 
             m_Board(rDst, c) = m_Board(r, c);

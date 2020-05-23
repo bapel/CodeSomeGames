@@ -85,9 +85,9 @@ namespace m3
             }
         }
 
-        inline Color ToColor(m3::gem_color_t col)
+        inline Color ToColor(m3::GemColor col)
         {
-            switch (col)
+            switch (col.Int())
             {
                 case 'B': return Color(0, 1, 0, 1); break;
                 case 'R': return Color(1, 0, 0, 1); break;
@@ -100,12 +100,11 @@ namespace m3
         }
 
         void RenderGems(
-            const Vector2* positions, 
-            const Vector2* scales, 
-            const m3::gem_color_t* colors,
-            size_t count)
+            const eastl::vector<Vector2> positions, 
+            const eastl::vector<Vector2> scales, 
+            const eastl::vector<m3::GemColor> colors)
         {
-            for (auto i = 0; i < count; i++)
+            for (auto i = 0; i < positions.size(); i++)
             {
                 auto position = positions[i];
                 auto scale = scales[i];
