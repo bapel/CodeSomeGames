@@ -55,7 +55,8 @@ namespace m3
     constexpr gem_id_t InvalidGemId = eastl::numeric_limits<gem_id_t>::max();
     
     using gem_color_t = uint8_t;
-    constexpr gem_color_t GemColors[] = { ' ', 'B', 'R', 'O', 'G', 'Y' };
+    const gem_color_t InvalidColor = ' ';
+    constexpr gem_color_t GemColors[] = { InvalidColor, 'B', 'R', 'O', 'G', 'Y' };
 
     struct RowCol
     {

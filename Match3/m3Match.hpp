@@ -20,34 +20,35 @@ namespace m3
     };
 
     template <class T, class Values>
-    inline Row GetMatchingRowsInCol_U(Row r, Col c, const T& value, const Values& values)
+    inline Row GetMatchingRowsInCol_U(Row r, Col c, const T& value, const Values& values, Row rMax)
     {
-        while (values.IsWithinBounds(r + 1, c) && (values(r + 1, c) == value)) 
+        assert(r <= rMax);
+        while ((r + 1) <= rMax && (values(r + 1, c) == value)) 
             r = r + 1;
         return r;
     }
 
     template <class T, class Values>
-    inline Row GetMatchingRowsInCol_D(Row r, Col c, const T& value, const Values& values)
+    inline Row GetMatchingRowsInCol_D(Row r, Col c, const T& value, const Values& values, Row rMin = 0)
     {
-        while (values.IsWithinBounds(r - 1, c) && (values(r - 1, c) == value)) 
+        while ((r - 1) >= rMin && (values(r - 1, c) == value)) 
             r = r - 1;
         return r;
     }
 
     template <class T, class Values>
-    inline Col GetMatchingColsInRow_L(Row r, Col c, const T& value, const Values& values)
+    inline Col GetMatchingColsInRow_R(Row r, Col c, const T& value, const Values& values, Col cMax)
     {
-        while (values.IsWithinBounds(r, c - 1) && (values(r, c - 1) == value)) 
-            c = c - 1;
+        while ((c + 1) <= cMax && (values(r, c + 1) == value)) 
+            c = c + 1;
         return c;
     }
 
     template <class T, class Values>
-    inline Col GetMatchingColsInRow_R(Row r, Col c, const T& value, const Values& values)
+    inline Col GetMatchingColsInRow_L(Row r, Col c, const T& value, const Values& values, Col cMin = 0)
     {
-        while (values.IsWithinBounds(r, c + 1) && (values(r, c + 1) == value)) 
-            c = c + 1;
+        while ((c - 1) >= cMin && (values(r, c - 1) == value)) 
+            c = c - 1;
         return c;
     }
 
@@ -69,7 +70,7 @@ namespace m3
         0,0                             0,0
     */
     template <class Values>
-    Matches GetMatchesForSwap_Col(Col c, Row r0, Row r1, const Values& values)
+    Matches GetMatchesForSwap_Col(Col c, Row r0, Row r1, const Values& values, Row rMax, Col cMax)
     {
         assert(r0 < r1);
 
@@ -80,12 +81,12 @@ namespace m3
         // Use swapped colors here.
 
         auto mcl0 = GetMatchingColsInRow_L(r0, c, col1, values);
-        auto mcr0 = GetMatchingColsInRow_R(r0, c, col1, values);
+        auto mcr0 = GetMatchingColsInRow_R(r0, c, col1, values, cMax);
 
         auto mcl1 = GetMatchingColsInRow_L(r1, c, col0, values);
-        auto mcr1 = GetMatchingColsInRow_R(r1, c, col0, values);
+        auto mcr1 = GetMatchingColsInRow_R(r1, c, col0, values, cMax);
 
-        auto mru = GetMatchingRowsInCol_U(r1, c, col0, values);
+        auto mru = GetMatchingRowsInCol_U(r1, c, col0, values, rMax);
         auto mrd = GetMatchingRowsInCol_D(r0, c, col1, values);
 
         Matches m;
@@ -119,7 +120,7 @@ namespace m3
         0,0                                    0,0
     */
     template <class Values>
-    Matches GetMatchesForSwap_Row(Row r, Col c0, Col c1, const Values& values)
+    Matches GetMatchesForSwap_Row(Row r, Col c0, Col c1, const Values& values, Row rMax, Col cMax)
     {
         assert(c0 < c1);
 
@@ -129,14 +130,14 @@ namespace m3
 
         // Use swapped colors here.
 
-        auto mru0 = GetMatchingRowsInCol_U(r, c0, col1, values);
+        auto mru0 = GetMatchingRowsInCol_U(r, c0, col1, values, rMax);
         auto mrd0 = GetMatchingRowsInCol_D(r, c0, col1, values);
 
-        auto mru1 = GetMatchingRowsInCol_U(r, c1, col0, values);
+        auto mru1 = GetMatchingRowsInCol_U(r, c1, col0, values, rMax);
         auto mrd1 = GetMatchingRowsInCol_D(r, c1, col0, values);
 
         auto mcl = GetMatchingColsInRow_L(r, c0, col1, values);
-        auto mcr = GetMatchingColsInRow_R(r, c1, col0, values);
+        auto mcr = GetMatchingColsInRow_R(r, c1, col0, values, cMax);
 
         Matches m;
 
@@ -181,16 +182,16 @@ TEST_CASE("Matching functions", "[matching]")
 
         for (auto i = 0U; i < colors.Count(); i++)
         {
-            auto r = i / colors.Cols().m_I;
-            auto c = i % colors.Cols().m_I;
+            Row r = i / colors.Cols().m_I;
+            Col c = i % colors.Cols().m_I;
             auto cl = colors(r, c);
 
-            DYNAMIC_SECTION("Match check (" << r << ", " << c << ")")
+            DYNAMIC_SECTION("Match check (" << r.m_I << ", " << c.m_I << ")")
             {
-                REQUIRE(r == GetMatchingRowsInCol_U(r, c, cl, colors));
-                REQUIRE(r == GetMatchingRowsInCol_D(r, c, cl, colors));
-                REQUIRE(c == GetMatchingColsInRow_L(r, c, cl, colors));
-                REQUIRE(c == GetMatchingColsInRow_R(r, c, cl, colors));
+                REQUIRE(r.m_I == GetMatchingRowsInCol_U(r, c, cl, colors, Rows - 1).m_I);
+                REQUIRE(r.m_I == GetMatchingRowsInCol_D(r, c, cl, colors).m_I);
+                REQUIRE(c.m_I == GetMatchingColsInRow_L(r, c, cl, colors).m_I);
+                REQUIRE(c.m_I == GetMatchingColsInRow_R(r, c, cl, colors, Cols - 1).m_I);
             }
         }
     }
@@ -220,7 +221,7 @@ TEST_CASE("Matching functions", "[matching]")
 
         DYNAMIC_SECTION("Match check (" << r << ", " << c << ") Col_U") 
         {
-            REQUIRE(GetMatchingRowsInCol_U(r, c, cl, colors) == 4);
+            REQUIRE(GetMatchingRowsInCol_U(r, c, cl, colors, Rows - 1) == 4);
         }
 
         DYNAMIC_SECTION("Match check (" << r << ", " << c << ") Col_D") 
@@ -235,7 +236,7 @@ TEST_CASE("Matching functions", "[matching]")
 
         DYNAMIC_SECTION("Match check (" << r << ", " << c << ") Row_R") 
         {
-            REQUIRE(GetMatchingColsInRow_R(r, c, cl, colors) == 5);
+            REQUIRE(GetMatchingColsInRow_R(r, c, cl, colors, Cols - 1) == 5);
         }
     }
 
@@ -262,7 +263,7 @@ TEST_CASE("Matching functions", "[matching]")
         auto r0 = 2;
         auto r1 = 3;
 
-        auto m = GetMatchesForSwap_Col(c, r0, r1, colors);
+        auto m = GetMatchesForSwap_Col(c, r0, r1, colors, Rows - 1, Cols - 1);
 
         REQUIRE(m.Row_0 == RowSpan { 2, 1, 3 });
         REQUIRE(m.Row_1 == RowSpan { 3, 0, 3 });
@@ -293,7 +294,7 @@ TEST_CASE("Matching functions", "[matching]")
         auto c0 = 3;
         auto c1 = 4;
 
-        auto m = GetMatchesForSwap_Row(r, c0, c1, colors);
+        auto m = GetMatchesForSwap_Row(r, c0, c1, colors, Rows - 1, Cols - 1);
 
         REQUIRE(m.Row_0 == RowSpan { 2, 1, 3 });
         REQUIRE(m.Row_1 == RowSpan { 2, 4, 6 });

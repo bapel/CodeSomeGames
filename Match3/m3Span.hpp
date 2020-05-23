@@ -62,6 +62,7 @@ namespace m3
     using Row_ = Row;
     using Col_ = Col;
 
+    // Span along row. Some col to some other col.
     struct RowSpan : Span<Row, Col>
     {
         RowSpan() = default;
@@ -74,6 +75,7 @@ namespace m3
         inline Col Col_1() const { return m_1; }
     };
 
+    // Span along col. Some row to some other row.
     struct ColSpan : Span<Col_, Row>
     {
         ColSpan() = default;

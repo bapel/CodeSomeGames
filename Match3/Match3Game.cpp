@@ -113,8 +113,8 @@ private:
         // Create and place random colored gems.
         for (auto i = 0U; i < m_Board.Count(); i++)
         {
-            auto r = i / m_Board.Cols().m_I;
-            auto c = i % m_Board.Cols().m_I;
+            m3::Row r = i / m_Board.Cols().m_I;
+            m3::Col c = i % m_Board.Cols().m_I;
             auto id = m_GemPool.GetOrCreateGem();
             auto index = (uint32_t)m_GemRows.size();
 
@@ -142,13 +142,6 @@ private:
             m_GemScales[i] = { scale, scale };
         }
 
-        // destroy a few gems.
-        {
-            DespawnGem(3, 2);
-            DespawnGem(3, 3);
-            DespawnGem(3, 4);
-        }
-
         /*
                          c           
                 +------+------+------+
@@ -163,30 +156,69 @@ private:
                 +------+------+------+
             0,0                       
         */
-        /*
         for (auto i = 0; i < m_Board.Count(); i++)
         {
-            m3::Row r = i / m_Board.Cols();
-            m3::Col c = i % m_Board.Cols();
-            auto color = m_Board(c, r);
+            m3::Row r = i / m_Board.Cols().m_I;
+            m3::Col c = i % m_Board.Cols().m_I;
+            auto color = m_Board(r, c);
+            if (color == m3::InvalidColor)
+                continue;
 
-            auto rl = m3::RowSpan { r, c, m3::GetMatchingColsInRow_L(r, c, color, m_Board) };
-            auto rr = m3::RowSpan { r, m3::GetMatchingColsInRow_R(r, c, color, m_Board), c };
-            auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, m_Board) };
-            auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, m_Board), r };
+            //auto rl = m3::RowSpan { r, c, m3::GetMatchingColsInRow_L(r, c, color, GetColor) };
+            //auto rr = m3::RowSpan { r, m3::GetMatchingColsInRow_R(r, c, color, GetColor), c };
+            //auto cu = m3::ColSpan { c, r, m3::GetMatchingRowsInCol_U(r, c, color, GetColor) };
+            //auto cd = m3::ColSpan { c, m3::GetMatchingRowsInCol_D(r, c, color, GetColor), r };
 
-            if (rl.Count() >= 3)
-            {
-                for (auto i = 0; i < rl.Count(); i++)
-                {
-                    auto rr = rl[i];
-                    auto cc = c;
+            //if (rl.Count() >= 3)
+            //{
+            //    for (auto i = 0; i < rl.Count(); i++)
+            //    {
+            //        auto r_ = r;
+            //        auto c_ = rl[i];
+            //        auto id = m_Board(r_, c_);
+            //        RemoveGemById(id);
+            //    }
+            //}
 
-                    auto id = m_Board(rr, cc);
-                }
-            }
+            //if (rr.Count() >= 3)
+            //{
+            //    for (auto i = 0; i < rr.Count(); i++)
+            //    {
+            //        auto r_ = r;
+            //        auto c_ = rr[i];
+            //        auto id = m_Board(r_, c_);
+            //        RemoveGemById(id);
+            //    }
+            //}
+
+            //if (cu.Count() >= 3)
+            //{
+            //    for (auto i = 0; i < cu.Count(); i++)
+            //    {
+            //        auto r_ = cu[i];
+            //        auto c_ = c;
+            //        auto id = m_Board(r_, c_);
+            //        RemoveGemById(id);
+            //    }
+            //}
+
+            //if (cd.Count() >= 3)
+            //{
+            //    for (auto i = 0; i < cd.Count(); i++)
+            //    {
+            //        auto r_ = cd[i];
+            //        auto c_ = c;
+            //        auto id = m_Board(r_, c_);
+            //        RemoveGemById(id);
+            //    }
+            //}
         }
-        */
+
+        // @Todo: Remove test. 
+        // Despawn a few gems.
+        //DespawnGem(3, 2);
+        //DespawnGem(3, 3);
+        //DespawnGem(3, 4);
     }
 
     // @Todo: float instead of double is okay?
