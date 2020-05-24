@@ -11,10 +11,10 @@
 // @Todo. Make not dependent on SDL_assert?
 #ifdef _DEBUG
 #include <SDL_assert.h>
-#define D3D_OK(__call__)\
+#define Direct3D_Ok__(__call__)\
     SDL_assert(S_OK == (__call__))
 #else
-#define D3D_OK(__call__) __call__
+#define Direct3D_Ok__(__call__) __call__
 #endif
 
 struct SDL_Window;

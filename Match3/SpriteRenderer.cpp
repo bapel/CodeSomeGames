@@ -14,21 +14,23 @@ const SpriteVertex vertices[] =
     { {  0.5f,  0.5f, }, { 1.0f, 0.0f } }
 };
 
-#define append_elem__ D3D11_APPEND_ALIGNED_ELEMENT
+#define AppendElem__ D3D11_APPEND_ALIGNED_ELEMENT
 
 const D3D11_INPUT_ELEMENT_DESC spriteElementDescs[] = 
 {
     // Vertex.
     { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,       0, 0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
-    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, append_elem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
 
     // Instance.                                         
     { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,       1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,       1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_ZROT",  0, DXGI_FORMAT_R32_FLOAT,          1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_TINT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,           1, append_elem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,       1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_ZROT",  0, DXGI_FORMAT_R32_FLOAT,          1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_TINT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,           1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 };
+
+#undef append_elem__
 
 void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numMaxSprites)
 {
@@ -44,7 +46,7 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
 
     const auto d3dDevice = d3d11.GetDevice();
 
-    D3D_OK(d3dDevice->CreateInputLayout(
+    Direct3D_Ok__(d3dDevice->CreateInputLayout(
         spriteElementDescs, 
         sizeof(spriteElementDescs) / sizeof(D3D11_INPUT_ELEMENT_DESC), 
         vsByteCode.data(), 
@@ -59,7 +61,7 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
     D3D11_SUBRESOURCE_DATA initialData = {};
     initialData.pSysMem = vertices;
 
-    D3D_OK(d3dDevice->CreateBuffer(
+    Direct3D_Ok__(d3dDevice->CreateBuffer(
         &vertexBufferDesc, 
         &initialData, 
         m_QuadBuffer.GetAddressOf()));
@@ -73,7 +75,7 @@ void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
     instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    D3D_OK(m_Device->CreateBuffer(
+    Direct3D_Ok__(m_Device->CreateBuffer(
         &instanceBufferDesc,
         nullptr,
         m_InstancesBuffer.GetAddressOf()));

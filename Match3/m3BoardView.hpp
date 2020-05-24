@@ -131,7 +131,7 @@ namespace m3
             samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
             ComPtr<ID3D11SamplerState> samplerState = nullptr;
-            D3D_OK(d3dDevice->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
+            Direct3D_Ok__(d3dDevice->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf()));
             return samplerState;
         }
 
@@ -148,7 +148,7 @@ namespace m3
             blendStateDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
 
             ComPtr<ID3D11BlendState> blendState = nullptr;
-            D3D_OK(d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf()));
+            Direct3D_Ok__(d3dDevice->CreateBlendState(&blendStateDesc, blendState.GetAddressOf()));
             return blendState;
         }
     };
