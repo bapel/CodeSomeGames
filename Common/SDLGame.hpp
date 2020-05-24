@@ -31,5 +31,8 @@ public:
 
 #define Game__(in_Game__)\
     int main(int argc, char** argv) {\
-        return in_Game__().Run(argc, argv);\
+        auto* p = new in_Game__();\
+        auto r = p->Run(argc, argv);\
+        delete p;\
+        return r;\
     }
