@@ -13,12 +13,13 @@ private:
     ComPtr<ID3D11Buffer> m_QuadBuffer;
     ComPtr<ID3D11Buffer> m_InstancesBuffer;
 
+    __declspec(align(16))
     struct InstanceData
     {
         Vector2 Position;
         Vector2 Scale;
         float Rotation_Z;
-        Color Tint;
+        uint32_t Tint;
         uint16_t SpriteId;
     };
 
@@ -36,14 +37,14 @@ public:
     inline void Draw(Vector2 position, Vector2 scale, Color tint, uint16_t spriteId = 0)
     {
         assert(spriteId < MaxNumSpriteIds);
-        InstanceData instance = { position, scale, 0.0f, tint, spriteId };
+        InstanceData instance = { position, scale, 0.0f, tint.BGRA(), spriteId };
         m_SpriteInstances.push_back(instance);
     }
 
     inline void Draw(Vector2 position, Vector2 scale, float rotationZ, Color tint, uint16_t spriteId = 0)
     {
         assert(spriteId < MaxNumSpriteIds);
-        InstanceData instance = { position, scale, rotationZ, tint, spriteId };
+        InstanceData instance = { position, scale, rotationZ, tint.BGRA(), spriteId };
         m_SpriteInstances.push_back(instance);
     }
 };

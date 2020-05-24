@@ -19,15 +19,15 @@ const SpriteVertex vertices[] =
 const D3D11_INPUT_ELEMENT_DESC spriteElementDescs[] = 
 {
     // Vertex.
-    { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,       0, 0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
-    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,       0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+    { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,   0, 0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,   0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
 
-    // Instance.                                         
-    { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,       1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,       1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_ZROT",  0, DXGI_FORMAT_R32_FLOAT,          1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_TINT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-    { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,           1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+    // Instance.                                     
+    { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,   1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,   1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_ZROT",  0, DXGI_FORMAT_R32_FLOAT,      1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_TINT",  0, DXGI_FORMAT_B8G8R8A8_UNORM, 1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,       1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 };
 
 #undef append_elem__
