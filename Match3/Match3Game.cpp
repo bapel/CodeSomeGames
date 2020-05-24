@@ -24,9 +24,9 @@ void* __cdecl operator new[](size_t size, size_t align, size_t offset, const cha
     return new uint8_t[size];
 }
 
-static const auto BoardRows = 256;
-static const auto BoardCols = 128;
-static const auto SpriteSize = 4.0f;
+static const auto BoardRows = 64;
+static const auto BoardCols = 64;
+static const auto SpriteSize = 16.0f;
 
 struct CameraConstantsBuffer
 {

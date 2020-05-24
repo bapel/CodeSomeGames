@@ -38,6 +38,8 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
     m_DeviceContext = d3d11.GetDeviceContext();
     m_VertexShader = d3d11.CreateVertexShaderFromFile(shadersBasePath + "SpriteVS.cso", vsByteCode);
     m_PixelShader = d3d11.CreatePixelShaderFromFile(shadersBasePath + "SpritePS.cso");
+
+    InitInstancesBuffer(numMaxSprites);
     m_MaxSprites = numMaxSprites;
 
     const auto d3dDevice = d3d11.GetDevice();
@@ -61,15 +63,10 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
         &vertexBufferDesc, 
         &initialData, 
         m_QuadBuffer.GetAddressOf()));
-
-    InitInstancesBuffer(numMaxSprites);
 }
 
 void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
 {
-    if (m_InstancesBuffer != nullptr)
-        m_InstancesBuffer->Release();
-
     D3D11_BUFFER_DESC instanceBufferDesc = {};
     instanceBufferDesc.ByteWidth = (UINT)(sizeof(InstanceData) * numInstances);
     instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -80,8 +77,6 @@ void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
         &instanceBufferDesc,
         nullptr,
         m_InstancesBuffer.GetAddressOf()));
-
-    m_MaxSprites = m_SpriteInstances.size();
 }
 
 void SpriteRenderer::Begin()
@@ -105,6 +100,7 @@ void SpriteRenderer::End()
     {
         m_InstancesBuffer->Release();
         InitInstancesBuffer(m_SpriteInstances.size());
+        m_MaxSprites = m_SpriteInstances.size();
     }
 
     auto d3dContext = m_DeviceContext.Get();

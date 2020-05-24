@@ -41,7 +41,7 @@ int SDLGame::Run(int argc, char** argv)
 
     SDL_assert_release(nullptr != m_Window);
 
-    m_D3D11.Init(m_Window, false);
+    m_D3D11.Init(m_Window, true);
     OnCreate();
 
     bool quit = false;
