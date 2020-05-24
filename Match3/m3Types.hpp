@@ -49,7 +49,7 @@ namespace m3
         BinaryOp__(T__, T__, |)*/
 
     // These are distinct types to help avoid bugs related to mixing them up.
-    IntType__(GemId, uint16_t);
+    IntType__(GemId, uint32_t);
     IntType__(GemColor, uint8_t);
 
     // These could be 8 bits, but then they show up as char in the debugger.
