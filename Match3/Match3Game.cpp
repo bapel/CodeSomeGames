@@ -30,8 +30,8 @@ static const auto SpriteSize = 16.0f;
 
 struct CameraConstantsBuffer
 {
-    Matrix model;
-    Matrix viewProj;
+    Matrix Model;
+    Matrix ViewProj;
 };
 
 enum EaseType

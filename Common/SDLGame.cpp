@@ -4,8 +4,8 @@
 #pragma comment(lib, "RuntimeObject.lib")
 
 #include <SDL_assert.h>
-#include <SDL_image.h>
 #include <SDL_events.h>
+//#include <SDL_image.h>
 
 int SDLGame::Run(int argc, char** argv)
 {
@@ -24,11 +24,11 @@ int SDLGame::Run(int argc, char** argv)
     size_t offset = kExePath.find_last_of("\\");
     m_ShadersPath = kExePath.substr(0, offset + 1);
 
-    auto flags = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
-    if (IMG_INIT_JPG != (flags & IMG_INIT_JPG))
-        SDL_Log("Failed to load **jpeg** module");
-    if (IMG_INIT_PNG != (flags & IMG_INIT_PNG))
-        SDL_Log("Failed to load **png** module");
+    //auto flags = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+    //if (IMG_INIT_JPG != (flags & IMG_INIT_JPG))
+    //    SDL_Log("Failed to load **jpeg** module");
+    //if (IMG_INIT_PNG != (flags & IMG_INIT_PNG))
+    //    SDL_Log("Failed to load **png** module");
 
     auto [width, height] = GetDesiredWindowSize();
 

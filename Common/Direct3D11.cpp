@@ -6,7 +6,6 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
-#include <SDL_image.h>
 #include <SDL_rwops.h>
 
 size_t ReadBinaryFile(const char* path, std::vector<char>& outBuffer);
@@ -181,50 +180,8 @@ ComPtr<ID3D11PixelShader> Common::Direct3D11::CreatePixelShaderFromFile(const st
 
 ComPtr<ID3D11Texture2D> Common::Direct3D11::CreateTextureFromFile(const std::string& path) const
 {
-    auto sprite = IMG_Load(path.c_str());
-
-    if (nullptr == sprite)
-    {
-        SDL_Log("Image load failed: %s", path.c_str());
-        return nullptr;
-    }
-
-    auto formatName = SDL_GetPixelFormatName(sprite->format->format);
-    SDL_Log("Image loaded: %s Format: %s", path.c_str(), formatName);
-
-    DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
-    switch (sprite->format->format)
-    {
-        case SDL_PIXELFORMAT_ABGR8888:
-            format = DXGI_FORMAT_R8G8B8A8_UNORM;
-            break;
-    }
-
-    // Unsupported format.
-    SDL_assert(format != DXGI_FORMAT_UNKNOWN);
-
-    D3D11_TEXTURE2D_DESC desc = {};
-    desc.Width = sprite->w;
-    desc.Height = sprite->h;
-    desc.MipLevels = 1;
-    desc.ArraySize = 1;
-    desc.Format = format;
-    desc.SampleDesc.Count = 1;
-    desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    desc.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA data = {};
-    data.pSysMem = sprite->pixels;
-    data.SysMemPitch = sprite->pitch;
-    data.SysMemSlicePitch = sprite->w * sprite->h * 4;
-
-    ComPtr<ID3D11Texture2D> texture = nullptr;
-    Direct3D_Ok__(m_Device->CreateTexture2D(&desc, &data, texture.GetAddressOf()));
-    SetDebugName(texture, path);
-    SDL_FreeSurface(sprite);
-    return texture;
+    // @Todo: Implement.
+    return nullptr;
 }
 
 ComPtr<ID3D11ShaderResourceView> Common::Direct3D11::CreateShaderResourceView(const ComPtr<ID3D11Texture2D> texture) const
