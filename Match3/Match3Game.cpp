@@ -4,7 +4,6 @@
 
 #include "m3Board.hpp"
 #include "m3GemPool.hpp"
-//#include "m3GemData.hpp"
 #include "m3Match.hpp"
 #include "m3BoardView.hpp"
 

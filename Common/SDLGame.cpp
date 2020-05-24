@@ -47,7 +47,6 @@ int SDLGame::Run(int argc, char** argv)
     bool quit = false;
     SDL_Event event = {};
     uint32_t lastMS = 0;
-    float rotationAngle = 0.0f;
 
     while (!quit)
     {
