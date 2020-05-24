@@ -64,6 +64,7 @@ namespace m3
             m_SpriteRenderer.Begin();
         }
 
+        // @Todo: This is actually static. So implement as a separate batch?
         void RenderBackground(int rows, int cols, float spriteScale)
         {
             const Vector2 scale = { spriteScale, spriteScale };

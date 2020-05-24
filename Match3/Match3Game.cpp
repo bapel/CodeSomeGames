@@ -124,6 +124,7 @@ private:
     // Tweens. 
     // Double-buffered to eliminate cost of erase for completed tweens.
     // We simply move incomplete tweens to the other vector and clear-swap.
+    // @Todo: Begging to be abstracted to it's own class.
     eastl::vector<m3::GemId> m_DespawnGemIds;
     eastl::vector<uint32_t> m_DespawnDstIndices;
     eastl::vector<uint32_t> m_DespawnDstIndices_1;
@@ -560,16 +561,19 @@ public:
         m_RandGenerator(0),
         m_ColorDistribution(1, sizeof(m3::GemColors) - 1)
     {
-        m_DespawnGemIds.reserve(m_Board.Count() / 4);
-        m_DespawnDstIndices.reserve(m_Board.Count() / 4);
-        m_DespawnDstIndices_1.reserve(m_Board.Count() / 4);
-        m_DespawnTweens.reserve(m_Board.Count() / 4);
-        m_DespawnTweens_1.reserve(m_Board.Count() / 4);
+        auto despawnReserve = m_Board.Count() / 4;
+        m_DespawnGemIds.reserve(despawnReserve);
+        m_DespawnDstIndices.reserve(despawnReserve);
+        m_DespawnDstIndices_1.reserve(despawnReserve);
+        m_DespawnTweens.reserve(despawnReserve);
+        m_DespawnTweens_1.reserve(despawnReserve);
 
-        m_FallDstIndices.reserve(m_Board.Count() / 2);
-        m_FallDstIndices_1.reserve(m_Board.Count() / 2);
-        m_FallTweens.reserve(m_Board.Count() / 2);
-        m_FallTweens_1.reserve(m_Board.Count() / 2);
+        auto fallReserve = m_Board.Count() / 2;
+        m_FallGemIds.reserve(fallReserve);
+        m_FallDstIndices.reserve(fallReserve);
+        m_FallDstIndices_1.reserve(fallReserve);
+        m_FallTweens.reserve(fallReserve);
+        m_FallTweens_1.reserve(fallReserve);
     }
 };
 
