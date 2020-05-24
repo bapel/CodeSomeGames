@@ -77,6 +77,8 @@ void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
         &instanceBufferDesc,
         nullptr,
         m_InstancesBuffer.GetAddressOf()));
+
+    m_MaxSprites = m_SpriteInstances.size();
 }
 
 void SpriteRenderer::Begin()

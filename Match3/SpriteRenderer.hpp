@@ -27,7 +27,7 @@ private:
     size_t m_MaxSprites = 100;
 
 public:
-    void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numInstances = 100);
+    void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numInstances = 200);
     void InitInstancesBuffer(size_t numInstances);
 
     void Begin();
