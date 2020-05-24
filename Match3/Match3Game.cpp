@@ -25,9 +25,9 @@ void* __cdecl operator new[](size_t size, size_t align, size_t offset, const cha
     return new uint8_t[size];
 }
 
-static const auto BoardRows = 12;
-static const auto BoardCols = 8;
-static const auto SpriteSize = 64.0f;
+static const auto BoardRows = 256;
+static const auto BoardCols = 128;
+static const auto SpriteSize = 4.0f;
 
 struct CameraConstantsBuffer
 {
@@ -105,6 +105,9 @@ private:
     m3::GemPool m_GemPool;
     
     // Board data.
+    // @Todo: Everything might benefit from this being column-major
+    // We hardly iterate over a row, except when matching. But we iterate over columns a lot, 
+    // like when generating falls. So having the column be in a cache-line would be great.
     using Board = m3::Board<m3::GemId, BoardRows, BoardCols>;
 
     Board m_Board;
@@ -118,15 +121,20 @@ private:
     eastl::vector<Vector2> m_GemPositions;
     eastl::vector<Vector2> m_GemScales;
 
-    // Tweens.
+    // Tweens. 
+    // Double-buffered to eliminate cost of erase for completed tweens.
+    // We simply move incomplete tweens to the other vector and clear-swap.
+    eastl::vector<m3::GemId> m_DespawnGemIds;
     eastl::vector<uint32_t> m_DespawnDstIndices;
+    eastl::vector<uint32_t> m_DespawnDstIndices_1;
     eastl::vector<Tween> m_DespawnTweens;
-    eastl::vector<uint32_t> m_FallDstIndices;
-    eastl::vector<Tween> m_FallTweens;
+    eastl::vector<Tween> m_DespawnTweens_1;
 
-    // Temp buffers.
-    eastl::vector<uint32_t> m_DespawnIndicesToRemove;
-    eastl::vector<uint32_t> m_FallIndicesToRemove;
+    eastl::vector<m3::GemId> m_FallGemIds;
+    eastl::vector<uint32_t> m_FallDstIndices;
+    eastl::vector<uint32_t> m_FallDstIndices_1;
+    eastl::vector<Tween> m_FallTweens;
+    eastl::vector<Tween> m_FallTweens_1;
 
 private:
     std::tuple<int, int> GetDesiredWindowSize() override final
@@ -140,6 +148,8 @@ private:
 
     void OnCreate() override final
     {
+        assert((BoardRows * BoardCols) < m3::InvalidGemId.Int());
+
         m3::Row r1, r2;
 
         auto r = r1 <= r2;
@@ -161,10 +171,10 @@ private:
             m_Board(r, c) = id;
             m_IdToIndex.insert(id);
             m_IdToIndex[id] = index;
-            m_GemIds.push_back(id);
-            m_GemRows.push_back(r);
-            m_GemCols.push_back(c);
-            m_GemColors.push_back(color);
+            m_GemIds.emplace_back(id);
+            m_GemRows.emplace_back(r);
+            m_GemCols.emplace_back(c);
+            m_GemColors.emplace_back(color);
         }
 
         m_GemPositions.resize(m_GemRows.size());
@@ -213,15 +223,6 @@ private:
         dtSeconds = eastl::clamp(dtSeconds, 0.0, 1.0 / 60.0);
         UpdateDespawnTweens((float)dtSeconds);
         UpdateFallTweens((float)dtSeconds);
-
-        // If no tweens are in progress, we look for more matches on the whole board.
-        if (m_DespawnTweens.size() == 0 &&
-            m_DespawnDstIndices.size() == 0 &&
-            m_FallTweens.size() == 0 && 
-            m_FallDstIndices.size() == 0)
-        {
-            // FindAndClearFromWholeBoard();
-        }
     }
 
     // @Todo. Get width and height from Direct3D11?
@@ -369,6 +370,7 @@ private:
                 auto r = m_GemRows[idx];
                 auto c = m_GemCols[idx];
 
+                // @Todo: Compact to front?
                 DespawnGem(r, c);
             }
         }
@@ -386,80 +388,66 @@ private:
         despawnTween.DelayMs = 200;
         despawnTween.DurationMs = 200;
 
-        m_DespawnDstIndices.push_back(idx);
-        m_DespawnTweens.push_back(despawnTween);
+        m_DespawnGemIds.emplace_back(id);
+        m_DespawnDstIndices.emplace_back(idx);
+        m_DespawnTweens.emplace_back(despawnTween);
     }
 
     void UpdateDespawnTweens(float dtSeconds)
     {
-        m_DespawnIndicesToRemove.clear();
-
         // Run scale animations and update gem scale.
         for (auto i = 0; i < m_DespawnTweens.size(); i++)
         {
             auto dst = m_DespawnDstIndices[i];
-            auto scale = m_DespawnTweens[i].Evaluate() * SpriteSize;
+            auto& tween = m_DespawnTweens[i];
 
+            auto scale = tween.Evaluate() * SpriteSize;
             m_GemScales[dst] = { scale, scale };
             m_DespawnTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
-            if (m_DespawnTweens[i].Completed())
-                m_DespawnIndicesToRemove.push_back(i);
-        }
-
-        // Erase completed despawn tweens.
-        // @Todo. Optimize? This is a small enough array and probably okay.
-        {
-            auto numErased = 0;
-            for (auto i = 0; i < m_DespawnIndicesToRemove.size(); i++)
+            if (!m_DespawnTweens[i].Completed())
             {
-                auto indexToRemove = m_DespawnIndicesToRemove[i] - numErased;
-                m_DespawnTweens.erase(m_DespawnTweens.begin() + indexToRemove);
-                auto dstIndex = m_DespawnDstIndices[indexToRemove];
-                m_DespawnDstIndices.erase(m_DespawnDstIndices.begin() + indexToRemove);
-                m_DespawnDstIndices.push_back(dstIndex);
-                numErased++;
+                m_DespawnDstIndices_1.emplace_back(dst);
+                m_DespawnTweens_1.emplace_back(tween);
             }
         }
 
-        if (m_DespawnTweens.size() == 0 && 
-            m_DespawnDstIndices.size() > 0)
+        m_DespawnDstIndices.clear();
+        m_DespawnTweens.clear();
+
+        eastl::swap(m_DespawnDstIndices, m_DespawnDstIndices_1);
+        eastl::swap(m_DespawnTweens, m_DespawnTweens_1);
+
+        if (m_DespawnGemIds.size() > 0 && m_DespawnTweens.size() == 0)
         {
             // These are just for readability, and we want to avoid copying.
-            auto& despawnIds = m_DespawnDstIndices;
-
-            // Convert indices to ids.
-            for (auto i = 0; i < despawnIds.size(); i++)
-                despawnIds[i] = m_GemIds[m_DespawnDstIndices[i]].m_I;
+            auto& despawnIds = m_DespawnGemIds;
 
             // Destroy despawned gems.
-            // Also create a RowSpan above which gems will fall.
-            m3::RowSpan fallSpan;
+            // Also create a RowSpan above which gems are going to fall.
+            auto id = despawnIds[0];
+            auto idx = m_IdToIndex[id];
+            auto r = m_GemRows[idx];
+            auto c = m_GemCols[idx];
+            m3::RowSpan fallSpan = { r, c, c };
+
+            RemoveGemById(id);
+
+            for (auto i = 1; i < despawnIds.size(); i++)
             {
-                auto id = despawnIds[0];
-                auto idx = m_IdToIndex[id];
-                auto r = m_GemRows[idx];
-                auto c = m_GemCols[idx];
-                fallSpan = { r, c, c };
+                id = despawnIds[i];
+                idx = m_IdToIndex[id];
+                r = m_GemRows[idx];
+                c = m_GemCols[idx];
+
+                fallSpan = 
+                {
+                    eastl::min(fallSpan.Row(), r),
+                    eastl::min(fallSpan.Col_0(), c),
+                    eastl::max(fallSpan.Col_1(), c)
+                };
 
                 RemoveGemById(id);
-
-                for (auto i = 1; i < despawnIds.size(); i++)
-                {
-                    id = despawnIds[i];
-                    idx = m_IdToIndex[id];
-                    r = m_GemRows[idx];
-                    c = m_GemCols[idx];
-
-                    fallSpan = 
-                    {
-                        eastl::min(fallSpan.Row(), r),
-                        eastl::min(fallSpan.Col_0(), c),
-                        eastl::max(fallSpan.Col_1(), c)
-                    };
-
-                    RemoveGemById(id);
-                }
             }
 
             for (auto i = 0; i < fallSpan.Count(); i++)
@@ -469,14 +457,12 @@ private:
                 MakeGemsFall(r, c);
             }
 
-            m_DespawnDstIndices.clear();
+            m_DespawnGemIds.clear();
         }
     }
 
     void UpdateFallTweens(float dtSeconds)
     {
-        m_FallIndicesToRemove.clear();
-
         // Run fall tweens and update gem position.
         for (auto i = 0; i < m_FallTweens.size(); i++)
         {
@@ -486,30 +472,33 @@ private:
             m_GemPositions[dst].y = GemY(y, SpriteSize);
             m_FallTweens[i].ElapsedMs += dtSeconds * 1000.0f;
 
-            if (m_FallTweens[i].Completed())
-                m_FallIndicesToRemove.push_back(i);
-        }
-
-        // Erase completed despawn tweens.
-        // @Todo. Optimize? This is a small enough array and probably okay.
-        {
-            auto numErased = 0;
-            for (auto i = 0; i < m_FallIndicesToRemove.size(); i++)
+            if (!m_FallTweens[i].Completed())
             {
-                auto indexToRemove = m_FallIndicesToRemove[i] - numErased;
-                m_FallTweens.erase(m_FallTweens.begin() + indexToRemove);
-                auto dstIndex = m_FallDstIndices[indexToRemove];
-                m_FallDstIndices.erase(m_FallDstIndices.begin() + indexToRemove);
-                m_FallDstIndices.push_back(dstIndex);
-                numErased++;
+                // If the tween isn't completed tranfer it to the other vector.
+                m_FallTweens_1.emplace_back(m_FallTweens[i]);
+                m_FallDstIndices_1.emplace_back(m_FallDstIndices[i]);
             }
         }
 
-        if (m_FallTweens.size() == 0 && 
-            m_FallDstIndices.size() > 0)
+        m_FallDstIndices.clear();
+        m_FallTweens.clear();
+
+        eastl::swap(m_FallDstIndices, m_FallDstIndices_1);
+        eastl::swap(m_FallTweens, m_FallTweens_1);
+
+        if (m_FallGemIds.size() > 0 && m_FallTweens.size() == 0)
         {
             m_FallDstIndices.clear();
+            m_FallDstIndices_1.clear();
+            m_FallTweens.clear();
+            m_FallTweens_1.clear();
+
+            // @Todo: Ideally we should only be checking in the neighborhood of gems that fell into place.
             FindAndClearFromWholeBoard();
+
+            // @Todo: We should only use these ids to check for matches. 
+            // Right now this just helps signal completion of all fall tweens.
+            m_FallGemIds.clear();
         }
     }
 
@@ -555,11 +544,12 @@ private:
 
                 fall.Value_0 = r.m_I;
                 fall.Value_1 = (r - dr).m_I;
-                fall.DurationMs = dr * 500;
+                fall.DurationMs = dr * 100;
                 fall.EaseType = OutBounce;
 
-                m_FallDstIndices.push_back(index);
-                m_FallTweens.push_back(fall);
+                m_FallGemIds.emplace_back(id);
+                m_FallDstIndices.emplace_back(index);
+                m_FallTweens.emplace_back(fall);
             }
         }
     }
@@ -569,7 +559,18 @@ public:
         m_Board(),
         m_RandGenerator(0),
         m_ColorDistribution(1, sizeof(m3::GemColors) - 1)
-    {}
+    {
+        m_DespawnGemIds.reserve(m_Board.Count() / 4);
+        m_DespawnDstIndices.reserve(m_Board.Count() / 4);
+        m_DespawnDstIndices_1.reserve(m_Board.Count() / 4);
+        m_DespawnTweens.reserve(m_Board.Count() / 4);
+        m_DespawnTweens_1.reserve(m_Board.Count() / 4);
+
+        m_FallDstIndices.reserve(m_Board.Count() / 2);
+        m_FallDstIndices_1.reserve(m_Board.Count() / 2);
+        m_FallTweens.reserve(m_Board.Count() / 2);
+        m_FallTweens_1.reserve(m_Board.Count() / 2);
+    }
 };
 
 #ifndef Test__
