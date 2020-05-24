@@ -217,20 +217,17 @@
     <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{86076fdb-0f26-43a2-b6f0-ff35d76cf017}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\EASTL\EASTL.vcxproj">
-      <Project>{8b989dd1-455a-493c-8e07-52b9cb71329f}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\ThirdParty\DirectXTK\DirectXTK_Desktop_2019.vcxproj">
       <Project>{e0b52ae7-e160-4d32-bf3f-910b785e5a8e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\EASTL\vcproj\EASTL.vcxproj">
+      <Project>{8b989dd1-455a-493c-8e07-52b9cb71329f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SDL\VisualC\SDLmain\SDLmain.vcxproj">
       <Project>{da956fd3-e142-46f2-9dd5-c78bebb56b7a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SDL\VisualC\SDL\SDL.vcxproj">
       <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\SDL_image\VisualC\SDL_image.vcxproj">
-      <Project>{2bd5534e-00e2-4bea-ac96-d9a92ea24696}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
