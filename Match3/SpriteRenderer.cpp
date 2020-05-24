@@ -67,6 +67,9 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
 
 void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
 {
+    if (m_InstancesBuffer != nullptr)
+        m_InstancesBuffer->Release();
+
     D3D11_BUFFER_DESC instanceBufferDesc = {};
     instanceBufferDesc.ByteWidth = (UINT)(sizeof(InstanceData) * numInstances);
     instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
