@@ -19,7 +19,7 @@ private:
         Vector2 Position;
         Vector2 Scale;
         float Rotation_Z;
-        uint32_t Tint;
+        Color32 Tint;
         uint16_t SpriteId;
     };
 
