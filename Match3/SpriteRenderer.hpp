@@ -5,14 +5,7 @@
 class SpriteRenderer
 {
 private:
-    ComPtr<ID3D11Device> m_Device;
-    ComPtr<ID3D11DeviceContext> m_DeviceContext;
-    ComPtr<ID3D11VertexShader> m_VertexShader;
-    ComPtr<ID3D11PixelShader> m_PixelShader;
-    ComPtr<ID3D11InputLayout> m_InputLayout;
-    ComPtr<ID3D11Buffer> m_QuadBuffer;
-    ComPtr<ID3D11Buffer> m_InstancesBuffer;
-
+    __declspec(align(16))
     struct InstanceData
     {
         Vector2 Position;
@@ -21,6 +14,14 @@ private:
         Color Tint;
         uint16_t SpriteId;
     };
+    
+    ComPtr<ID3D11Device> m_Device;
+    ComPtr<ID3D11DeviceContext> m_DeviceContext;
+    ComPtr<ID3D11VertexShader> m_VertexShader;
+    ComPtr<ID3D11PixelShader> m_PixelShader;
+    ComPtr<ID3D11InputLayout> m_InputLayout;
+    ComPtr<ID3D11Buffer> m_QuadBuffer;
+    ComPtr<ID3D11Buffer> m_InstancesBuffer;
 
     const static uint16_t MaxNumSpriteIds = 8;
     std::vector<InstanceData> m_SpriteInstances;
