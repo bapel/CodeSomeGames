@@ -150,20 +150,20 @@ private:
     {
         assert((BoardRows * BoardCols) < m3::InvalidGemId.Int());
 
-        m3::Row r1, r2;
-
-        auto r = r1 <= r2;
-
         m_CameraConstantsBuffer = m_D3D11.CreateConstantsBuffer<CameraConstantsBuffer>();
         m_D3D11.SetDebugName(m_CameraConstantsBuffer.Get(), "CameraConstantsBuffer");
 
+        auto rows = m_Board.Rows();
+        auto cols = m_Board.Cols();
+
         m_BoardView.Init(m_D3D11, m_ShadersPath);
+        m_BoardView.InitBackgroundBatch(rows.m_I, cols.m_I, SpriteSize);
 
         // Create and place random colored gems.
         for (auto i = 0U; i < m_Board.Count(); i++)
         {
-            m3::Row r = i / m_Board.Cols().m_I;
-            m3::Col c = i % m_Board.Cols().m_I;
+            m3::Row r = i / cols.m_I;
+            m3::Col c = i % cols.m_I;
             auto id = m_GemPool.GetOrCreateGem();
             auto index = (uint32_t)m_GemRows.size();
             auto color = RandomGemColor();
@@ -249,7 +249,7 @@ private:
         auto cols = m_Board.Cols();
 
         m_BoardView.BeginRender();
-        m_BoardView.RenderBackground(rows.m_I, cols.m_I, SpriteSize);
+        m_BoardView.RenderBackground();
         m_BoardView.RenderGems(m_GemPositions, m_GemScales, m_GemColors);
         m_BoardView.EndRender();
 

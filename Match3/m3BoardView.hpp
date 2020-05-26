@@ -21,6 +21,8 @@ namespace m3
         ComPtr<ID3D11Resource> m_TileSpriteTex2D;
         ComPtr<ID3D11ShaderResourceView> m_TileSpriteSRV;
 
+        uint32_t m_BackgroundBatchId;
+
     public:
         BoardView() = default;
 
@@ -40,6 +42,33 @@ namespace m3
 
             m_PixellySamplerState = InitPixellySamplerState(d3dDevice);
             m_TransparentSpriteBlendState = InitTransparentSpriteBlendState(d3dDevice);
+        }
+
+        void InitBackgroundBatch(int rows, int cols, float spriteScale)
+        {
+            m_BackgroundBatchId = m_SpriteRenderer.CreateStaticBatch();
+            
+            const Vector2 scale = { spriteScale, spriteScale };
+            const Vector2 origin = -0.5f * scale * Vector2((float)cols - 1, (float)rows - 1);
+            const float rotations[] = {
+                TwoPi * 0.0f, 
+                TwoPi * 0.25f, 
+                TwoPi * 0.5f, 
+                TwoPi * 0.0f
+            };
+
+            for (auto i = 0; i < rows * cols; i++)
+            {
+                auto r = i / cols;
+                auto c = i % cols;
+                auto position = origin + scale * Vector2((float)c, (float)r);
+                auto tint = Color(1, 1, 1, 1);
+
+                m_SpriteRenderer.Draw(position, scale, rotations[i % 4], tint, 1);
+            }
+
+            m_SpriteRenderer.FinishStaticBatch(m_BackgroundBatchId);
+            m_SpriteRenderer.CommitStaticBatches();
         }
 
         void BeginRender()
@@ -64,27 +93,11 @@ namespace m3
             m_SpriteRenderer.Begin();
         }
 
-        // @Todo: This is actually static. So implement as a separate batch?
-        void RenderBackground(int rows, int cols, float spriteScale)
+        void RenderBackground()
         {
-            const Vector2 scale = { spriteScale, spriteScale };
-            const Vector2 origin = -0.5f * scale * Vector2((float)cols - 1, (float)rows - 1);
-            const float rotations[] = {
-                TwoPi * 0.0f, 
-                TwoPi * 0.25f, 
-                TwoPi * 0.5f, 
-                TwoPi * 0.0f
-            };
-
-            for (auto i = 0; i < rows * cols; i++)
-            {
-                auto r = i / cols;
-                auto c = i % cols;
-                auto position = origin + scale * Vector2((float)c, (float)r);
-                auto tint = Color(1, 1, 1, 1);
-
-                m_SpriteRenderer.Draw(position, scale, rotations[i % 4], tint, 1);
-            }
+            m_SpriteRenderer.BeginStatic();
+            m_SpriteRenderer.DrawStatic(m_BackgroundBatchId);
+            m_SpriteRenderer.EndStatic();
         }
 
         inline Color ToColor(m3::GemColor col)

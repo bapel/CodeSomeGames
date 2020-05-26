@@ -19,20 +19,18 @@ const SpriteVertex vertices[] =
 const D3D11_INPUT_ELEMENT_DESC spriteElementDescs[] = 
 {
     // Vertex.
-    { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,   0, 0, D3D11_INPUT_PER_VERTEX_DATA,   0 },
-    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,   0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA,   0 },
+    { "POSITION",     0, DXGI_FORMAT_R32G32_FLOAT,   0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,   0, AppendElem__, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
     // Instance.                                     
-    { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,   1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+    { "SPRITE_POS",   0, DXGI_FORMAT_R32G32_FLOAT,   1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     { "SPRITE_SCALE", 0, DXGI_FORMAT_R32G32_FLOAT,   1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     { "SPRITE_ZROT",  0, DXGI_FORMAT_R32_FLOAT,      1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     { "SPRITE_TINT",  0, DXGI_FORMAT_B8G8R8A8_UNORM, 1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
     { "SPRITE_ID",    0, DXGI_FORMAT_R16_UINT,       1, AppendElem__, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 };
 
-#undef append_elem__
-
-void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, size_t numMaxSprites)
+void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, uint32_t numMaxSprites)
 {
     std::vector<char> vsByteCode;
 
@@ -42,7 +40,6 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
     m_PixelShader = d3d11.CreatePixelShaderFromFile(shadersBasePath + "SpritePS.cso");
 
     InitInstancesBuffer(numMaxSprites);
-    m_MaxSprites = numMaxSprites;
 
     const auto d3dDevice = d3d11.GetDevice();
 
@@ -67,7 +64,7 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
         m_QuadBuffer.GetAddressOf()));
 }
 
-void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
+void SpriteRenderer::InitInstancesBuffer(uint32_t numInstances)
 {
     D3D11_BUFFER_DESC instanceBufferDesc = {};
     instanceBufferDesc.ByteWidth = (UINT)(sizeof(InstanceData) * numInstances);
@@ -76,9 +73,44 @@ void SpriteRenderer::InitInstancesBuffer(size_t numInstances)
     instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     Direct3D_Ok__(m_Device->CreateBuffer(
-        &instanceBufferDesc,
-        nullptr,
-        m_InstancesBuffer.GetAddressOf()));
+        &instanceBufferDesc, nullptr,
+        m_DynamicInstancesBuffer.GetAddressOf()));
+}
+
+uint32_t SpriteRenderer::CreateStaticBatch()
+{
+    if (m_StaticBatches.size() == 0)
+        assert(m_SpriteInstances.size() == 0);
+
+    StaticBatch batch = { m_SpriteInstances.size(), 0 };
+    m_StaticBatches.emplace_back(batch);
+
+    return m_StaticBatches.size() - 1;
+}
+
+void SpriteRenderer::FinishStaticBatch(uint32_t batchId)
+{
+    assert(batchId == m_StaticBatches.size() - 1);
+
+    auto& lastBatch = m_StaticBatches[m_StaticBatches.size() - 1];
+    lastBatch.InstanceCount = m_SpriteInstances.size() - lastBatch.StartInstanceLocation;
+}
+
+void SpriteRenderer::CommitStaticBatches()
+{
+    assert(m_StaticInstancesBuffer == nullptr);
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.ByteWidth = (UINT)(m_SpriteInstances.size() * sizeof(InstanceData));
+    desc.Usage = D3D11_USAGE_IMMUTABLE;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = m_SpriteInstances.data();
+
+    Direct3D_Ok__(m_Device->CreateBuffer(&desc, &data, m_StaticInstancesBuffer.GetAddressOf()));
+
+    m_SpriteInstances.clear();
 }
 
 void SpriteRenderer::Begin()
@@ -93,26 +125,36 @@ void SpriteRenderer::Begin()
     d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
 
+void SpriteRenderer::BeginStatic()
+{
+    auto d3dContext = m_DeviceContext.Get();
+
+    ID3D11Buffer* buffers[] = { m_QuadBuffer.Get(), m_StaticInstancesBuffer.Get() };
+    UINT strides[] = { sizeof(SpriteVertex), sizeof(InstanceData) };
+    UINT offsets[] = { 0, 0 };
+    const auto numBuffers = sizeof(strides) / sizeof(UINT);
+    d3dContext->IASetVertexBuffers(0, numBuffers, buffers, strides, offsets);
+}
+
 void SpriteRenderer::End()
 {
     if (m_SpriteInstances.empty())
         return;
 
-    if (m_SpriteInstances.size() > m_MaxSprites)
+    if (m_SpriteInstances.size() > GetDynamicInstanceCapacity())
     {
-        m_InstancesBuffer->Release();
+        m_DynamicInstancesBuffer->Release();
         InitInstancesBuffer(m_SpriteInstances.size());
-        m_MaxSprites = m_SpriteInstances.size();
     }
 
     auto d3dContext = m_DeviceContext.Get();
 
     D3D11_MAPPED_SUBRESOURCE mappedInstanceBuffer;
-    d3dContext->Map(m_InstancesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);
+    d3dContext->Map(m_DynamicInstancesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedInstanceBuffer);
     memcpy(mappedInstanceBuffer.pData, m_SpriteInstances.data(), m_SpriteInstances.size() * sizeof(InstanceData));
-    d3dContext->Unmap(m_InstancesBuffer.Get(), 0);
+    d3dContext->Unmap(m_DynamicInstancesBuffer.Get(), 0);
 
-    ID3D11Buffer* buffers[] = { m_QuadBuffer.Get(), m_InstancesBuffer.Get() };
+    ID3D11Buffer* buffers[] = { m_QuadBuffer.Get(), m_DynamicInstancesBuffer.Get() };
     UINT strides[] = { sizeof(SpriteVertex), sizeof(InstanceData) };
     UINT offsets[] = { 0, 0 };
     const auto numBuffers = sizeof(strides) / sizeof(UINT);
