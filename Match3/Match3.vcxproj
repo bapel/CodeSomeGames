@@ -241,7 +241,6 @@
     <ClInclude Include="m3Match.hpp" />
     <ClInclude Include="m3Span.hpp" />
     <ClInclude Include="m3Types.hpp" />
-    <ClInclude Include="m3Logic.hpp" />
     <ClInclude Include="m3BoardView.hpp" />
     <ClInclude Include="SpriteRenderer.hpp" />
   </ItemGroup>

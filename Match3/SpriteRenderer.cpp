@@ -77,7 +77,7 @@ void SpriteRenderer::InitInstancesBuffer(uint32_t numInstances)
         m_DynamicInstancesBuffer.GetAddressOf()));
 }
 
-uint32_t SpriteRenderer::CreateStaticBatch()
+uint32_t SpriteRenderer::CreateAndBeginStaticBatch()
 {
     if (m_StaticBatches.size() == 0)
         assert(m_SpriteInstances.size() == 0);

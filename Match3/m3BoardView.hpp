@@ -46,7 +46,7 @@ namespace m3
 
         void InitBackgroundBatch(int rows, int cols, float spriteScale)
         {
-            m_BackgroundBatchId = m_SpriteRenderer.CreateStaticBatch();
+            m_BackgroundBatchId = m_SpriteRenderer.CreateAndBeginStaticBatch();
             
             const Vector2 scale = { spriteScale, spriteScale };
             const Vector2 origin = -0.5f * scale * Vector2((float)cols - 1, (float)rows - 1);
