@@ -21,15 +21,16 @@ private:
         uint32_t InstanceCount;
     };
 
+    const static uint16_t MaxNumSpriteIds = 8;
+
     ComPtr<ID3D11Device> m_Device;
     ComPtr<ID3D11DeviceContext> m_DeviceContext;
     ComPtr<ID3D11VertexShader> m_VertexShader;
     ComPtr<ID3D11PixelShader> m_PixelShader;
     ComPtr<ID3D11InputLayout> m_InputLayout;
     ComPtr<ID3D11Buffer> m_QuadBuffer;
+
     ComPtr<ID3D11Buffer> m_DynamicInstancesBuffer;
-    
-    const static uint16_t MaxNumSpriteIds = 8;
     std::vector<InstanceData> m_SpriteInstances;
 
     ComPtr<ID3D11Buffer> m_StaticInstancesBuffer;
@@ -53,14 +54,14 @@ public:
     void Init(const Common::Direct3D11& d3d11, const std::string& shadersBasePath, uint32_t numInstances = 200);
     void InitInstancesBuffer(uint32_t numInstances);
 
-    void Begin();
-    void End();
-
-    uint32_t CreateStaticBatch();
+    uint32_t CreateAndBeginStaticBatch();
     void FinishStaticBatch(uint32_t batchId);
     void CommitStaticBatches();
 
+    void Begin();
     void BeginStatic();
+    void EndStatic() { }
+    void End();
 
     inline void DrawStatic(uint32_t batchId)
     {
@@ -68,8 +69,6 @@ public:
         const auto& batch = m_StaticBatches[batchId];
         d3dContext->DrawInstanced(4, batch.InstanceCount, 0, batch.StartInstanceLocation);
     }
-
-    void EndStatic() { }
 
     inline void Draw(Vector2 position, Vector2 scale, Color tint, uint16_t spriteId = 0)
     {
