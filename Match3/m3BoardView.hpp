@@ -21,7 +21,7 @@ namespace m3
         ComPtr<ID3D11Resource> m_TileSpriteTex2D;
         ComPtr<ID3D11ShaderResourceView> m_TileSpriteSRV;
 
-        uint32_t m_BackgroundBatchId;
+        eastl::vector<uint32_t> m_BackgroundBatchIds;
 
     public:
         BoardView() = default;
@@ -46,8 +46,6 @@ namespace m3
 
         void InitBackgroundBatch(int rows, int cols, float spriteScale)
         {
-            m_BackgroundBatchId = m_SpriteRenderer.CreateAndBeginStaticBatch();
-            
             const Vector2 scale = { spriteScale, spriteScale };
             const Vector2 origin = -0.5f * scale * Vector2((float)cols - 1, (float)rows - 1);
             const float rotations[] = {
@@ -57,17 +55,22 @@ namespace m3
                 TwoPi * 0.0f
             };
 
-            for (auto i = 0; i < rows * cols; i++)
+            for (auto r = 0; r < rows; r++)
             {
-                auto r = i / cols;
-                auto c = i % cols;
-                auto position = origin + scale * Vector2((float)c, (float)r);
-                auto tint = Color(1, 1, 1, 1);
+                auto batchId = m_SpriteRenderer.CreateAndBeginStaticBatch();    
 
-                m_SpriteRenderer.Draw(position, scale, rotations[i % 4], tint, 1);
+                for (auto c = 0; c < cols; c++)
+                {
+                    auto position = origin + scale * Vector2((float)c, (float)r);
+                    auto tint = Color(1, 1, 1, 1);
+
+                    m_SpriteRenderer.Draw(position, scale, rotations[(r + c) % 4], tint, 1);
+                }
+
+                m_BackgroundBatchIds.emplace_back(batchId);
+                m_SpriteRenderer.FinishStaticBatch(batchId);
             }
 
-            m_SpriteRenderer.FinishStaticBatch(m_BackgroundBatchId);
             m_SpriteRenderer.CommitStaticBatches();
         }
 
@@ -96,7 +99,10 @@ namespace m3
         void RenderBackground()
         {
             m_SpriteRenderer.BeginStatic();
-            m_SpriteRenderer.DrawStatic(m_BackgroundBatchId);
+
+            for (auto i = 0; i < m_BackgroundBatchIds.size(); i++)
+                m_SpriteRenderer.DrawStatic(m_BackgroundBatchIds[i]);
+
             m_SpriteRenderer.EndStatic();
         }
 

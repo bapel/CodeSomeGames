@@ -159,6 +159,8 @@ private:
         m_BoardView.Init(m_D3D11, m_ShadersPath);
         m_BoardView.InitBackgroundBatch(rows.m_I, cols.m_I, SpriteSize);
 
+        m_IdToIndex.reserve(m_Board.Count());
+
         // Create and place random colored gems.
         for (auto i = 0U; i < m_Board.Count(); i++)
         {
