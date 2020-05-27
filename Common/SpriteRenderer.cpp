@@ -36,8 +36,8 @@ void SpriteRenderer::Init(const Common::Direct3D11& d3d11, const std::string& sh
 
     m_Device = d3d11.GetDevice();
     m_DeviceContext = d3d11.GetDeviceContext();
-    m_VertexShader = d3d11.CreateVertexShaderFromFile(shadersBasePath + "SpriteVS.cso", vsByteCode);
-    m_PixelShader = d3d11.CreatePixelShaderFromFile(shadersBasePath + "SpritePS.cso");
+    m_VertexShader = d3d11.CreateVertexShaderFromFile(shadersBasePath + "Sprite.vsh.cso", vsByteCode);
+    m_PixelShader = d3d11.CreatePixelShaderFromFile(shadersBasePath + "Sprite.psh.cso");
 
     InitInstancesBuffer(numMaxSprites);
 
@@ -82,10 +82,10 @@ uint32_t SpriteRenderer::CreateAndBeginStaticBatch()
     if (m_StaticBatches.size() == 0)
         assert(m_SpriteInstances.size() == 0);
 
-    StaticBatch batch = { m_SpriteInstances.size(), 0 };
+    StaticBatch batch = { (UINT)m_SpriteInstances.size(), 0 };
     m_StaticBatches.emplace_back(batch);
 
-    return m_StaticBatches.size() - 1;
+    return (UINT)m_StaticBatches.size() - 1U;
 }
 
 void SpriteRenderer::FinishStaticBatch(uint32_t batchId)
@@ -93,7 +93,7 @@ void SpriteRenderer::FinishStaticBatch(uint32_t batchId)
     assert(batchId == m_StaticBatches.size() - 1);
 
     auto& lastBatch = m_StaticBatches[m_StaticBatches.size() - 1];
-    lastBatch.InstanceCount = m_SpriteInstances.size() - lastBatch.StartInstanceLocation;
+    lastBatch.InstanceCount = (UINT)m_SpriteInstances.size() - lastBatch.StartInstanceLocation;
 }
 
 void SpriteRenderer::CommitStaticBatches()
@@ -144,7 +144,7 @@ void SpriteRenderer::End()
     if (m_SpriteInstances.size() > GetDynamicInstanceCapacity())
     {
         m_DynamicInstancesBuffer->Release();
-        InitInstancesBuffer(m_SpriteInstances.size());
+        InitInstancesBuffer((UINT)m_SpriteInstances.size());
     }
 
     auto d3dContext = m_DeviceContext.Get();

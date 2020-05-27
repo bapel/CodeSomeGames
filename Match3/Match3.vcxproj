@@ -233,7 +233,6 @@
   <ItemGroup>
     <ClCompile Include="Match3Game.cpp" />
     <ClCompile Include="Match3Test.cpp" />
-    <ClCompile Include="SpriteRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="m3Board.hpp" />
@@ -242,7 +241,6 @@
     <ClInclude Include="m3Span.hpp" />
     <ClInclude Include="m3Types.hpp" />
     <ClInclude Include="m3BoardView.hpp" />
-    <ClInclude Include="SpriteRenderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\SpritePS.hlsl">
