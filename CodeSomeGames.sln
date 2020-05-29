@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTemplate_Test1", "GameT
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FontRender", "FontRender\FontRender.vcxproj", "{44618BA0-A403-4280-9C90-1721A58F8D20}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Collections", "Collections\Collections.vcxproj", "{B09488E4-7A25-4664-ADCB-9B59416A7F66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -225,6 +227,24 @@ Global
 		{44618BA0-A403-4280-9C90-1721A58F8D20}.Test|x64.Build.0 = Test|x64
 		{44618BA0-A403-4280-9C90-1721A58F8D20}.Test|x86.ActiveCfg = Test|Win32
 		{44618BA0-A403-4280-9C90-1721A58F8D20}.Test|x86.Build.0 = Test|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|ARM.ActiveCfg = Debug|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|x64.ActiveCfg = Debug|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|x64.Build.0 = Debug|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|x86.ActiveCfg = Debug|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Debug|x86.Build.0 = Debug|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|ARM.ActiveCfg = Release|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|ARM64.ActiveCfg = Release|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|x64.ActiveCfg = Release|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|x64.Build.0 = Release|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|x86.ActiveCfg = Release|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Release|x86.Build.0 = Release|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|ARM.ActiveCfg = Test|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|ARM64.ActiveCfg = Test|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|x64.ActiveCfg = Test|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|x64.Build.0 = Test|x64
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|x86.ActiveCfg = Test|Win32
+		{B09488E4-7A25-4664-ADCB-9B59416A7F66}.Test|x86.Build.0 = Test|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

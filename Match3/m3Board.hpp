@@ -92,7 +92,7 @@ TEST_CASE("Inverted board creation", "[board]")
         _1"BROBROGY"
         _0"YBROBROG";
 
-    using GemColors = Board<gem_color_t, Rows, Cols>;
+    using GemColors = Board<GemColor, Rows, Cols>;
 
     GemColors colors;
     GemColors::CreateInverted(colors_, sizeof(colors_), &colors);
