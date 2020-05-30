@@ -28,24 +28,24 @@ Namespace__
 {
     // Resizable growing array.
     template <class T>
-    class List
+    class ArrayList
     {
     public:
-        List() : m_Allocator(GetFallbackAllocator())
+        ArrayList() : m_Allocator(GetFallbackAllocator())
         { AssertIsPod__(T); }
         
-        List(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
+        ArrayList(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
             m_Allocator(allocator), 
             m_Count(0), 
             m_Capacity(capacity)
         {
             AssertIsPod__(T);
-            m_Data = m_Allocator->Malloc_n(capacity);
+            m_Data = m_Allocator->Malloc_n<T>(capacity);
         }
         
-        List(const List<T>& other) = delete;
+        ArrayList(const ArrayList<T>& other) = delete;
 
-        List(List<T>&& other) :
+        ArrayList(ArrayList<T>&& other) :
             m_Allocator(other.m_Allocator), 
             m_Data(other.m_Data),
             m_Count(other.m_Data),
@@ -57,7 +57,7 @@ Namespace__
             other.m_Capacity = 0;
         }
 
-        ~List()
+        ~ArrayList()
         {
             if (m_Data != nullptr)
                 m_Allocator->Free(m_Data);
@@ -181,7 +181,7 @@ Namespace__
 
             auto count = Min(m_Count, capacity);
 
-            auto dst = m_Allocator->Malloc_n(capacity);
+            auto dst = m_Allocator->Malloc_n<T>(capacity);
             auto dstSize = count * sizeof(T);
             auto src = m_Data;
             auto srcSize = dstSize;
@@ -203,5 +203,127 @@ Namespace__
 }
 
 #ifdef CatchAvailable__
+
+TEST_CASE("List construction", "[list]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("List must be initially empty and unallocated")
+    {
+        ArrayList<int> ints;
+
+        REQUIRE(0 == ints.Count());
+        REQUIRE(0 == ints.Capacity());
+        REQUIRE(nullptr == ints.Data());
+        REQUIRE(0 == ints.DataSize());
+        REQUIRE(0 == ints.AllocatedSize());
+    }
+
+    SECTION("List init with capacity should adequately allocate")
+    {
+        const auto n = 200;
+        ArrayList<int> ints(n);
+
+        REQUIRE(0 == ints.Count());
+        REQUIRE(n == ints.Capacity());
+        REQUIRE(nullptr != ints.Data());
+        REQUIRE(0 == ints.DataSize());
+        REQUIRE(n * sizeof(int) == ints.AllocatedSize());
+    }
+}
+
+TEST_CASE("List add and retrieval", "[list]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("List Add and items retrieval (no growth)")
+    {
+        const auto n = 100;
+        ArrayList<int> ints(n);
+
+        for (auto i = 0; i < n; i++)
+            ints.Add(2 * i);
+
+        REQUIRE(n == ints.Count());
+        REQUIRE(n == ints.Capacity());
+        REQUIRE(n * sizeof(int) == ints.DataSize());
+        REQUIRE(n * sizeof(int) == ints.AllocatedSize());
+
+        for (auto i = 0; i < n; i++)
+            REQUIRE(ints[i] == (2 * i));
+    }
+
+    SECTION("List Add and items retrieval (with growth)")
+    {
+        const auto n0 = 10;
+        const auto n = 200;
+        ArrayList<int> ints(10);
+
+        for (auto i = 0; i < n; i++)
+            ints.Add(2 * i);
+
+        REQUIRE(n == ints.Count());
+        REQUIRE(n <= ints.Capacity());
+        REQUIRE(n * sizeof(int) == ints.DataSize());
+        REQUIRE(n * sizeof(int) <= ints.AllocatedSize());
+
+        for (auto i = 0; i < n; i++)
+            REQUIRE(ints[i] == (2 * i));
+    }
+}
+
+TEST_CASE("List insert and retrieval", "[list]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("List insert and items retrieval (no growth)")
+    {
+        const auto n = 99;
+        ArrayList<int> ints(n + 1);
+
+        for (auto i = 0; i < n; i++)
+            ints.Add(2 * i);
+
+        ints.Insert(15, -15);
+
+        REQUIRE((n + 1) == ints.Count());
+        REQUIRE((n + 1) == ints.Capacity());
+        REQUIRE((n + 1) * sizeof(int) == ints.DataSize());
+        REQUIRE((n + 1) * sizeof(int) <= ints.AllocatedSize());
+
+        for (auto i = 0; i < 15; i++)
+            REQUIRE(ints[i] == (2 * i));
+
+        REQUIRE(-15 == ints[15]);
+
+        for (auto i = 17; i < n + 1; i++)
+            REQUIRE(ints[i] == (2 * (i - 1)));
+    }
+
+    SECTION("List many insert and items retrieval (with growth)")
+    {
+        const auto n = 50;
+        ArrayList<int> ints(n);
+
+        for (auto i = 0; i < n; i++)
+            ints.Add(2 * i + 1);
+
+        for (auto j = 0; j < n; j++)
+            ints.Insert(2 * j, 2 * j);
+
+        REQUIRE(2 * n == ints.Count());
+        REQUIRE(2 * n == ints.Capacity());
+        REQUIRE(2 * n * sizeof(int) == ints.DataSize());
+        REQUIRE(2 * n * sizeof(int) <= ints.AllocatedSize());
+
+        for (auto i = 0; i < ints.Count(); i++)
+            REQUIRE(i == ints[i]);
+    }
+}
+
+TEST_CASE("List remove and retrieval")
+{
+    
+}
 
 #endif

@@ -32,7 +32,7 @@
     <ClInclude Include="Allocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="List.hpp">
+    <ClInclude Include="ArrayList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

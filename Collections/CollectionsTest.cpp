@@ -5,7 +5,8 @@
 
 #include <catch.hpp>
 
-#include "List.hpp"
+#include "Allocator.hpp"
+#include "ArrayList.hpp"
 
 int main(int argc, char** argv) 
 {

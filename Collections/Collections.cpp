@@ -2,7 +2,7 @@
 
 #include "Collections.hpp"
 
-pstl::List<int> ints;
+pstl::ArrayList<int> ints;
 
 int main()
 {

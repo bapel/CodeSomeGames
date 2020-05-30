@@ -49,4 +49,12 @@ Namespace__
     // Double ended queue.
     template <class T>
     struct Dequeue;
+
+    // Static bitset.
+    template<int N, class T = uint64_t>
+    struct Bitset;
+
+    // Bit vector.
+    template<class T = uint64_t>
+    struct BitArray;
 }
