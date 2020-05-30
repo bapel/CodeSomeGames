@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 
+// @Todo: Think of another name for core libs?
+// pstl stands for POD STL.
 #define NamespaceName__ pstl
 #define Namespace__ namespace NamespaceName__
 
@@ -25,6 +27,9 @@ Namespace__
     template <class T> using ConstPtrType = const T*;
     template <class T> using RefType = T &;
     template <class T> using ConstRefType = const T &;
+
+    // @Todo: Do we need "bit-twiddling" versions of Min/Max?
+    // Are those actually faster?
 
     template <class T>
     T Min(ConstRefType<T> a, ConstRefType<T> b)

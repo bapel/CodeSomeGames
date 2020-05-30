@@ -30,7 +30,49 @@ Namespace__
 
 void SpecificAlignTest(
     NamespaceName__::IAllocator* allocator, 
-    NamespaceName__::SizeType offset = 0)
+    NamespaceName__::SizeType offset = 0);
+
+void StructAlignTest(
+    NamespaceName__::IAllocator* allocator, 
+    NamespaceName__::SizeType offset = 0);
+
+TEST_CASE("Allocator implementations", "[allocators]", )
+{
+    using namespace NamespaceName__;
+
+    IAllocator* allocators[] = 
+    {
+        GetFallbackAllocator()
+        // @Todo: Add other allocators here.
+    };
+
+    const char* names[] = 
+    {
+        "FallbackAllocator"
+    };
+
+    for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
+    {
+        SECTION(names[i])
+        {
+            SECTION("Specific alignment") 
+            { SpecificAlignTest(allocators[i]); }
+
+            SECTION("Specific alignment with offset")
+            { SpecificAlignTest(allocators[i], 15); }
+
+            SECTION("Struct alignment")
+            { StructAlignTest(allocators[i]); }
+
+            SECTION("Struct alignment with offset")
+            { StructAlignTest(allocators[i], 10); }
+        }
+    }
+}
+
+void SpecificAlignTest(
+    NamespaceName__::IAllocator* allocator, 
+    NamespaceName__::SizeType offset)
 {
     auto ptr_0 = allocator->Malloc(128,  8, offset);
     auto ptr_1 = allocator->Malloc(128, 16, offset);
@@ -50,7 +92,7 @@ void SpecificAlignTest(
 
 void StructAlignTest(
     NamespaceName__::IAllocator* allocator, 
-    NamespaceName__::SizeType offset = 0)
+    NamespaceName__::SizeType offset)
 {
     __declspec(align(8))  struct Aligned__8 { double v[16]; };
     __declspec(align(16)) struct Aligned_16 { double v[16]; };
@@ -71,41 +113,6 @@ void StructAlignTest(
     allocator->Free(ptr_1);
     allocator->Free(ptr_2);
     allocator->Free(ptr_3);
-}
-
-TEST_CASE("Allocator implementations", "[allocators]", )
-{
-    using namespace NamespaceName__;
-
-    IAllocator* allocators[] = 
-    {
-        GetFallbackAllocator()
-        // @Todo: Add other allocators here.
-    };
-
-    SECTION("Specific alignment")
-    {
-        for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
-            SpecificAlignTest(allocators[i]);
-    }
-
-    SECTION("Specific alignment with offset")
-    {
-        for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
-            SpecificAlignTest(allocators[i], 15);
-    }
-
-    SECTION("Struct alignment")
-    {
-        for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
-            StructAlignTest(allocators[i]);
-    }
-
-    SECTION("Struct alignment with offset")
-    {
-        for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
-            StructAlignTest(allocators[i], 10);
-    }
 }
 
 #endif
