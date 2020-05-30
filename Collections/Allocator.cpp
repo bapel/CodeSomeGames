@@ -9,16 +9,24 @@ namespace internal_
     {
         void* Malloc(SizeType size, SizeType alignment, SizeType offset) override final
         {
+            if (size == 0)
+                return nullptr;
+
             auto block = _aligned_offset_malloc(size, alignment, offset);
+
             if (block != nullptr)
                 m_NumAllocations++;
+
             return block;
         }
 
         void Free(void* block) override final
         {
-            assert(block != nullptr);
+            if (block == nullptr)
+                return;
+
             _aligned_free(block);
+
             assert(m_NumAllocations > 0);
             m_NumAllocations--;
         }

@@ -1,5 +1,5 @@
 
-TEST_CASE("List construction", "[list]")
+TEST_CASE("ArrayList construction", "[array-list]")
 {
     using namespace NamespaceName__;
 
@@ -45,64 +45,141 @@ TEST_CASE("List construction", "[list]")
     }
 }
 
-TEST_CASE("List add", "[list-construct]")
+TEST_CASE("ArrayList set capacity", "[array-list]")
 {
     using namespace NamespaceName__;
 
-    SECTION("List Add with no growth")
+    SECTION("Set capacity larger than 0")
     {
-        const auto n = 100;
-        ArrayList<int> ints(n);
-
-        for (auto i = 0; i < n; i++)
-            ints.Add(2 * i);
-
-        REQUIRE(n == ints.Count());
-        REQUIRE(n == ints.Capacity());
-        REQUIRE(n * sizeof(int) == ints.DataSize());
-        REQUIRE(n * sizeof(int) == ints.AllocatedSize());
-
-        for (auto i = 0; i < n; i++)
-            REQUIRE(ints[i] == (2 * i));
-    }
-
-    SECTION("List Add with growth")
-    {
-        const auto n0 = 10;
-        const auto n = 200;
-        ArrayList<int> ints(10);
-
-        for (auto i = 0; i < n; i++)
-            ints.Add(2 * i);
-
-        REQUIRE(n == ints.Count());
-        REQUIRE(n <= ints.Capacity());
-        REQUIRE(n * sizeof(int) == ints.DataSize());
-        REQUIRE(n * sizeof(int) <= ints.AllocatedSize());
-
-        for (auto i = 0; i < n; i++)
-            REQUIRE(ints[i] == (2 * i));
-    }
-
-    SECTION("List Add, no init capacity")
-    {
-        const auto n = 100;
         ArrayList<int> ints;
 
-        for (auto i = 0; i < n; i++)
-            ints.Add(2 * i);
+        ints.SetCapacity(10);
 
-        REQUIRE(n == ints.Count());
-        REQUIRE(n <= ints.Capacity());
-        REQUIRE(n * sizeof(int) == ints.DataSize());
-        REQUIRE(n * sizeof(int) <= ints.AllocatedSize());
+        REQUIRE(ints.Count() == 0);
+        REQUIRE(ints.Capacity() == 10);
+    }
 
-        for (auto i = 0; i < n; i++)
-            REQUIRE(ints[i] == (2 * i));
+    SECTION("Set capacity to smaller")
+    {
+        ArrayList<int> ints(20);
+
+        ints.SetCapacity(10);
+
+        REQUIRE(ints.Count() == 0);
+        REQUIRE(ints.Capacity() == 10);
+    }
+
+    SECTION("Set capacity to larger with count > 0")
+    {
+        ArrayList<int> a = { 1, 2, 3, 4, 5 };
+        ArrayList<int> b = { 1, 2, 3, 4, 5 };
+
+        a.SetCapacity(20);
+
+        REQUIRE(a.Capacity() == 20);
+        REQUIRE(a.CompareTo(b));
+    }
+
+    SECTION("Set capacity to smaller with count > 0")
+    {
+        ArrayList<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        ArrayList<int> b = { 1, 2, 3 };
+
+        a.SetCapacity(b.Count());
+
+        REQUIRE(a.Capacity() == b.Count());
+        REQUIRE(a.CompareTo(b));
     }
 }
 
-TEST_CASE("List insert and retrieval", "[list-insert]")
+TEST_CASE("ArrayList reserve", "[array-list]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("Reserve after default construct")
+    {
+        ArrayList<int> ints;
+
+        ints.Reserve(10);
+
+        REQUIRE(ints.Data() != nullptr);
+        REQUIRE(ints.Count() == 0);
+        REQUIRE(ints.Capacity() >= 10);
+    }
+
+    SECTION("Reserve smaller")
+    {
+        ArrayList<int> ints(10);
+
+        ints.Reserve(0);
+
+        REQUIRE(ints.Data() != nullptr);
+        REQUIRE(ints.Count() == 0);
+        REQUIRE(ints.Capacity() >= 0);
+    }
+
+    SECTION("Reserve larger")
+    {
+        ArrayList<int> ints(10);
+
+        ints.Reserve(20);
+
+        REQUIRE(ints.Data() != nullptr);
+        REQUIRE(ints.Count() == 0);
+        REQUIRE(ints.Capacity() >= 20);
+    }
+}
+
+TEST_CASE("ArrayList add", "[array-list]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("Add, no growth")
+    {
+        ArrayList<int> ints(100);
+
+        for (auto i = 0; i < 50; i++)
+            ints.Add(0);
+
+        REQUIRE(ints.Count() == 50);
+        REQUIRE(ints.Capacity() >= 100);
+    }
+
+    SECTION("Add with growth")
+    {
+        ArrayList<int> ints(10);
+
+        for (auto i = 0; i < 20; i++)
+            ints.Add(0);
+
+        REQUIRE(ints.Count() == 20);
+        REQUIRE(ints.Capacity() >= 20);
+    }
+
+    SECTION("Add, no init capacity")
+    {
+        ArrayList<int> ints;
+
+        for (auto i = 0; i < 10; i++)
+            ints.Add(0);
+
+        REQUIRE(ints.Count() == 10);
+        REQUIRE(ints.Capacity() >= 10);
+    }
+
+    SECTION("Add values")
+    {
+        ArrayList<int> ints(10);
+
+        for (auto i = 0; i < ints.Count(); i++)
+            ints.Add(i);
+
+        for (auto i = 0; i < ints.Count(); i++)
+            REQUIRE(ints[i] == i);
+    }
+}
+
+TEST_CASE("ArrayList insert", "[array-list]")
 {
     using namespace NamespaceName__;
 
@@ -140,17 +217,15 @@ TEST_CASE("List insert and retrieval", "[list-insert]")
     {
         ArrayList<int> a;
 
-        a.Insert(0, 0);
+        a.Insert(0, 13);
 
-        REQUIRE(0 == a[0]);
-        REQUIRE(1 == a.Count());
-        REQUIRE(1 <= a.Capacity());
-        REQUIRE(sizeof(int) == a.DataSize());
-        REQUIRE(sizeof(int) <= a.AllocatedSize());
+        REQUIRE(a[0] == 13);
+        REQUIRE(a.Count() == 1);
+        REQUIRE(a.Capacity() >= 1);
     }
 }
 
-TEST_CASE("List removal", "[list-remove]")
+TEST_CASE("ArrayList removal", "[array-list]")
 {
     using namespace NamespaceName__;
 
@@ -159,7 +234,7 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = { 0, 1,    3, 4, 5, 6 };
 
-        a.Remove(2);
+        a.RemoveAt(2);
 
         REQUIRE(b.CompareTo(a));
     }
@@ -169,7 +244,7 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = {    1, 2, 3, 4, 5, 6 };
 
-        a.Remove(0);
+        a.RemoveAt(0);
 
         REQUIRE(b.CompareTo(a));
     }
@@ -179,7 +254,7 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = { 0, 1, 2, 3, 4, 5 };
 
-        a.Remove(a.Count() - 1);
+        a.RemoveAt(a.Count() - 1);
 
         REQUIRE(b.CompareTo(a));
     }
@@ -189,7 +264,7 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = { 0, 1, 6, 3, 4, 5 };
 
-        a.RemoveUnsorted(2);
+        a.RemoveAtSwapBack(2);
 
         REQUIRE(b.CompareTo(a));
     }
@@ -199,7 +274,7 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = { 6, 1, 2, 3, 4, 5 };
 
-        a.RemoveUnsorted(0);
+        a.RemoveAtSwapBack(0);
 
         REQUIRE(b.CompareTo(a));
     }
@@ -209,8 +284,30 @@ TEST_CASE("List removal", "[list-remove]")
         ArrayList<int> a = { 0, 1, 2, 3, 4, 5, 6 };
         ArrayList<int> b = { 0, 1, 2, 3, 4, 5 };
 
-        a.RemoveUnsorted(a.Count() - 1);
+        a.RemoveAtSwapBack(a.Count() - 1);
 
         REQUIRE(b.CompareTo(a));
     }
+}
+
+TEST_CASE("ArrayList resize", "[array-list]")
+{
+    using namespace NamespaceName__;
+
+    ArrayList<int> ints;
+
+    ints.Resize(20);
+
+    REQUIRE(ints.Count() == 20);
+    REQUIRE(ints.Capacity() >= 20);
+
+    ints.Resize(10);
+
+    REQUIRE(ints.Count() == 10);
+    REQUIRE(ints.Capacity() >= 10);
+
+    ints.Resize(30);
+
+    REQUIRE(ints.Count() == 30);
+    REQUIRE(ints.Capacity() >= 30);
 }

@@ -32,16 +32,22 @@ Namespace__
     class ArrayList
     {
     public:
-        ArrayList() : m_Allocator(GetFallbackAllocator())
+        ArrayList() : 
+            m_Allocator(GetFallbackAllocator())
         { AssertIsPod__(T); }
         
         ArrayList(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
-            m_Allocator(allocator), 
-            m_Count(0), 
-            m_Capacity(capacity)
+            m_Allocator(allocator)
         {
             AssertIsPod__(T);
-            m_Data = m_Allocator->Malloc_n<T>(capacity);
+            SetCapacity(capacity);
+        }
+
+        ArrayList(std::initializer_list<T> initList) :
+            ArrayList((CountType)initList.size())
+        {
+            for (auto iter = initList.begin(); iter < initList.end(); iter++)
+                m_Data[m_Count++] = *iter;
         }
         
         ArrayList(const ArrayList<T>& other) = delete;
@@ -56,19 +62,6 @@ Namespace__
             other.m_Data = nullptr;
             other.m_Count = 0;
             other.m_Capacity = 0;
-        }
-
-        ArrayList(std::initializer_list<T> initList)
-        {
-            auto c = (CountType)initList.size();
-
-            m_Allocator = GetFallbackAllocator();
-            m_Data = m_Allocator->Malloc_n<T>(c);
-            m_Count = 0;
-            m_Capacity = c;
-
-            for (auto iter = initList.begin(); iter < initList.end(); iter++)
-                m_Data[m_Count++] = *iter;
         }
 
         ArrayList<T>& operator = (std::initializer_list<T> initList)
@@ -127,7 +120,7 @@ Namespace__
         void Add(ConstRefType<T> value)
         {
             if (m_Count == m_Capacity)
-                Reserve(m_Capacity << 1);
+                Grow();
 
             m_Data[m_Count++] = value;
         }
@@ -140,7 +133,7 @@ Namespace__
 
             // @Todo: Do insertion along with growth?
             if (m_Count == m_Capacity)
-                Reserve(m_Capacity << 1);
+                Grow();
 
             auto dst = m_Data + index + 1;
             auto src = m_Data + index;
@@ -185,57 +178,41 @@ Namespace__
         { m_Count = 0; }
 
         void TrimExcess()
-        { Reserve(m_Count); }
+        { SetCapacity(m_Count); }
 
-        void Resize(CountType count)
+        void Resize(CountType newCount)
         {
-            if (count > m_Capacity)
-                Reserve(count);
+            if (newCount > m_Capacity)
+                Grow(newCount);
 
-            m_Count = count;
+            m_Count = newCount;
         }
 
-        void Resize(CountType count, ConstRefType<T> value)
+        void SetCapacity(CountType newCapacity)
         {
-            if (count <= m_Count)
-            {
-                m_Count = count;
+            if (newCapacity == m_Capacity)
                 return;
+
+            if (newCapacity < m_Count)
+                m_Count = newCapacity;
+
+            T* newData = nullptr;
+
+            if (newCapacity > 0) 
+            {
+                newData = m_Allocator->Malloc_n<T>(newCapacity);
+                memcpy(newData, m_Data, sizeof(T) * m_Count);
             }
 
-            if (count > m_Capacity)
-                Reserve(count);
-
-            while (m_Count < count)
-                m_Data[m_Count++] = value;
+            m_Allocator->Free(m_Data);
+            m_Data = newData;
+            m_Capacity = newCapacity;
         }
 
-        void Reserve(CountType capacity)
+        void Reserve(CountType newCapacity)
         {
-            if (capacity == 0)
-                capacity = DefaultReserve;
-
-            if (m_Capacity == capacity)
-                return;
-
-            auto count = Min(m_Count, capacity);
-            auto dst = m_Allocator->Malloc_n<T>(capacity);
-
-            if (count > 0)
-            {
-                auto dstSize = count * sizeof(T);
-                auto src = m_Data;
-                auto srcSize = dstSize;
-
-                memcpy_s(dst, dstSize, src, srcSize);
-            }
-            
-            if (m_Data != nullptr)
-                m_Allocator->Free(m_Data);
-
-            m_Data = dst;
-            m_Count = count;
-            m_Capacity = capacity;
+            if (newCapacity > m_Capacity)
+                SetCapacity(newCapacity);
         }
 
         bool CompareTo(const ArrayList<T>& other)
@@ -247,8 +224,17 @@ Namespace__
         }
 
     private:
-        const CountType DefaultReserve = 8;
+        void Grow(CountType minCapacity = 0)
+        {
+            auto newCapacity = m_Capacity * 2 + 8;
 
+            if (newCapacity < minCapacity)
+                newCapacity = minCapacity;
+
+            SetCapacity(newCapacity);
+        }
+
+    private:
         IAllocator* m_Allocator = nullptr;
         PtrType<T> m_Data = nullptr;
         CountType m_Count = 0;
