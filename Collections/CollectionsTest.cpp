@@ -3,10 +3,20 @@
 #define CATCH_CONFIG_RUNNER
 #define CatchAvailable__
 
-#include <catch.hpp>
-
 #include "Allocator.hpp"
 #include "ArrayList.hpp"
+
+#pragma warning(push)
+#pragma warning(disable : 26439)
+#pragma warning(disable : 26444)
+#pragma warning(disable : 26451)
+#pragma warning(disable : 26495)
+
+#include <catch.hpp>
+#include "Tests/Allocator.inl"
+#include "Tests/ArrayList.inl"
+
+#pragma warning(pop)
 
 int main(int argc, char** argv) 
 {

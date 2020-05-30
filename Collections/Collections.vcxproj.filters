@@ -35,5 +35,13 @@
     <ClInclude Include="ArrayList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Tests\Allocator.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\ArrayList.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

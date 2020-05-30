@@ -42,19 +42,25 @@ Namespace__
 
 Namespace__
 {
+    // @Todo: Implment
+
     // Static fixed array, like T x[N].
     template <class T, int N = -1>
-    struct Array;
-
-    // Double ended queue.
-    template <class T>
-    struct Dequeue;
+    class Array;
 
     // Static bitset.
     template<int N, class T = uint64_t>
-    struct Bitset;
+    class Bitset;
 
     // Bit vector.
     template<class T = uint64_t>
-    struct BitArray;
+    class BitArray;
+
+    // Double ended queue.
+    template <class T>
+    class Dequeue;
+
+    // HashMap.
+    template <class K, class V>
+    class HashMap;
 }
