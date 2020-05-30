@@ -27,7 +27,5 @@ namespace internal_
 
 internal_::FallbackAllocator FallbackAllocator;
 
-IAllocator* GetFallbackAllocator()
-{
-    return &FallbackAllocator;
-}
+IAllocator* NamespaceName__::GetFallbackAllocator()
+{ return &FallbackAllocator; }
