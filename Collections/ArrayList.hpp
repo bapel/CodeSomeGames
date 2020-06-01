@@ -28,31 +28,31 @@
 Namespace__
 {
     // Resizable growing array.
-    template <class T>
+    template <class Value_T>
     class ArrayList
     {
     public:
         ArrayList() : 
             m_Allocator(GetFallbackAllocator())
-        { AssertIsPod__(T); }
+        { AssertIsPod__(Value_T); }
         
         ArrayList(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
             m_Allocator(allocator)
         {
-            AssertIsPod__(T);
+            AssertIsPod__(Value_T);
             SetCapacity(capacity);
         }
 
-        ArrayList(std::initializer_list<T> initList) :
+        ArrayList(std::initializer_list<Value_T> initList) :
             ArrayList((CountType)initList.size())
         {
             for (auto iter = initList.begin(); iter < initList.end(); iter++)
                 m_Data[m_Count++] = *iter;
         }
         
-        ArrayList(const ArrayList<T>& other) = delete;
+        ArrayList(const ArrayList<Value_T>& other) = delete;
 
-        ArrayList(ArrayList<T>&& other) :
+        ArrayList(ArrayList<Value_T>&& other) :
             m_Allocator(other.m_Allocator), 
             m_Data(other.m_Data),
             m_Count(other.m_Data),
@@ -64,7 +64,7 @@ Namespace__
             other.m_Capacity = 0;
         }
 
-        ArrayList<T>& operator = (std::initializer_list<T> initList)
+        ArrayList<Value_T>& operator = (std::initializer_list<Value_T> initList)
         {
             m_Count = 0;
 
@@ -90,18 +90,18 @@ Namespace__
         { return m_Capacity; }
 
         inline SizeType DataSize() const 
-        { return sizeof(T) * m_Count; }
+        { return sizeof(Value_T) * m_Count; }
 
         inline SizeType AllocatedSize() const 
-        { return sizeof(T) * m_Capacity; }
+        { return sizeof(Value_T) * m_Capacity; }
 
-        inline PtrType<T> Data() 
+        inline PtrType<Value_T> Data() 
         { return m_Data; }
 
-        inline ConstPtrType<T> Data() const 
+        inline ConstPtrType<Value_T> Data() const 
         { return m_Data; }
 
-        inline RefType<T> operator[] (IndexType index)
+        inline RefType<Value_T> operator[] (IndexType index)
         {
             #ifdef BoundsCheck__
             assert(index < m_Count);
@@ -109,7 +109,7 @@ Namespace__
             return m_Data[index];
         }
 
-        inline ConstRefType<T> operator[] (IndexType index) const
+        inline ConstRefType<Value_T> operator[] (IndexType index) const
         {
             #ifdef BoundsCheck__
             assert(index < m_Count);
@@ -117,7 +117,7 @@ Namespace__
             return m_Data[index];
         }
 
-        void Add(ConstRefType<T> value)
+        void Add(ConstRefType<Value_T> value)
         {
             if (m_Count == m_Capacity)
                 Grow();
@@ -125,7 +125,7 @@ Namespace__
             m_Data[m_Count++] = value;
         }
 
-        void Insert(IndexType index, ConstRefType<T> value)
+        void Insert(IndexType index, ConstRefType<Value_T> value)
         {
             #ifdef BoundsCheck__
             assert(index <= m_Count);
@@ -137,7 +137,7 @@ Namespace__
 
             auto dst = m_Data + index + 1;
             auto src = m_Data + index;
-            auto size = sizeof(T) * (m_Count - index);
+            auto size = sizeof(Value_T) * (m_Count - index);
 
             memmove_s(dst, size, src, size);
             m_Data[index] = value;
@@ -154,7 +154,7 @@ Namespace__
             {
                 auto dst = m_Data + index;
                 auto src = m_Data + index + 1;
-                auto size = sizeof(T) * (m_Count - index - 1);
+                auto size = sizeof(Value_T) * (m_Count - index - 1);
 
                 memmove_s(dst, size, src, size);
             }
@@ -196,12 +196,12 @@ Namespace__
             if (newCapacity < m_Count)
                 m_Count = newCapacity;
 
-            T* newData = nullptr;
+            Value_T* newData = nullptr;
 
             if (newCapacity > 0) 
             {
-                newData = m_Allocator->Malloc_n<T>(newCapacity);
-                memcpy(newData, m_Data, sizeof(T) * m_Count);
+                newData = m_Allocator->Malloc_n<Value_T>(newCapacity);
+                memcpy(newData, m_Data, sizeof(Value_T) * m_Count);
             }
 
             m_Allocator->Free(m_Data);
@@ -215,12 +215,12 @@ Namespace__
                 SetCapacity(newCapacity);
         }
 
-        bool CompareTo(const ArrayList<T>& other)
+        bool CompareTo(const ArrayList<Value_T>& other)
         {
             if (other.m_Count != m_Count)
                 return false;
 
-            return 0 == memcmp(m_Data, other.m_Data, sizeof(T) * m_Count);
+            return 0 == memcmp(m_Data, other.m_Data, sizeof(Value_T) * m_Count);
         }
 
     private:
@@ -236,7 +236,7 @@ Namespace__
 
     private:
         IAllocator* m_Allocator = nullptr;
-        PtrType<T> m_Data = nullptr;
+        PtrType<Value_T> m_Data = nullptr;
         CountType m_Count = 0;
         CountType m_Capacity = 0;
     };

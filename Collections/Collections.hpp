@@ -10,7 +10,7 @@
 
 #if defined(_DEBUG)
 #define BoundsCheck__
-#define AssertIsPod__(T__) static_assert(__is_pod(T))
+#define AssertIsPod__(T__) static_assert(__is_pod(T__), #T__" is not POD")
 #else
 #define AssertIsPod__(T__)
 #endif
@@ -42,7 +42,7 @@ Namespace__
 
 Namespace__
 {
-    // @Todo: Implment
+    // @Todo: Implement
 
     // Static fixed array, like T x[N].
     template <class T, int N = -1>
