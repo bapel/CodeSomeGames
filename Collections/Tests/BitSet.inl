@@ -1,6 +1,6 @@
 
 #define BT__(N__) NamespaceName__::BitSet<N__>
-#define BitSetTypes__ BT__(16), BT__(32), BT__(64), BT__(128), BT__(256)
+#define BitSetTypes__ BT__(8), BT__(16), BT__(24), BT__(32), BT__(64), BT__(128), BT__(256)
 
 TEMPLATE_TEST_CASE("Bitset init", "[bitset]", BitSetTypes__)
 {
