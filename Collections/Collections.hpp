@@ -16,6 +16,7 @@
 #endif
 
 #include <stdint.h>
+#include <array>
 
 Namespace__
 {
@@ -27,6 +28,10 @@ Namespace__
     template <class T> using ConstPtrType = const T*;
     template <class T> using RefType = T &;
     template <class T> using ConstRefType = const T &;
+
+    // Static fixed array, like T x[N].
+    template <class T, int N>
+    using Array = std::array<T, N>;
 
     // @Todo: Do we need "bit-twiddling" versions of Min/Max?
     // Are those actually faster?
@@ -43,14 +48,6 @@ Namespace__
 Namespace__
 {
     // @Todo: Implement
-
-    // Static fixed array, like T x[N].
-    template <class T, int N = -1>
-    class Array;
-
-    // Static bitset.
-    template<int N, class T = uint64_t>
-    class Bitset;
 
     // Bit vector.
     template<class T = uint64_t>
