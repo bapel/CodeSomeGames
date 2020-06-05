@@ -1,13 +1,14 @@
 
-TEST_CASE("Bitset init", "[bitset]")
+#define BT__(N__) NamespaceName__::BitSet<N__>
+#define BitSetTypes__ BT__(16), BT__(32), BT__(64), BT__(128), BT__(256)
+
+TEMPLATE_TEST_CASE("Bitset init", "[bitset]", BitSetTypes__)
 {
     using namespace NamespaceName__;
 
     SECTION("Default construct")
     {
-        BitSet<100> a;
-        for (auto i = 0U; i < a.Count(); i++)
-            REQUIRE(a[i] == false);
+        TestType a;
 
         REQUIRE(a.Any() == false);
         REQUIRE(a.All() == false);
@@ -16,7 +17,7 @@ TEST_CASE("Bitset init", "[bitset]")
 
     SECTION("Init from ints. All ones")
     {
-        BitSet<100> a({ 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF });
+        TestType a = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
 
         REQUIRE(a.Any() == true);
         REQUIRE(a.All() == true);
@@ -25,8 +26,8 @@ TEST_CASE("Bitset init", "[bitset]")
 
     SECTION("Init from int array. All ones")
     {
-        uint64_t ints[] = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
-        BitSet<100> a(ints, sizeof(ints) / sizeof(uint64_t));
+        uint64_t ints[] = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
+        TestType a(ints, sizeof(ints) / sizeof(uint64_t));
 
         REQUIRE(a.Any() == true);
         REQUIRE(a.All() == true);
@@ -34,44 +35,46 @@ TEST_CASE("Bitset init", "[bitset]")
     }
 }
 
-TEST_CASE("Get/Set bit", "[bitset]")
+TEMPLATE_TEST_CASE("Get/Set bit", "[bitset]", BitSetTypes__)
 {
     using namespace NamespaceName__;
 
-    BitSet<100> a;
+    TestType a;
 
-    REQUIRE(a.Count() >= 100);
-    REQUIRE(a.Count() <= 128);
+    REQUIRE(a.Any() == false);
+    REQUIRE(a.All() == false);
+    REQUIRE(a.None() == true);
 
-    REQUIRE(false == a[3]);
-    a.Set(3, true);
+    a.Set(3);
     REQUIRE(true == a[3]);
 
-    REQUIRE(false == a[70]);
-    a.Set(70, true);
-    REQUIRE(true == a[70]);
+    a.Set(a.Count() / 3);
+    REQUIRE(true == a[a.Count() / 3]);
 
-    REQUIRE(a.Any() == true);
+    a.Unset(3);
+    REQUIRE(false == a[3]);
+
+    a.Unset(a.Count() / 3);
+    REQUIRE(false == a[a.Count() / 3]);
+
+    REQUIRE(a.Any() == false);
     REQUIRE(a.All() == false);
-    REQUIRE(a.None() == false);
+    REQUIRE(a.None() == true);
 }
 
-TEST_CASE("Clear bitset", "[bitset]")
+TEMPLATE_TEST_CASE("Clear bitset", "[bitset]", BitSetTypes__)
 {
     using namespace NamespaceName__;
 
-    BitSet<100> a;
-
-    REQUIRE(a.Count() >= 70);
-    REQUIRE(a.Count() <= 128);
+    TestType a;
 
     REQUIRE(false == a[3]);
-    a.Set(3, true);
+    a.Set(3);
     REQUIRE(true == a[3]);
 
-    REQUIRE(false == a[65]);
-    a.Set(65, true);
-    REQUIRE(true == a[65]);
+    REQUIRE(false == a[a.Count() / 3]);
+    a.Set(a.Count() / 3);
+    REQUIRE(true == a[a.Count() / 3]);
 
     REQUIRE(a.Any() == true);
     REQUIRE(a.All() == false);
@@ -83,3 +86,84 @@ TEST_CASE("Clear bitset", "[bitset]")
     REQUIRE(a.All() == false);
     REQUIRE(a.None() == true);
 }
+
+TEST_CASE("Bitset operators", "[bitset]")
+{
+    using namespace NamespaceName__;
+
+    SECTION("& operator")
+    {
+        BitSet<100> a = { 858302ull, 78267498ull };
+        BitSet<100> b = { 927495ull, 95475902ull };
+        BitSet<100> c = 
+        {
+              858302ull & 927495ull,
+            78267498ull & 95475902ull
+        };
+
+        REQUIRE((a & b) == c);
+    }
+
+    SECTION("| operator")
+    {
+        BitSet<100> a = { 858302ull, 78267498ull };
+        BitSet<100> b = { 927495ull, 95475902ull };
+        BitSet<100> c = 
+        {
+              858302ull | 927495ull,
+            78267498ull | 95475902ull
+        };
+
+        REQUIRE((a | b) == c);
+    }
+
+    SECTION("^ operator")
+    {
+        BitSet<100> a = { 858302ull, 78267498ull };
+        BitSet<100> b = { 927495ull, 95475902ull };
+        BitSet<100> c = 
+        {
+              858302ull ^ 927495ull,
+            78267498ull ^ 95475902ull
+        };
+
+        REQUIRE((a ^ b) == c);
+    }
+
+    SECTION("~ operator")
+    {
+        BitSet<100> a = {  858302ull,  78267498ull };
+        BitSet<100> b = { ~858302ull, ~78267498ull };
+
+        REQUIRE((~a) == b);
+    }
+
+    SECTION("<< operator")
+    {
+        BitSet<100> a = { 0xFFFF'FFFF'FFFF'FFFF, 0xFFFF'FFFF'FFFF'FFFF };
+        BitSet<100> b = { 0xFFFF'FFFF'FFFF'0000, 0xFFFF'FFFF'FFFF'FFFF }; // a << 16
+        BitSet<100> c = { 0xFFFF'FFFF'FF00'0000, 0xFFFF'FFFF'FFFF'FFFF }; // a << 24
+        BitSet<100> d = {                     0, 0xFFFF'FFFF'FFFF'FF00 }; // a << (18 * 4 = 72)
+
+        REQUIRE((a <<  16) == b);
+        REQUIRE((a <<  24) == c);
+        REQUIRE((a <<  72) == d);
+        REQUIRE((a << 150) == 0);
+    }
+
+    SECTION(">> operator")
+    {
+        BitSet<100> a = { 0xFFFF'FFFF'FFFF'FFFF, 0xFFFF'FFFF'FFFF'FFFF };
+        BitSet<100> b = { 0xFFFF'FFFF'FFFF'FFFF, 0x0000'FFFF'FFFF'FFFF }; // a >> 16
+        BitSet<100> c = { 0xFFFF'FFFF'FFFF'FFFF, 0x0000'00FF'FFFF'FFFF }; // a >> 24
+        BitSet<100> d = { 0x00FF'FFFF'FFFF'FFFF, 0                     }; // a >> (18 * 4 = 72)
+
+        REQUIRE((a >>  16) == b);
+        REQUIRE((a >>  24) == c);
+        REQUIRE((a >>  72) == d);
+        REQUIRE((a >> 150) == 0);
+    }
+}
+
+#undef BT__
+#undef BitSetTypes__
