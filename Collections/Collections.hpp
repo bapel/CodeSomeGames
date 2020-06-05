@@ -31,12 +31,12 @@ Namespace__
     // @Todo: Do we need "bit-twiddling" versions of Min/Max?
     // Are those actually faster?
 
-    template <class T>
-    T Min(ConstRefType<T> a, ConstRefType<T> b)
+    template <class T, class U>
+    constexpr T Min(ConstRefType<T> a, ConstRefType<U> b)
     { return (a < b) ? a : b; }
 
-    template <class T>
-    T Max(ConstRefType<T> a, ConstRefType<T> b)
+    template <class T, class U>
+    constexpr T Max(ConstRefType<T> a, ConstRefType<U> b)
     { return (a > b) ? a : b; }
 }
 

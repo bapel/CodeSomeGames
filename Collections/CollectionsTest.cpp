@@ -5,6 +5,8 @@
 
 #include "Allocator.hpp"
 #include "ArrayList.hpp"
+// #include "DynamicBuffer.hpp"
+#include "Bitset.hpp"
 
 #pragma warning(push)
 #pragma warning(disable : 26439)
@@ -15,6 +17,7 @@
 #include <catch.hpp>
 #include "Tests/Allocator.inl"
 #include "Tests/ArrayList.inl"
+#include "Tests/Bitset.inl"
 
 #pragma warning(pop)
 

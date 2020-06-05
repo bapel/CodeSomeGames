@@ -171,10 +171,10 @@ TEST_CASE("ArrayList add", "[array-list]")
     {
         ArrayList<int> ints(10);
 
-        for (auto i = 0; i < ints.Count(); i++)
+        for (auto i = 0U; i < ints.Count(); i++)
             ints.Add(i);
 
-        for (auto i = 0; i < ints.Count(); i++)
+        for (auto i = 0U; i < ints.Count(); i++)
             REQUIRE(ints[i] == i);
     }
 }

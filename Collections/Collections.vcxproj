@@ -225,12 +225,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allocator.hpp" />
+    <ClInclude Include="BitSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
     <ClInclude Include="Tests\Allocator.inl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Tests\ArrayList.inl" />
+    <None Include="Tests\BitSet.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

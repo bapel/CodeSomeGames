@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Collections.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CollectionsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Allocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollectionsMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,9 +38,15 @@
     <ClInclude Include="Tests\Allocator.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BitSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Tests\ArrayList.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Tests\BitSet.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
