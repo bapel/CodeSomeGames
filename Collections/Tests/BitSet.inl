@@ -1,4 +1,3 @@
-
 #define BT__(N__) NamespaceName__::BitSet<N__>
 #define BitSetTypes__ BT__(8), BT__(16), BT__(24), BT__(32), BT__(64), BT__(128), BT__(256)
 
@@ -26,8 +25,7 @@ TEMPLATE_TEST_CASE("Bitset init", "[bitset]", BitSetTypes__)
 
     SECTION("Init from int array. All ones")
     {
-        uint64_t ints[] = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
-        TestType a(ints, sizeof(ints) / sizeof(uint64_t));
+        TestType a({ 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, 4);
 
         REQUIRE(a.Any() == true);
         REQUIRE(a.All() == true);
