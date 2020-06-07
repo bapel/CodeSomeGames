@@ -32,36 +32,32 @@ Namespace__
     class ArrayList
     {
     public:
+        AssertIsPod__(T);
         using ValueType = T;
 
-        ArrayList() : 
-            m_Allocator(GetFallbackAllocator())
-        { AssertIsPod__(ValueType); }
-        
+        ArrayList() = default;
+
         ArrayList(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
             m_Allocator(allocator)
-        {
-            AssertIsPod__(ValueType);
-            SetCapacity(capacity);
-        }
+        { SetCapacity(capacity); }
 
         ArrayList(std::initializer_list<ValueType> initList) :
             ArrayList((CountType)initList.size())
         {
             for (auto iter = initList.begin(); iter < initList.end(); iter++)
-                m_Data[m_Count++] = *iter;
+                m_Items[m_Count++] = *iter;
         }
         
         ArrayList(const ArrayList<ValueType>& other) = delete;
 
         ArrayList(ArrayList<ValueType>&& other) :
             m_Allocator(other.m_Allocator), 
-            m_Data(other.m_Data),
-            m_Count(other.m_Data),
+            m_Items(other.m_Items),
+            m_Count(other.m_Items),
             m_Capacity(other.m_Capacity)
         {
             other.m_Allocator = nullptr;
-            other.m_Data = nullptr;
+            other.m_Items = nullptr;
             other.m_Count = 0;
             other.m_Capacity = 0;
         }
@@ -74,15 +70,15 @@ Namespace__
                 Reserve((CountType)initList.size());
 
             for (auto iter = initList.begin(); iter < initList.end(); iter++)
-                m_Data[m_Count++] = *iter;
+                m_Items[m_Count++] = *iter;
 
             return *this;
         }
 
         ~ArrayList()
         {
-            if (m_Data != nullptr)
-                m_Allocator->Free(m_Data);
+            if (m_Items != nullptr)
+                m_Allocator->Free(m_Items);
         }
 
         inline CountType Count() const 
@@ -98,17 +94,17 @@ Namespace__
         { return sizeof(ValueType) * m_Capacity; }
 
         inline PtrType<ValueType> Data() 
-        { return m_Data; }
+        { return m_Items; }
 
         inline ConstPtrType<ValueType> Data() const 
-        { return m_Data; }
+        { return m_Items; }
 
         inline RefType<ValueType> operator[] (IndexType index)
         {
             #ifdef BoundsCheck__
             assert(index < m_Count);
             #endif
-            return m_Data[index];
+            return m_Items[index];
         }
 
         inline ConstRefType<ValueType> operator[] (IndexType index) const
@@ -116,7 +112,7 @@ Namespace__
             #ifdef BoundsCheck__
             assert(index < m_Count);
             #endif
-            return m_Data[index];
+            return m_Items[index];
         }
 
         void Add(ConstRefType<ValueType> value)
@@ -124,7 +120,7 @@ Namespace__
             if (m_Count == m_Capacity)
                 Grow();
 
-            m_Data[m_Count++] = value;
+            m_Items[m_Count++] = value;
         }
 
         void Insert(IndexType index, ConstRefType<ValueType> value)
@@ -137,12 +133,12 @@ Namespace__
             if (m_Count == m_Capacity)
                 Grow();
 
-            auto dst = m_Data + index + 1;
-            auto src = m_Data + index;
+            auto dst = m_Items + index + 1;
+            auto src = m_Items + index;
             auto size = sizeof(ValueType) * (m_Count - index);
 
             memmove_s(dst, size, src, size);
-            m_Data[index] = value;
+            m_Items[index] = value;
             m_Count++;
         }
 
@@ -154,8 +150,8 @@ Namespace__
 
             if (index < m_Count - 1)
             {
-                auto dst = m_Data + index;
-                auto src = m_Data + index + 1;
+                auto dst = m_Items + index;
+                auto src = m_Items + index + 1;
                 auto size = sizeof(ValueType) * (m_Count - index - 1);
 
                 memmove_s(dst, size, src, size);
@@ -171,7 +167,7 @@ Namespace__
             #endif
 
             if (index < m_Count - 1)
-                m_Data[index] = m_Data[m_Count - 1];
+                m_Items[index] = m_Items[m_Count - 1];
 
             m_Count--;
         }
@@ -203,11 +199,11 @@ Namespace__
             if (newCapacity > 0) 
             {
                 newData = m_Allocator->Malloc_n<ValueType>(newCapacity);
-                memcpy(newData, m_Data, sizeof(ValueType) * m_Count);
+                memcpy(newData, m_Items, sizeof(ValueType) * m_Count);
             }
 
-            m_Allocator->Free(m_Data);
-            m_Data = newData;
+            m_Allocator->Free(m_Items);
+            m_Items = newData;
             m_Capacity = newCapacity;
         }
 
@@ -222,7 +218,7 @@ Namespace__
             if (other.m_Count != m_Count)
                 return false;
 
-            return 0 == memcmp(m_Data, other.m_Data, sizeof(ValueType) * m_Count);
+            return 0 == memcmp(m_Items, other.m_Items, sizeof(ValueType) * m_Count);
         }
 
     private:
@@ -237,8 +233,8 @@ Namespace__
         }
 
     private:
-        IAllocator* m_Allocator = nullptr;
-        PtrType<ValueType> m_Data = nullptr;
+        IAllocator* m_Allocator = GetFallbackAllocator();
+        PtrType<ValueType> m_Items = nullptr;
         CountType m_Count = 0;
         CountType m_Capacity = 0;
     };
