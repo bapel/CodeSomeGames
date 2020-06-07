@@ -25,7 +25,8 @@ TEMPLATE_TEST_CASE("Bitset init", "[bitset]", BitSetTypes__)
 
     SECTION("Init from int array. All ones")
     {
-        TestType a({ 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, 4);
+        uint64_t ints[] = { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF };
+        TestType a(ints, 4);
 
         REQUIRE(a.Any() == true);
         REQUIRE(a.All() == true);
