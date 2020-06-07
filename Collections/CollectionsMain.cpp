@@ -4,20 +4,108 @@
 #include <inttypes.h>
 #include <type_traits>
 
+#include <chrono>
+#include <iostream>
+#include <unordered_set>
+
+using HiresClock = std::chrono::high_resolution_clock;
+using HiresTime = HiresClock::time_point;
+using HiresDuration = HiresClock::duration;
+using NanoSeconds = std::chrono::nanoseconds;
+
+using Payload = uint64_t;
+const auto NumLookups = 1000;
+
+void ProfileFind(uint32_t count)
+{
+    using namespace NamespaceName__;
+
+    FlatHashSet<Payload> set(count);
+
+    FlatHashSet<Payload>::NumCollisions = 0;
+    for (auto i = 0U; i < count; i++)
+        set.Add(i);
+
+    auto nc = FlatHashSet<Payload>::NumCollisions;
+    auto finds = NumLookups;
+    auto start = HiresClock::now();
+    
+    for (auto i = 0U; i < finds; i++)
+        assert(set.Contains(i % count));
+
+    auto elapsed = NanoSeconds(HiresClock::now() - start).count();
+    auto perFind = elapsed / finds;
+    std::cout 
+        << perFind << " ns, " 
+        << count << ',' 
+        << finds << ',' 
+        << elapsed << " ns" 
+        << std::endl;
+}
+
+void ProfileFind_1(uint32_t count)
+{
+    using namespace NamespaceName__;
+
+    std::unordered_set<Payload> set(count);
+
+    for (auto i = 0U; i < count; i++)
+        set.insert(i);
+
+    auto finds = NumLookups;
+    auto start = HiresClock::now();
+
+    for (auto i = 0U; i < finds; i++)
+        assert(set.end() != set.find(i % count));
+
+    auto elapsed = NanoSeconds(HiresClock::now() - start).count();
+    auto perFind = elapsed / finds;
+    std::cout 
+        << perFind << " ns, " 
+        << count << ',' 
+        << finds << ',' 
+        << elapsed << " ns" 
+        << std::endl;
+}
+
 void HashDistribution();
 
 int main()
 {
     using namespace NamespaceName__;
 
-    FlatHashSet<uint32_t> set;
+    /*
+    FlatHashSet<uint32_t> set(10);
 
     for (auto i = 0U; i < 10; i++)
-        set.Insert(i);
+        set.Add(i);
+    
+    for (auto i = 10U; i < 20; i++)
+        set.Add(i);
 
-    //HashDistribution();
+    assert(set.Add(3) == false);
+    assert(set.Remove(3) == true);
+    */
+
+    auto n = 10U;
+    for (; n <= 100000000U; n*=10)
+    {
+        ProfileFind(n);
+    }
+    std::cout << std::endl;
+
+    n = 10U;
+    for (; n <= 100000000U; n*=10)
+    {
+        ProfileFind_1(n);
+    }
+    std::cout << std::endl;
+    
     return 0;
 }
+
+#include "ArrayList.hpp"
+using namespace NamespaceName__;
 
 template <class T>
 void PrintBytes(const T& value)
