@@ -31,26 +31,23 @@ namespace NamespaceName__
             assert(m_Capacity > 0);
 
             const auto hash = Hash(key);
-            auto [found, index] = TryGetSlot(key, hash);
+            auto [exists, index] = FindForAdd(key, hash);
 
-            if (found)
+            if (exists)
+                return false;
+
+            auto po2 = __lzcnt(m_Capacity);
+            if ((m_Count + 1) >= k_RehashLUT[po2])
             {
-                if (m_Control[index] == H2(hash))
-                    return false; // already present.
-
-                // Divide by capacity.
-                auto sh = __lzcnt(m_Capacity);
-                if (((m_Count * 1000) >> sh) > k_LoadFactor)
-                    Rehash(m_Capacity << 1);
-
-                m_Control[index] = H2(hash);
-                m_Slots[index] = key;
-                m_Count++;
-                return true;
+                Rehash(m_Capacity << 1);
+                std::tie(exists, index) = FindForAdd(key, hash);
             }
 
-        present__:
-            return false;
+            m_Control[index] = H2(hash);
+            m_Slots[index] = key;
+            m_Count++;
+
+            return true;
         }
 
         bool Contains(ConstRefType<KeyType> key) const
@@ -58,7 +55,7 @@ namespace NamespaceName__
             assert(m_Capacity > 0);
 
             const auto hash = Hash(key);
-            auto [found, index] = TryGetSlot(key, hash);
+            auto [found, index] = Find(key, hash);
 
             return found;
         }
@@ -68,7 +65,7 @@ namespace NamespaceName__
             assert(m_Capacity > 0);
 
             const auto hash = Hash(key);
-            auto [found, index] = TryGetSlot(key, hash);
+            auto [found, index] = Find(key, hash);
 
             if (found)
             {
@@ -124,6 +121,8 @@ namespace NamespaceName__
 
         void Rehash(CountType newCapacity)
         {
+            assert(newCapacity <= k_MaxCapacity);
+
             auto control = m_Control;
             auto slots = m_Slots;
             auto capacity = m_Capacity;
@@ -149,7 +148,7 @@ namespace NamespaceName__
             m_Allocator->Free(control);
         }
 
-        inline std::pair<bool, IndexType> TryGetSlot(const KeyType& key, uint64_t hash) const
+        inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
             const auto index = Index(hash, m_Capacity);
             const auto h2 = H2(hash);
@@ -157,15 +156,34 @@ namespace NamespaceName__
             auto pos = index;
             do
             {
-                if (k_Empty == m_Control[pos] || 
-                    k_Deleted == m_Control[pos] ||
-                    h2 == m_Control[pos] ||
-                    key == m_Slots[pos])
-                {
-                    return { true, pos };
-                }
+                if (k_Empty == m_Control[pos] || k_Deleted == m_Control[pos])
+                    return { false, pos };
 
-                NumCollisions++;
+                if (h2 == m_Control[pos] && key == m_Slots[pos])
+                    return { true, pos };
+
+                pos = (pos + 1) & (m_Capacity - 1);
+            }
+            // @Todo: Have a max probe length? instead of wrapping around the whole table.
+            while (pos != index);
+
+            return { false, -1 };
+        }
+
+        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        {
+            const auto index = Index(hash, m_Capacity);
+            const auto h2 = H2(hash);
+
+            auto pos = index;
+            do
+            {
+                if (k_Empty == m_Control[pos])
+                    return { false, pos };
+
+                if (h2 == m_Control[pos] && key == m_Slots[pos])
+                    return { true, pos };
+
                 pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
@@ -176,12 +194,47 @@ namespace NamespaceName__
 
     private:
         constexpr static HashFunction k_HashFunction = HashFunction();
-        constexpr static auto k_LoadFactor = 875;
+        constexpr static auto k_MaxCapacity = 4'294'967'296; // 2^32
 
         const static auto k_Empty    = 0b1000'0000U; // 0x80
         const static auto k_Deleted  = 0b1111'1110U;
         const static auto k_Sentinel = 0b1111'1111U;
         const static auto k_Empty32  = 0x80808080; // k_Empty x4
+
+        // Max possible counts considering a load factor of 0.875.
+        constexpr static CountType k_RehashLUT[] = 
+        { 0, 0, 0,
+                        7,
+                       14,
+                       28,
+                       56,
+                      112,
+                      224,
+                      448,
+                      896,
+                    1'792,
+                    3'584,
+                    7'168,
+                   14'336,
+                   28'672,
+                   57'344,
+                  114'688,
+                  229'376,
+                  458'752,
+                  917'504,
+                1'835'008,
+                3'670'016,
+                7'340'032,
+               14'680'064,
+               29'360'128,
+               58'720'256,
+              117'440'512,
+              234'881'024,
+              469'762'048,
+              939'524'096,
+            1'879'048'192,
+            3'758'096'384
+        };
 
         IAllocator* m_Allocator = GetFallbackAllocator();
         uint8_t* m_Control = nullptr;
