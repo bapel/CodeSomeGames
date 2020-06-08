@@ -149,6 +149,31 @@ namespace NamespaceName__
             m_Allocator->Free(control);
         }
 
+        inline std::pair<bool, IndexType> TryGetSlot(const KeyType& key, uint64_t hash) const
+        {
+            const auto index = Index(hash, m_Capacity);
+            const auto h2 = H2(hash);
+
+            auto pos = index;
+            do
+            {
+                if (k_Empty == m_Control[pos] || 
+                    k_Deleted == m_Control[pos] ||
+                    h2 == m_Control[pos] ||
+                    key == m_Slots[pos])
+                {
+                    return { true, pos };
+                }
+
+                NumCollisions++;
+                pos = (pos + 1) & (m_Capacity - 1);
+            }
+            // @Todo: Have a max probe length? instead of wrapping around the whole table.
+            while (pos != index);
+
+            return { false, -1 };
+        }
+
     private:
         constexpr static HashFunction k_HashFunction = HashFunction();
         constexpr static auto k_LoadFactor = 875;
