@@ -1,7 +1,9 @@
 #ifndef Test__
 
 //#define UseSimd__
-#include "FlatHashSet.hpp"
+#include "MetaHashSet.hpp"
+#include "SimdHashSet.hpp"
+#include "PrimeHashSet.hpp"
 #include <inttypes.h>
 #include <type_traits>
 
@@ -30,17 +32,16 @@ const auto Count_n = (8 * 1024 * 1024) / sizeof(Payload);
 const auto Growth = 10;
 const auto NumLookups = 10'000'000;
 
+template <class HashSetType>
 void ProfileFind(uint32_t count)
 {
-    using namespace NamespaceName__;
+    HashSetType set(2 * count);
 
-    FlatHashSet<Payload> set(2 * count);
-
-    FlatHashSet<Payload>::NumCollisions = 0;
+    HashSetType::NumCollisions = 0;
     for (auto i = 0U; i < count; i++)
         set.Add(i);
 
-    auto nc = FlatHashSet<Payload>::NumCollisions;
+    auto nc = HashSetType::NumCollisions;
     auto finds = NumLookups;
     auto start = HiresClock::now();
     
@@ -110,6 +111,7 @@ int main()
     using namespace NamespaceName__;
 
     //FlatHashSet<uint32_t> set(8);
+    //PrimeHashSet<uint32_t> set(8);
 
     //for (auto i = 0U; i < 10; i++)
     //    set.Add(i);
@@ -120,6 +122,8 @@ int main()
     //assert(set.Add(3) == false);
     //assert(set.Remove(3) == true);
 
+    //return 0;
+
     auto n = Growth;
 
     //n = Growth;
@@ -128,16 +132,22 @@ int main()
     //    ProfileFind_1(n);
     //std::cout << std::endl;
 
+    //n = Growth;
+    //std::cout << "eastl::unordered_set" << std::endl;
+    //for (; n < Count_n; n*=Growth)
+    //    ProfileFind_2(n);
+    //std::cout << std::endl;
+
     n = Growth;
-    std::cout << "eastl::unordered_set" << std::endl;
+    std::cout << "MetaHashSet" << std::endl;
     for (; n < Count_n; n*=Growth)
-        ProfileFind_2(n);
+        ProfileFind<MetaHashSet<Payload>>(n);
     std::cout << std::endl;
 
     n = Growth;
-    std::cout << "FlatHashSet" << std::endl;
+    std::cout << "SimdHashSet" << std::endl;
     for (; n < Count_n; n*=Growth)
-        ProfileFind(n);
+        ProfileFind<SimdHashSet<Payload>>(n);
     std::cout << std::endl;
     
     return 0;

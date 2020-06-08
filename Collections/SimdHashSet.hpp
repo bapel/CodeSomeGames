@@ -7,20 +7,20 @@
 namespace NamespaceName__
 {
     template <class K, typename H = std::hash<K>>
-    class FlatHashSet
+    class SimdHashSet
     {
     public:
         using KeyType = K;
         using HashFunction = H;
 
-        FlatHashSet() = default;
-        FlatHashSet(IAllocator* allocator) : m_Allocator(allocator)  {}
-        
-        FlatHashSet(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
-            FlatHashSet(allocator)
+        SimdHashSet() = default;
+        SimdHashSet(IAllocator* allocator) : m_Allocator(allocator)  {}
+
+        SimdHashSet(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
+            SimdHashSet(allocator)
         { EnsureCapacity(capacity); }
 
-        ~FlatHashSet()
+        ~SimdHashSet()
         { m_Allocator->Free(m_Control); }
 
         CountType Count() const { return m_Count; }
@@ -95,9 +95,13 @@ namespace NamespaceName__
         }
 
     private:
-        // Capacity is always a power of two.
+        // Capacity is always a power of two and a multiple of 16.
+        // Note that all powers of two > 16 are multiple of 16.
         inline static CountType CalcCapacity(CountType n)
         {
+            if (n < 16)
+                return 16;
+
             n--;
             n |= n >> 1;
             n |= n >> 2;
@@ -115,9 +119,6 @@ namespace NamespaceName__
 
         inline static uint64_t H1(uint64_t hash) { return hash >> 7; }
         inline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
-
-        inline static CountType Index(uint64_t hash, CountType capacity)
-        { return H1(hash) & (capacity - 1); }
 
         void Rehash(CountType newCapacity)
         {
@@ -150,7 +151,7 @@ namespace NamespaceName__
 
         inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
-            const auto index = Index(hash, m_Capacity);
+            const auto index = H1(hash) & (m_Capacity - 1);
             const auto h2 = H2(hash);
 
             auto pos = index;
@@ -172,12 +173,16 @@ namespace NamespaceName__
 
         inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
-            const auto index = Index(hash, m_Capacity);
+            const auto index = H1(hash) & (m_Capacity - 1);
             const auto h2 = H2(hash);
 
             auto pos = index;
             do
             {
+                //auto a = _mm_set1_epi8(h2);
+                //auto b = _mm_load_si128((__m128i*)(m_Control + pos));
+                //auto r = _mm_cmpeq_epi8(a, b);
+
                 if (k_Empty == m_Control[pos])
                     return { false, pos };
 
