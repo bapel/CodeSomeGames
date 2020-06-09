@@ -61,9 +61,9 @@ struct SoHash<uint32_t>
 
 using Payload = uint64_t;
 using Hasher = SoHash<Payload>;
-const auto Count_n = 1'000'000U; //(16 * 1024 * 1024) / sizeof(Payload);
+const auto Count_n = 10'000'000U; //(16 * 1024 * 1024) / sizeof(Payload);
 const auto Growth = 10;
-const auto NumLookups = 10'000'000U;
+const auto NumLookups = 20'000'000U;
 
 template <class HashSetType>
 void ProfileFind(uint32_t count)
@@ -73,29 +73,31 @@ void ProfileFind(uint32_t count)
     HashSetType set(1.2f * count);
 
     HashSetType::MaxProbeLength = 0;
-    {
-        for (auto i = 0U; i < count; i++)
-            set.Add(i);
-    }
+    for (auto i = 0U; i < count; i++)
+        set.Add(i);
     auto nc = HashSetType::MaxProbeLength;
 
-    auto success = 0U;
-    auto finds = Max(count, NumLookups);
-    
+    assert(NumLookups > count);
+    assert(NumLookups % count == 0);
+
+    auto finds = NumLookups;
+    auto repeat = NumLookups / (2 * count);
     auto start = HiresClock::now();
+
+    for (auto r = 0U; r < repeat; r++)
     {
-        for (auto i = 0; i < finds; i++)
-            success += set.Contains(i);
-        for (auto i = count; i < count + finds; i++)
-            success += set.Contains(i);
+        for (auto i = 0; i < count; i++)
+            assert(set.Contains(i));
+        for (auto i = count; i < 2 * count; i++)
+            assert(!set.Contains(i));
     }
+
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perFind = elapsed / finds;
 
     std::cout 
-        << perFind << " ns, "
-        << "MPL: " << nc << " "
-        << success << ", "
+        << elapsed / NumLookups << " ns, "
+        << "MPL: " << nc << ", "
+        << count << ", "
         << finds << ", "
         << elapsed << " ns"
         << std::endl;
@@ -111,22 +113,26 @@ void ProfileFind_1(uint32_t count)
     for (auto i = 0U; i < count; i++)
         set.insert(i);
 
-    auto success = 0U;
-    auto finds = Max(count, NumLookups);
+    assert(NumLookups > count);
+    assert(NumLookups % count == 0);
 
+    auto finds = NumLookups;
+    auto repeat = NumLookups / (2 * count);
     auto start = HiresClock::now();
+
+    for (auto r = 0U; r < repeat; r++)
     {
-        for (auto i = 0; i < finds; i++)
-            success += (set.end() != set.find(i));
-        for (auto i = count; i < count + finds; i++)
-            success += (set.end() != set.find(i));
+        for (auto i = 0; i < count; i++)
+            assert(set.find(i) != set.end());
+        for (auto i = count; i < 2 * count; i++)
+            assert(set.find(i) == set.end());
     }
+
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perFind = elapsed / finds;
 
     std::cout 
-        << perFind << " ns, "
-        << success << ", "
+        << elapsed / NumLookups << " ns, "
+        << count << ", "
         << finds << ", "
         << elapsed << " ns"
         << std::endl;
@@ -138,6 +144,11 @@ void Profiling();
 
 int main()
 {
+    auto a = __lzcnt(4097);
+    auto a1 = __lzcnt(4096);
+    auto b = __lzcnt(33);
+    auto b1 = __lzcnt(32);
+
     //HashDistribution();
     //TestingSandbox();
     Profiling();

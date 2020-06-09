@@ -234,6 +234,7 @@
   <ItemGroup>
     <ClInclude Include="Allocator.hpp" />
     <ClInclude Include="BitSet.hpp" />
+    <ClInclude Include="ChunkHashSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
     <ClInclude Include="MetaHashSet.hpp" />

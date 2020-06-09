@@ -166,17 +166,14 @@ namespace NamespaceName__
                 const auto control = _mm_loadu_si128((__m128i*)(m_Control + pos));
                 auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, control));
 
-                auto i = 0U;
-                while (true)
+                auto i = 0;
+                while (result != 0)
                 {
-                    auto r = result >> i;
-                    if (r == 0) 
-                        break;
-
                     const auto offset = (pos + i) & (m_Capacity - 1);
-                    if ((r & 1) && (key == m_Slots[offset]))
+                    if ((result & 1) && (key == m_Slots[offset]))
                         return { true, offset };
 
+                    result >>= 1;
                     i++;
                 }
 
