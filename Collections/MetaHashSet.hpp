@@ -28,7 +28,8 @@ namespace NamespaceName__
 
         bool Add(ConstRefType<KeyType> key)
         {
-            assert(m_Capacity > 0);
+            if (m_Capacity == 0)
+                Rehash(4);
 
             const auto hash = Hash(key);
             auto [exists, index] = FindForAdd(key, hash);
@@ -53,10 +54,14 @@ namespace NamespaceName__
         __forceinline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
+            auto [found, index] = Find(key, Hash(key));
+            return found;
+        }
 
-            const auto hash = Hash(key);
+        __forceinline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
+        {
+            assert(m_Capacity > 0);
             auto [found, index] = Find(key, hash);
-
             return found;
         }
 
@@ -112,7 +117,7 @@ namespace NamespaceName__
         __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
         __forceinline IndexType Index(uint64_t hash) const
-        { return (hash) & (m_Capacity - 1); }
+        { return H1(hash) & (m_Capacity - 1); }
 
         __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
