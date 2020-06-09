@@ -38,7 +38,19 @@
     <ClInclude Include="Tests\Allocator.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="BitSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimeHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimdHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaHashSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -43,7 +43,7 @@ namespace NamespaceName__
                 std::tie(exists, index) = FindForAdd(key, hash);
             }
 
-            m_Control[index] = H2(hash);
+            SetControl(index, H2(hash));
             m_Slots[index] = key;
             m_Count++;
 
@@ -69,7 +69,7 @@ namespace NamespaceName__
 
             if (found)
             {
-                m_Control[index] = k_Deleted;
+                SetControl(index, k_Deleted);
                 m_Count--;
                 return true;
             }
@@ -77,10 +77,10 @@ namespace NamespaceName__
             return false;
         }
 
-        void Clear()
+        __forceinline void Clear()
         { memset(m_Control, k_Empty32, m_Capacity); }
 
-        void EnsureCapacity(CountType minCapacity)
+        __forceinline void EnsureCapacity(CountType minCapacity)
         { Rehash(CalcCapacity(minCapacity)); }
 
         void GetKeys(KeyType* outKeys) const
@@ -97,7 +97,7 @@ namespace NamespaceName__
     private:
         // Capacity is always a power of two and a multiple of 16.
         // Note that all powers of two > 16 are multiple of 16.
-        inline static CountType CalcCapacity(CountType n)
+        __forceinline static CountType CalcCapacity(CountType n)
         {
             if (n < 16)
                 return 16;
@@ -111,46 +111,23 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        inline static uint64_t Hash(const KeyType& key)
-        { 
-            const static auto hasher = HashFunction();
-            return hasher(key); 
-        }
+        __forceinline static uint64_t Hash(const KeyType& key)
+        { const static HashFunction hfn; return hfn(key); }
 
-        inline static uint64_t H1(uint64_t hash) { return hash >> 7; }
-        inline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
+        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; } 
+        __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
-        void Rehash(CountType newCapacity)
+        __forceinline void SetControl(IndexType index, uint8_t control) const
         {
-            assert(newCapacity <= k_MaxCapacity);
-
-            auto control = m_Control;
-            auto slots = m_Slots;
-            auto capacity = m_Capacity;
-            auto count = m_Count;
-
-            // @Todo: Support for capacity < 16.
-            // Enough for all keys and a byte per key.
-            auto size = newCapacity * (1 + sizeof(KeyType));
-            m_Control = (uint8_t*)m_Allocator->Malloc(size, 16);
-            m_Slots = (KeyType*)(m_Control + newCapacity);
-            m_Capacity = newCapacity;
-            m_Count = 0;
-
-            memset(m_Control, k_Empty32, m_Capacity);
-
-            for (auto i = 0U; i < capacity; i++)
-            {
-                if (k_Empty != control[i] && 
-                    k_Deleted != control[i])
-                    Add(slots[i]);
-            }
-
-            m_Allocator->Free(control);
+            m_Control[index] = control;
+            if (index < 16)
+                m_Control[index + m_Capacity] = control;
         }
 
         inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
+            MaxProbeLength = 0U;
+
             const auto index = H1(hash) & (m_Capacity - 1);
             const auto h2 = H2(hash);
 
@@ -163,6 +140,7 @@ namespace NamespaceName__
                 if (h2 == m_Control[pos] && key == m_Slots[pos])
                     return { true, pos };
 
+                MaxProbeLength++;
                 pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
@@ -179,9 +157,49 @@ namespace NamespaceName__
             auto pos = index;
             do
             {
-                //auto a = _mm_set1_epi8(h2);
-                //auto b = _mm_load_si128((__m128i*)(m_Control + pos));
-                //auto r = _mm_cmpeq_epi8(a, b);
+                const auto value = _mm_set1_epi8(h2);
+                const auto control = _mm_loadu_si128((__m128i*)(m_Control + pos));
+                auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, control));
+
+                auto i = 0U;
+                while (true)
+                {
+                    auto r = result >> i;
+                    if (r == 0) 
+                        break;
+
+                    const auto offset = (pos + i) & (m_Capacity - 1);
+                    if ((r & 1) && (key == m_Slots[offset]))
+                        return { true, offset };
+
+                    i++;
+                }
+
+                const auto empty = _mm_set1_epi8(k_Empty);
+                result = _mm_movemask_epi8(_mm_cmpeq_epi8(empty, control));
+                if (result != 0)
+                    return { false, pos };
+
+                pos = (pos + 16) & (m_Capacity - 1);
+            }
+            // @Todo: Have a max probe length? instead of wrapping around the whole table.
+            while (pos != index);
+
+            return { false, -1 };
+        }
+
+        /*
+        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        {
+            const auto index = H1(hash) & (m_Capacity - 1);
+            const auto h2 = H2(hash);
+
+            auto pos = index;
+            do
+            {
+                // auto a = _mm_set1_epi8(h2);
+                // auto b = _mm_load_si128((__m128i*)(m_Control + pos));
+                // auto r = _mm_cmpeq_epi8(a, b);
 
                 if (k_Empty == m_Control[pos])
                     return { false, pos };
@@ -195,6 +213,40 @@ namespace NamespaceName__
             while (pos != index);
 
             return { false, -1 };
+        }
+        */
+
+        void Rehash(CountType newCapacity)
+        {
+            assert(newCapacity <= k_MaxCapacity);
+
+            // src for copying.
+            auto control = m_Control;
+            auto slots = m_Slots;
+            auto capacity = m_Capacity;
+            auto count = m_Count;
+
+            const auto sizeOfControl = newCapacity + 16;
+            const auto sizeOfSlots = newCapacity * sizeof(KeyType);
+            const auto size = sizeOfControl + sizeOfSlots;
+
+            m_Control = (uint8_t*)m_Allocator->Malloc(size, 16);
+            m_Slots = (KeyType*)(m_Control + sizeOfControl);
+            m_Capacity = newCapacity;
+            m_Count = 0;
+
+            // Not setting 
+            memset(m_Control, k_Empty32, m_Capacity + 16);
+
+            for (auto i = 0U; i < capacity; i++)
+            {
+                if (k_Empty != control[i] && 
+                    k_Deleted != control[i])
+                    Add(slots[i]);
+            }
+
+            // m_Control[newCapacity] = k_Sentinel;
+            m_Allocator->Free(control);
         }
 
     private:
@@ -248,6 +300,6 @@ namespace NamespaceName__
         CountType m_Count = 0;
 
     public:
-        static inline uint32_t NumCollisions = 0;
+        static inline uint32_t MaxProbeLength = 0;
     };
 }

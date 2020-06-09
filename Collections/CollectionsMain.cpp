@@ -27,130 +27,138 @@ using HiresTime = HiresClock::time_point;
 using HiresDuration = HiresClock::duration;
 using NanoSeconds = std::chrono::nanoseconds;
 
+template <class T>
+struct SoHash;
+
+template <>
+struct SoHash<uint64_t>
+{
+    uint64_t operator()(uint64_t x) const
+    {
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+        x = x ^ (x >> 31);
+        return x;
+    }
+};
+
 using Payload = uint64_t;
-const auto Count_n = (8 * 1024 * 1024) / sizeof(Payload);
+using Hasher = SoHash<Payload>;
+const auto Count_n = 1'000'000U; //(16 * 1024 * 1024) / sizeof(Payload);
 const auto Growth = 10;
 const auto NumLookups = 10'000'000;
 
 template <class HashSetType>
 void ProfileFind(uint32_t count)
 {
-    HashSetType set(2 * count);
+    HashSetType set(1.5f * count);
 
-    HashSetType::NumCollisions = 0;
+    HashSetType::MaxProbeLength = 0;
     for (auto i = 0U; i < count; i++)
         set.Add(i);
 
-    auto nc = HashSetType::NumCollisions;
+    auto nc = HashSetType::MaxProbeLength;
+    auto success = 0U;
     auto finds = NumLookups;
     auto start = HiresClock::now();
-    
+
     for (auto i = 0U; i < finds; i++)
-        assert(set.Contains(i % count));
+        success += set.Contains(i);
 
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
     auto perFind = elapsed / finds;
     std::cout 
-        << perFind << " ns, " 
-        << count << ',' 
-        << finds << ',' 
-        << elapsed << " ns" 
+        << perFind << " ns, "
+        << "MPL: " << nc << " "
+        << success << ", "
+        << finds << ", "
+        << elapsed << " ns"
         << std::endl;
 }
 
+template <class HashSetType>
 void ProfileFind_1(uint32_t count)
 {
-    std::unordered_set<Payload> set(count);
+    HashSetType set(1.5f * count);
 
     for (auto i = 0U; i < count; i++)
         set.insert(i);
 
+    auto success = 0U;
     auto finds = NumLookups;
     auto start = HiresClock::now();
 
     for (auto i = 0U; i < finds; i++)
-        assert(set.end() != set.find(i % count));
+        success += (set.end() != set.find(i));
 
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
     auto perFind = elapsed / finds;
     std::cout 
-        << perFind << " ns, " 
-        << count << ',' 
-        << finds << ',' 
-        << elapsed << " ns" 
-        << std::endl;
-}
-
-void ProfileFind_2(uint32_t count)
-{
-    eastl::unordered_set<Payload> set(count);
-
-    for (auto i = 0U; i < count; i++)
-        set.insert(i);
-
-    auto finds = NumLookups;
-    auto start = HiresClock::now();
-
-    for (auto i = 0U; i < finds; i++)
-        assert(set.end() != set.find(i % count));
-
-    auto elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perFind = elapsed / finds;
-    std::cout 
-        << perFind << " ns, " 
-        << count << ',' 
-        << finds << ',' 
-        << elapsed << " ns" 
+        << perFind << " ns, "
+        << success << ", "
+        << finds << ", "
+        << elapsed << " ns"
         << std::endl;
 }
 
 void HashDistribution();
+void TestingSandbox();
+void Profiling();
 
 int main()
+{
+    //HashDistribution();
+    //TestingSandbox();
+    Profiling();
+    return 0;
+}
+
+void TestingSandbox()
 {
     using namespace NamespaceName__;
 
     //FlatHashSet<uint32_t> set(8);
-    //PrimeHashSet<uint32_t> set(8);
+    SimdHashSet<uint32_t> set(8);
 
-    //for (auto i = 0U; i < 10; i++)
-    //    set.Add(i);
-    //
-    //for (auto i = 10U; i < 20; i++)
-    //    set.Add(i);
+    for (auto i = 0U; i < 10; i++)
+        set.Add(i);
+    
+    for (auto i = 10U; i < 20; i++)
+        set.Add(i);
 
-    //assert(set.Add(3) == false);
-    //assert(set.Remove(3) == true);
+    assert(set.Add(3) == false);
+    assert(set.Remove(3) == true);
+}
 
-    //return 0;
+void Profiling()
+{
+    using namespace NamespaceName__;
 
     auto n = Growth;
+    
+    n = Growth;
+    std::cout << "std::unordered_set" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<std::unordered_set<Payload>>(n);
+    std::cout << std::endl;
 
-    //n = Growth;
-    //std::cout << "std::unordered_set" << std::endl;
-    //for (; n < Count_n; n*=Growth)
-    //    ProfileFind_1(n);
-    //std::cout << std::endl;
-
-    //n = Growth;
-    //std::cout << "eastl::unordered_set" << std::endl;
-    //for (; n < Count_n; n*=Growth)
-    //    ProfileFind_2(n);
-    //std::cout << std::endl;
+    n = Growth;
+    std::cout << "eastl::unordered_set" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<eastl::unordered_set<Payload, Hasher>>(n);
+    std::cout << std::endl;
 
     n = Growth;
     std::cout << "MetaHashSet" << std::endl;
-    for (; n < Count_n; n*=Growth)
-        ProfileFind<MetaHashSet<Payload>>(n);
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind<MetaHashSet<Payload, Hasher>>(n);
     std::cout << std::endl;
 
     n = Growth;
     std::cout << "SimdHashSet" << std::endl;
-    for (; n < Count_n; n*=Growth)
-        ProfileFind<SimdHashSet<Payload>>(n);
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind<SimdHashSet<Payload, Hasher>>(n);
     std::cout << std::endl;
-    
-    return 0;
 }
 
 #include "ArrayList.hpp"
@@ -200,7 +208,7 @@ void HashDistribution()
             occupied += buckets[j] > 0;
         auto lf = (float)occupied / buckets.Count();
 
-        if (bucket == 7)
+        //if (bucket == 7)
         {
             printf("%4u | %24llu | " , i, hash);
             PrintBytes(hash);

@@ -23,8 +23,8 @@ namespace NamespaceName__
         ~MetaHashSet()
         { m_Allocator->Free(m_Control); }
 
-        CountType Count() const { return m_Count; }
-        CountType Capacity() const { return m_Capacity; }
+        __forceinline CountType Count() const { return m_Count; }
+        __forceinline CountType Capacity() const { return m_Capacity; }
 
         bool Add(ConstRefType<KeyType> key)
         {
@@ -50,7 +50,7 @@ namespace NamespaceName__
             return true;
         }
 
-        bool Contains(ConstRefType<KeyType> key) const
+        __forceinline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
 
@@ -107,14 +107,14 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        inline static uint64_t Hash(const KeyType& key)
-        { 
+        __forceinline static uint64_t Hash(KeyType x)
+        {
             const static auto hasher = HashFunction();
-            return hasher(key); 
+            return hasher(x); 
         }
 
-        inline static uint64_t H1(uint64_t hash) { return hash >> 7; }
-        inline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
+        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; }
+        __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
         void Rehash(CountType newCapacity)
         {
@@ -145,8 +145,9 @@ namespace NamespaceName__
             m_Allocator->Free(control);
         }
 
-        inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
+        __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
+            MaxProbeLength = 0U;
             const auto index = H1(hash) & (m_Capacity - 1);
             const auto h2 = H2(hash);
 
@@ -159,6 +160,7 @@ namespace NamespaceName__
                 if (h2 == m_Control[pos] && key == m_Slots[pos])
                     return { true, pos };
 
+                MaxProbeLength++;
                 pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
@@ -167,7 +169,7 @@ namespace NamespaceName__
             return { false, -1 };
         }
 
-        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
             const auto index = H1(hash) & (m_Capacity - 1);
             const auto h2 = H2(hash);
@@ -240,6 +242,6 @@ namespace NamespaceName__
         CountType m_Count = 0;
 
     public:
-        static inline uint32_t NumCollisions = 0;
+        static inline uint32_t MaxProbeLength = 0;
     };
 }
