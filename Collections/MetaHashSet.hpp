@@ -112,12 +112,12 @@ namespace NamespaceName__
         __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
         __forceinline IndexType Index(uint64_t hash) const
-        { return H1(hash) & (m_Capacity - 1); }
+        { return (hash) & (m_Capacity - 1); }
 
         __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
         #ifdef HashMetrics__
-            MaxProbeLength = 0U;
+            auto probeLength = 0U;
         #endif
             const auto index = Index(hash);
             const auto h2 = H2(hash);
@@ -132,7 +132,8 @@ namespace NamespaceName__
                     return { true, pos };
 
             #ifdef HashMetrics__
-                MaxProbeLength++;
+                probeLength++;
+                MaxProbeLength = Max(probeLength, MaxProbeLength);
             #endif
                 pos = (pos + 1) & (m_Capacity - 1);
             }
@@ -236,9 +237,9 @@ namespace NamespaceName__
             3'758'096'384
         };
 
-        IAllocator* m_Allocator = GetFallbackAllocator();
         uint8_t* m_Control = nullptr;
         KeyType* m_Slots = nullptr;
+        IAllocator* m_Allocator = GetFallbackAllocator();
         CountType m_Capacity = 0;
         CountType m_Count = 0;
 

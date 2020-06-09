@@ -191,7 +191,7 @@
       <PreprocessToFile>false</PreprocessToFile>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -212,7 +212,7 @@
       <PreprocessToFile>false</PreprocessToFile>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -225,6 +225,9 @@
     <ClCompile Include="Allocator.cpp" />
     <ClCompile Include="CollectionsMain.cpp" />
     <ClCompile Include="CollectionsTest.cpp" />
+    <ClCompile Include="Hash\Hash.hpp" />
+    <ClCompile Include="Hash\xxHash\xxhash.c" />
+    <ClCompile Include="Hash\xxHash\xxhsum.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\EASTL\vcproj\EASTL.vcxproj">
@@ -237,6 +240,9 @@
     <ClInclude Include="ChunkHashSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
+    <ClInclude Include="Hash\xxHash64.hpp" />
+    <ClInclude Include="Hash\xxHash\xxh3.h" />
+    <ClInclude Include="Hash\xxHash\xxhash.h" />
     <ClInclude Include="MetaHashSet.hpp" />
     <ClInclude Include="PrimeHashSet.hpp" />
     <ClInclude Include="SimdHashSet.hpp" />

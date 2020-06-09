@@ -14,6 +14,8 @@
 #include <unordered_set>
 #include <EASTL\unordered_set.h>
 
+#include "Hash\Hash.hpp"
+
 void* __cdecl operator new[](size_t size, const char* name, int flags, unsigned debugFlags, const char* file, int line)
 {
     return new uint8_t[size];
@@ -29,39 +31,12 @@ using HiresTime = HiresClock::time_point;
 using HiresDuration = HiresClock::duration;
 using NanoSeconds = std::chrono::nanoseconds;
 
-template <class T>
-struct SoHash;
-
-// What integer hash function are good that accepts an integer hash key?
-// https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key/
-
-template <>
-struct SoHash<uint64_t>
-{
-    __forceinline uint64_t operator()(uint64_t x) const
-    {
-        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
-        x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
-        x = x ^ (x >> 31);
-        return x;
-    }
-};
-
-template <>
-struct SoHash<uint32_t>
-{
-    __forceinline uint32_t operator()(uint32_t x) const
-    {
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = (x >> 16) ^ x;
-        return x;
-    }
-};
-
 using Payload = uint64_t;
-using Hasher = SoHash<Payload>;
-const auto Count_n = 10'000'000U; //(16 * 1024 * 1024) / sizeof(Payload);
+//using Hasher = std::hash<Payload>;
+//using Hasher = NamespaceName__::SoHash<Payload>;
+//using Hasher = NamespaceName__::xxHash<Payload>;
+using Hasher = NamespaceName__::BrehmHash<Payload>;
+const auto Count_n = 10'000'000U;
 const auto Growth = 10;
 const auto NumLookups = 20'000'000U;
 
@@ -70,7 +45,7 @@ void ProfileFind(uint32_t count)
 {
     using namespace NamespaceName__;
 
-    HashSetType set(1.2f * count);
+    HashSetType set(count);
 
     HashSetType::MaxProbeLength = 0;
     for (auto i = 0U; i < count; i++)
@@ -96,7 +71,8 @@ void ProfileFind(uint32_t count)
 
     std::cout 
         << elapsed / NumLookups << " ns, "
-        << "MPL: " << nc << ", "
+        << "Load: " << (float)set.Count() / set.Capacity() << ", "
+        << "Probe: " << nc << ", "
         << count << ", "
         << finds << ", "
         << elapsed << " ns"
@@ -144,11 +120,6 @@ void Profiling();
 
 int main()
 {
-    auto a = __lzcnt(4097);
-    auto a1 = __lzcnt(4096);
-    auto b = __lzcnt(33);
-    auto b1 = __lzcnt(32);
-
     //HashDistribution();
     //TestingSandbox();
     Profiling();
@@ -184,17 +155,17 @@ void Profiling()
         ProfileFind_1<std::unordered_set<Payload, Hasher>>(n);
     std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "eastl::unordered_set\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<eastl::unordered_set<Payload, Hasher>>(n);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "eastl::unordered_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<eastl::unordered_set<Payload, Hasher>>(n);
+    //std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "eastl::hash_set\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<eastl::hash_set<Payload, Hasher>>(n);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "eastl::hash_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<eastl::hash_set<Payload, Hasher>>(n);
+    //std::cout << std::endl;
 
     n = Growth;
     std::cout << "MetaHashSet\n---" << std::endl;

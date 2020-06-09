@@ -24,6 +24,15 @@
     <ClCompile Include="CollectionsMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Hash\xxHash\xxhash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hash\xxHash\xxhsum.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hash\Hash.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collections.hpp">
@@ -54,6 +63,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ChunkHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hash\xxHash\xxh3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hash\xxHash\xxhash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hash\xxHash64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -117,7 +117,7 @@ namespace NamespaceName__
         __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
         __forceinline IndexType Index(uint64_t hash) const
-        { return H1(hash) & (m_Capacity - 1); }
+        { return (hash) & (m_Capacity - 1); }
 
         __forceinline void SetControl(IndexType index, uint8_t control) const
         {
@@ -129,7 +129,7 @@ namespace NamespaceName__
         __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
         #ifdef HashMetrics__
-            MaxProbeLength = 0U;
+            auto probeLength = 0U;
         #endif
             const auto index = Index(hash);
             const auto h2 = H2(hash);
@@ -144,7 +144,8 @@ namespace NamespaceName__
                     return { true, pos };
 
             #ifdef HashMetrics__
-                MaxProbeLength++;
+                probeLength++;
+                MaxProbeLength = Max(probeLength, MaxProbeLength);
             #endif
                 pos = (pos + 1) & (m_Capacity - 1);
             }
@@ -173,6 +174,7 @@ namespace NamespaceName__
                     if ((result & 1) && (key == m_Slots[offset]))
                         return { true, offset };
 
+                    auto s = __lzcnt(result);
                     result >>= 1;
                     i++;
                 }
