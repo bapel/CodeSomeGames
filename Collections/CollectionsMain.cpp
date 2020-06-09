@@ -6,6 +6,7 @@
 #include <iostream>
 
 #define HashMetrics__
+#include "Collections.hpp"
 #include "MetaHashSet.hpp"
 #include "SimdHashSet.hpp"
 // #include "PrimeHashSet.hpp"
@@ -31,10 +32,13 @@ using NanoSeconds = std::chrono::nanoseconds;
 template <class T>
 struct SoHash;
 
+// What integer hash function are good that accepts an integer hash key?
+// https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key/
+
 template <>
 struct SoHash<uint64_t>
 {
-    uint64_t operator()(uint64_t x) const
+    __forceinline uint64_t operator()(uint64_t x) const
     {
         x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
         x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
@@ -43,31 +47,51 @@ struct SoHash<uint64_t>
     }
 };
 
+template <>
+struct SoHash<uint32_t>
+{
+    __forceinline uint32_t operator()(uint32_t x) const
+    {
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = (x >> 16) ^ x;
+        return x;
+    }
+};
+
 using Payload = uint64_t;
 using Hasher = SoHash<Payload>;
 const auto Count_n = 1'000'000U; //(16 * 1024 * 1024) / sizeof(Payload);
 const auto Growth = 10;
-const auto NumLookups = 10'000'000;
+const auto NumLookups = 10'000'000U;
 
 template <class HashSetType>
 void ProfileFind(uint32_t count)
 {
-    HashSetType set(1.5f * count);
+    using namespace NamespaceName__;
+
+    HashSetType set(1.2f * count);
 
     HashSetType::MaxProbeLength = 0;
-    for (auto i = 0U; i < count; i++)
-        set.Add(i);
-
+    {
+        for (auto i = 0U; i < count; i++)
+            set.Add(i);
+    }
     auto nc = HashSetType::MaxProbeLength;
+
     auto success = 0U;
-    auto finds = NumLookups;
+    auto finds = Max(count, NumLookups);
+    
     auto start = HiresClock::now();
-
-    for (auto i = 0U; i < finds; i++)
-        success += set.Contains(i);
-
+    {
+        for (auto i = 0; i < finds; i++)
+            success += set.Contains(i);
+        for (auto i = count; i < count + finds; i++)
+            success += set.Contains(i);
+    }
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
     auto perFind = elapsed / finds;
+
     std::cout 
         << perFind << " ns, "
         << "MPL: " << nc << " "
@@ -80,20 +104,26 @@ void ProfileFind(uint32_t count)
 template <class HashSetType>
 void ProfileFind_1(uint32_t count)
 {
+    using namespace NamespaceName__;
+
     HashSetType set(1.5f * count);
 
     for (auto i = 0U; i < count; i++)
         set.insert(i);
 
     auto success = 0U;
-    auto finds = NumLookups;
+    auto finds = Max(count, NumLookups);
+
     auto start = HiresClock::now();
-
-    for (auto i = 0U; i < finds; i++)
-        success += (set.end() != set.find(i));
-
+    {
+        for (auto i = 0; i < finds; i++)
+            success += (set.end() != set.find(i));
+        for (auto i = count; i < count + finds; i++)
+            success += (set.end() != set.find(i));
+    }
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
     auto perFind = elapsed / finds;
+
     std::cout 
         << perFind << " ns, "
         << success << ", "
@@ -119,7 +149,7 @@ void TestingSandbox()
     using namespace NamespaceName__;
 
     //FlatHashSet<uint32_t> set(8);
-    SimdHashSet<uint32_t> set(8);
+    SimdHashSet<uint32_t> set;
 
     for (auto i = 0U; i < 10; i++)
         set.Add(i);
@@ -138,25 +168,31 @@ void Profiling()
     auto n = Growth;
     
     n = Growth;
-    std::cout << "std::unordered_set" << std::endl;
+    std::cout << "std::unordered_set\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<std::unordered_set<Payload>>(n);
+        ProfileFind_1<std::unordered_set<Payload, Hasher>>(n);
     std::cout << std::endl;
 
     n = Growth;
-    std::cout << "eastl::unordered_set" << std::endl;
+    std::cout << "eastl::unordered_set\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
         ProfileFind_1<eastl::unordered_set<Payload, Hasher>>(n);
     std::cout << std::endl;
 
     n = Growth;
-    std::cout << "MetaHashSet" << std::endl;
+    std::cout << "eastl::hash_set\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<eastl::hash_set<Payload, Hasher>>(n);
+    std::cout << std::endl;
+
+    n = Growth;
+    std::cout << "MetaHashSet\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
         ProfileFind<MetaHashSet<Payload, Hasher>>(n);
     std::cout << std::endl;
 
     n = Growth;
-    std::cout << "SimdHashSet" << std::endl;
+    std::cout << "SimdHashSet\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
         ProfileFind<SimdHashSet<Payload, Hasher>>(n);
     std::cout << std::endl;

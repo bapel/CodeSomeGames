@@ -28,7 +28,8 @@ namespace NamespaceName__
 
         bool Add(ConstRefType<KeyType> key)
         {
-            assert(m_Capacity > 0);
+            if (m_Capacity == 0)
+                Rehash(16);
 
             const auto hash = Hash(key);
             auto [exists, index] = FindForAdd(key, hash);
@@ -295,9 +296,9 @@ namespace NamespaceName__
             3'758'096'384
         };
 
-        IAllocator* m_Allocator = GetFallbackAllocator();
         uint8_t* m_Control = nullptr;
         KeyType* m_Slots = nullptr;
+        IAllocator* m_Allocator = GetFallbackAllocator();
         CountType m_Capacity = 0;
         CountType m_Count = 0;
 
