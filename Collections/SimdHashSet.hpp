@@ -6,7 +6,7 @@
 
 namespace NamespaceName__
 {
-    template <class K, typename H = std::hash<K>>
+    template <class K, class H = std::hash<K>>
     class SimdHashSet
     {
     public:
@@ -50,7 +50,7 @@ namespace NamespaceName__
             return true;
         }
 
-        bool Contains(ConstRefType<KeyType> key) const
+        __forceinline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
 
@@ -80,7 +80,7 @@ namespace NamespaceName__
         __forceinline void Clear()
         { memset(m_Control, k_Empty32, m_Capacity); }
 
-        __forceinline void EnsureCapacity(CountType minCapacity)
+        void EnsureCapacity(CountType minCapacity)
         { Rehash(CalcCapacity(minCapacity)); }
 
         void GetKeys(KeyType* outKeys) const
@@ -111,11 +111,12 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        __forceinline static uint64_t Hash(const KeyType& key)
-        { const static HashFunction hfn; return hfn(key); }
-
-        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; } 
+        __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; }
         __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
+
+        __forceinline IndexType Index(uint64_t hash) const
+        { return H1(hash) & (m_Capacity - 1); }
 
         __forceinline void SetControl(IndexType index, uint8_t control) const
         {
@@ -124,11 +125,12 @@ namespace NamespaceName__
                 m_Control[index + m_Capacity] = control;
         }
 
-        inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
+        __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
+        #ifdef HashMetrics__
             MaxProbeLength = 0U;
-
-            const auto index = H1(hash) & (m_Capacity - 1);
+        #endif
+            const auto index = Index(hash);
             const auto h2 = H2(hash);
 
             auto pos = index;
@@ -140,7 +142,9 @@ namespace NamespaceName__
                 if (h2 == m_Control[pos] && key == m_Slots[pos])
                     return { true, pos };
 
+            #ifdef HashMetrics__
                 MaxProbeLength++;
+            #endif
                 pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
@@ -149,9 +153,9 @@ namespace NamespaceName__
             return { false, -1 };
         }
 
-        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
-            const auto index = H1(hash) & (m_Capacity - 1);
+            const auto index = Index(hash);
             const auto h2 = H2(hash);
 
             auto pos = index;
@@ -235,8 +239,7 @@ namespace NamespaceName__
             m_Capacity = newCapacity;
             m_Count = 0;
 
-            // Not setting 
-            memset(m_Control, k_Empty32, m_Capacity + 16);
+            memset(m_Control, k_Empty32, sizeOfControl);
 
             for (auto i = 0U; i < capacity; i++)
             {
@@ -245,7 +248,6 @@ namespace NamespaceName__
                     Add(slots[i]);
             }
 
-            // m_Control[newCapacity] = k_Sentinel;
             m_Allocator->Free(control);
         }
 
@@ -300,6 +302,8 @@ namespace NamespaceName__
         CountType m_Count = 0;
 
     public:
+    #ifdef HashMetrics__
         static inline uint32_t MaxProbeLength = 0;
+    #endif
     };
 }

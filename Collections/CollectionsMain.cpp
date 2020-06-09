@@ -1,14 +1,15 @@
 #ifndef Test__
 
-//#define UseSimd__
-#include "MetaHashSet.hpp"
-#include "SimdHashSet.hpp"
-#include "PrimeHashSet.hpp"
 #include <inttypes.h>
 #include <type_traits>
-
 #include <chrono>
 #include <iostream>
+
+#define HashMetrics__
+#include "MetaHashSet.hpp"
+#include "SimdHashSet.hpp"
+// #include "PrimeHashSet.hpp"
+
 #include <unordered_set>
 #include <EASTL\unordered_set.h>
 

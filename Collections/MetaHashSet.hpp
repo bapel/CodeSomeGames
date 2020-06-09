@@ -6,7 +6,7 @@
 
 namespace NamespaceName__
 {
-    template <class K, typename H = std::hash<K>>
+    template <class K, class H = std::hash<K>>
     class MetaHashSet
     {
     public:
@@ -96,7 +96,7 @@ namespace NamespaceName__
 
     private:
         // Capacity is always a power of two.
-        inline static CountType CalcCapacity(CountType n)
+        __forceinline static CountType CalcCapacity(CountType n)
         {
             n--;
             n |= n >> 1;
@@ -107,48 +107,19 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        __forceinline static uint64_t Hash(KeyType x)
-        {
-            const static auto hasher = HashFunction();
-            return hasher(x); 
-        }
-
+        __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
         __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; }
         __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
-        void Rehash(CountType newCapacity)
-        {
-            assert(newCapacity <= k_MaxCapacity);
-
-            auto control = m_Control;
-            auto slots = m_Slots;
-            auto capacity = m_Capacity;
-            auto count = m_Count;
-
-            // @Todo: Support for capacity < 16.
-            // Enough for all keys and a byte per key.
-            auto size = newCapacity * (1 + sizeof(KeyType));
-            m_Control = (uint8_t*)m_Allocator->Malloc(size, 16);
-            m_Slots = (KeyType*)(m_Control + newCapacity);
-            m_Capacity = newCapacity;
-            m_Count = 0;
-
-            memset(m_Control, k_Empty32, m_Capacity);
-
-            for (auto i = 0U; i < capacity; i++)
-            {
-                if (k_Empty != control[i] && 
-                    k_Deleted != control[i])
-                    Add(slots[i]);
-            }
-
-            m_Allocator->Free(control);
-        }
+        __forceinline IndexType Index(uint64_t hash) const
+        { return H1(hash) & (m_Capacity - 1); }
 
         __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
+        #ifdef HashMetrics__
             MaxProbeLength = 0U;
-            const auto index = H1(hash) & (m_Capacity - 1);
+        #endif
+            const auto index = Index(hash);
             const auto h2 = H2(hash);
 
             auto pos = index;
@@ -160,7 +131,9 @@ namespace NamespaceName__
                 if (h2 == m_Control[pos] && key == m_Slots[pos])
                     return { true, pos };
 
+            #ifdef HashMetrics__
                 MaxProbeLength++;
+            #endif
                 pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
@@ -171,7 +144,7 @@ namespace NamespaceName__
 
         __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
-            const auto index = H1(hash) & (m_Capacity - 1);
+            const auto index = Index(hash);
             const auto h2 = H2(hash);
 
             auto pos = index;
@@ -189,6 +162,34 @@ namespace NamespaceName__
             while (pos != index);
 
             return { false, -1 };
+        }
+
+        void Rehash(CountType newCapacity)
+        {
+            assert(newCapacity <= k_MaxCapacity);
+
+            // src for copying.
+            auto control = m_Control;
+            auto slots = m_Slots;
+            auto capacity = m_Capacity;
+            auto count = m_Count;
+
+            auto size = newCapacity * (1 + sizeof(KeyType));
+            m_Control = (uint8_t*)m_Allocator->Malloc(size, 16);
+            m_Slots = (KeyType*)(m_Control + newCapacity);
+            m_Capacity = newCapacity;
+            m_Count = 0;
+
+            memset(m_Control, k_Empty32, m_Capacity);
+
+            for (auto i = 0U; i < capacity; i++)
+            {
+                if (k_Empty != control[i] && 
+                    k_Deleted != control[i])
+                    Add(slots[i]);
+            }
+
+            m_Allocator->Free(control);
         }
 
     private:
@@ -242,6 +243,8 @@ namespace NamespaceName__
         CountType m_Count = 0;
 
     public:
+    #ifdef HashMetrics__
         static inline uint32_t MaxProbeLength = 0;
+    #endif
     };
 }
