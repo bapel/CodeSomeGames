@@ -3,9 +3,13 @@
 #include "..\Collections.hpp"
 #include "xxHash\xxh3.h"
 #include "xxHash64.hpp"
+#include <EASTL\functional.h>
 
 Namespace__
 {
+    template <class T>
+    using Identity = eastl::hash<T>;
+
     // What integer hash function are good that accepts an integer hash key?
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key/
 

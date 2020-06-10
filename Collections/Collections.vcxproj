@@ -237,15 +237,16 @@
   <ItemGroup>
     <ClInclude Include="Allocator.hpp" />
     <ClInclude Include="BitSet.hpp" />
-    <ClInclude Include="ChunkHashSet.hpp" />
+    <ClInclude Include="HashSet\ChunkHashSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
+    <ClInclude Include="HashSet\HoodHashSet.hpp" />
     <ClInclude Include="Hash\xxHash64.hpp" />
     <ClInclude Include="Hash\xxHash\xxh3.h" />
     <ClInclude Include="Hash\xxHash\xxhash.h" />
-    <ClInclude Include="MetaHashSet.hpp" />
-    <ClInclude Include="PrimeHashSet.hpp" />
-    <ClInclude Include="SimdHashSet.hpp" />
+    <ClInclude Include="HashSet\MetaHashSet.hpp" />
+    <ClInclude Include="HashSet\PrimeHashSet.hpp" />
+    <ClInclude Include="HashSet\SimdHashSet.hpp" />
     <ClInclude Include="Tests\Allocator.inl" />
     <ClInclude Include="DynamicBuffer.hpp" />
   </ItemGroup>

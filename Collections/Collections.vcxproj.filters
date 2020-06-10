@@ -53,18 +53,6 @@
     <ClInclude Include="BitSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PrimeHashSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimdHashSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MetaHashSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChunkHashSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Hash\xxHash\xxh3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,6 +60,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Hash\xxHash64.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HashSet\ChunkHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HashSet\MetaHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HashSet\PrimeHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HashSet\SimdHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HashSet\HoodHashSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

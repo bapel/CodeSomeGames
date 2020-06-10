@@ -10,6 +10,7 @@
 #include "ArrayList.hpp"
 #include "HashSet\MetaHashSet.hpp"
 #include "HashSet\SimdHashSet.hpp"
+#include "HashSet\HoodHashSet.hpp"
 // #include "ChunkHashSet.hpp"
 // #include "PrimeHashSet.hpp"
 
@@ -47,11 +48,23 @@ void ProfileFind(uint32_t count)
 {
     using namespace NamespaceName__;
 
-    HashSetType set(2 * count);
+    HashSetType set(count);
+    ArrayList<uint64_t> hashes(count);
+    const auto dv = 15704;
 
     HashSetType::MaxProbeLength = 0;
+
     for (auto i = 0U; i < count; i++)
-        set.Add(i);
+    {
+        auto hash = Hasher()(i);
+        hashes.Add(hash);
+
+        if (i == dv)
+            assert(set.Add(i, hash));
+        else
+            assert(set.Add(i, hash));
+    }
+
     auto nc = HashSetType::MaxProbeLength;
 
     assert(NumLookups > count);
@@ -64,9 +77,15 @@ void ProfileFind(uint32_t count)
     for (auto r = 0U; r < repeat; r++)
     {
         for (auto i = 0; i < count; i++)
-            assert(set.Contains(i));
+        {
+            if (i == dv)
+                assert(set.Contains(i, hashes[i]));
+            else
+                assert(set.Contains(i, hashes[i]));
+        }
+            
         for (auto i = count; i < 2 * count; i++)
-            assert(!set.Contains(i));
+            assert(!set.Contains(i, Hasher()(i)));
     }
 
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
@@ -136,17 +155,18 @@ void TestingSandbox()
 {
     using namespace NamespaceName__;
 
-    //FlatHashSet<uint32_t> set(8);
-    SimdHashSet<uint32_t> set;
+    //FlatHashSet<Payload, Hasher> set(8);
+    //SimdHashSet<Payload, Hasher> set;
+    HoodHashSet<Payload, Hasher> set;
 
-    for (auto i = 0U; i < 10; i++)
-        set.Add(i);
-    
-    for (auto i = 10U; i < 20; i++)
-        set.Add(i);
+    //for (auto i = 0U; i < 10; i++)
+    //    set.Add(i);
+    //
+    //for (auto i = 10U; i < 20; i++)
+    //    set.Add(i);
 
-    assert(set.Add(3) == false);
-    assert(set.Remove(3) == true);
+    //assert(set.Add(3) == false);
+    //assert(set.Remove(3) == true);
 }
 
 void Profiling()
@@ -173,16 +193,22 @@ void Profiling()
     //    ProfileFind_1<eastl::hash_set<Payload, Hasher>>(n);
     //std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "MetaHashSet\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind<MetaHashSet<Payload, Hasher>>(n);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "MetaHashSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind<MetaHashSet<Payload, Hasher>>(n);
+    //std::cout << std::endl;
+
+    //n = Growth;
+    //std::cout << "SimdHashSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind<SimdHashSet<Payload, Hasher>>(n);
+    //std::cout << std::endl;
 
     n = Growth;
-    std::cout << "SimdHashSet\n---" << std::endl;
+    std::cout << "HoodHashSet\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
-        ProfileFind<SimdHashSet<Payload, Hasher>>(n);
+        ProfileFind<HoodHashSet<Payload, Hasher>>(n);
     std::cout << std::endl;
 }
 
