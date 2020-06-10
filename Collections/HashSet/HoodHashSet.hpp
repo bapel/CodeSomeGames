@@ -26,45 +26,37 @@ Namespace__
         CountType Count() const { return m_Count; }
         CountType Capacity() const { return m_Capacity; }
 
-        #define Write_Hash_and_Probe__(I__, P__, H__)\
-        {\
-            m_Probes[I__] = P__;\
-            m_Hashes[I__] = H__;\
-            if (I__ < 16) {\
-                m_Probes[I__ + m_Capacity] = P__;\
-                m_Hashes[I__ + m_Capacity] = H__;\
-            }\
-        }
+        __forceinline bool Add(const KeyType& key)
+        { return Add(key, Hash(key)); }
+
+        // Close to 100% load can cause probe/displacement to grow very large.
+        // So we keep the limit at 15/16 (=0.9375) of Capacity.
+        __forceinline bool ShouldRehash() const
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 4)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
             if (m_Capacity == 0)
                 Rehash(16);
 
-            // Keep load factors close but not close to 100%.
-            // That can cause probe/displacement to grow very large.
-            // Here we go with a limit of 15/16th (=0.9375) of Capacity.
-            if ((m_Count + 1) >= (m_Capacity - (m_Capacity >> 4)))
+            if (ShouldRehash())
                 Rehash(m_Capacity << 1);
 
             //const auto hash = Hash(key);
             const auto index = Index(hash);
             
             auto k = key;
-            auto h = hash & 0b1111'1111;
-            auto p = 0U;
+            uint8_t h = H1(hash);
+            uint8_t p = 0;
 
             auto pos = index;
             do
             {
                 if (k_Empty == m_Probes[pos])
                 {
-                    Write_Hash_and_Probe__(pos, p, h);
+                    SetProbeAndHash(pos, p, h);
                     m_Slots[pos] = k;
                     m_Count++;
-
-                    //if (k == 15704)
-                    //    std::cout << k << " at: " << pos << " +" << p << std::endl;
 
                     return true;
                 }
@@ -72,21 +64,7 @@ Namespace__
                 if (key == m_Slots[pos])
                     return false;
                 else if (m_Probes[pos] < p)
-                {
-                    auto p_ = m_Probes[pos];
-                    auto h_ = m_Hashes[pos];
-                    auto k_ = m_Slots[pos];
-
-                    Write_Hash_and_Probe__(pos, p, h);
-                    m_Slots[pos] = k;
-
-                    //if (k == 15704)
-                    //    std::cout << k << " at: " << pos << " +" << p << std::endl;
-
-                    p = p_;
-                    h = h_;
-                    k = k_;
-                }
+                    Swap(pos, &p, &h, &k);
 
                 p++;
                 pos = (pos + 1) & (m_Capacity - 1);
@@ -110,12 +88,12 @@ Namespace__
 
         #undef Write_Hash_and_Probe__
 
-        //__forceinline bool Contains(ConstRefType<KeyType> key) const
-        //{
-        //    assert(m_Capacity > 0);
-        //    auto [found, index] = Find(key, Hash(key));
-        //    return found;
-        //}
+        __forceinline bool Contains(ConstRefType<KeyType> key) const
+        {
+            assert(m_Capacity > 0);
+            auto [found, index] = Find(key, Hash(key));
+            return found;
+        }
 
         __forceinline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
         {
@@ -172,36 +150,39 @@ Namespace__
         }
 
         __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        __forceinline static uint8_t H1(uint64_t hash) { return hash & 0b1111'1111; }
         __forceinline IndexType Index(uint64_t hash) const { return hash & (m_Capacity - 1); }
 
-        /*
-        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __forceinline void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
         {
-            const auto index = Index(hash);
-            const auto h = hash & 0b1111'1111;
+            m_Probes[pos] = probe;
+            m_Hashes[pos] = hash;
 
-            auto pos = index;
-            do
+            if (pos < 16) 
             {
-                if (k_Empty == m_Probes[pos])
-                    return { false, pos };
-
-                if (h == m_Hashes[pos] && key == m_Slots[pos])
-                    return { true, pos };
-
-                pos = (pos + 1) & (m_Capacity - 1);
+                m_Probes[pos + m_Capacity] = probe;
+                m_Hashes[pos + m_Capacity] = hash;
             }
-            // @Todo: Have a max probe length? instead of wrapping around the whole table.
-            while (pos != index);
-
-            return { false, -1 };
         }
-        */
+
+        __forceinline void Swap(IndexType pos, uint8_t* p, uint8_t* h, KeyType* k)
+        {
+            auto p_ = m_Probes[pos];
+            auto h_ = m_Hashes[pos];
+            auto k_ = m_Slots[pos];
+
+            SetProbeAndHash(pos, *p, *h);
+            m_Slots[pos] = *k;
+
+            *p = p_;
+            *h = h_;
+            *k = k_;
+        }
 
         __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
             const auto index = Index(hash);
-            const auto h = hash & 0b1111'1111;
+            const auto h = H1(hash);
 
             auto pos = index;
             do
@@ -253,10 +234,10 @@ Namespace__
             assert(retries < 4);
 
             {
-                size_t sizeOfProbes = newCapacity + 16;
-                size_t sizeOfHashes = newCapacity + 16;
-                size_t sizeOfSlots = newCapacity * sizeof(KeyType);
-                auto totalSize = sizeOfProbes + sizeOfHashes + sizeOfSlots;
+                auto sizeOfProbes = newCapacity + 16;
+                auto sizeOfHashes = newCapacity + 16;
+                auto sizeOfSlots = newCapacity * sizeof(KeyType);
+                auto totalSize = (sizeOfProbes + sizeOfHashes) + sizeOfSlots;
 
                 m_Probes = (uint8_t*)m_Allocator->Malloc(totalSize, 16);
                 m_Hashes = (uint8_t*)(m_Probes + sizeOfProbes);

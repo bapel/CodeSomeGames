@@ -26,19 +26,26 @@ namespace NamespaceName__
         CountType Count() const { return m_Count; }
         CountType Capacity() const { return m_Capacity; }
 
-        bool Add(ConstRefType<KeyType> key)
+        __forceinline bool Add(const KeyType& key)
+        { return Add(key, Hash(key)); }
+
+        __forceinline bool ShouldRehash() const
+        {
+            auto po2 = __lzcnt(m_Capacity);
+            return (m_Count + 1) >= k_RehashLUT[po2];
+        }
+
+        bool Add(const KeyType& key, uint64_t hash)
         {
             if (m_Capacity == 0)
                 Rehash(16);
 
-            const auto hash = Hash(key);
             auto [exists, index] = FindForAdd(key, hash);
 
             if (exists)
                 return false;
 
-            auto po2 = __lzcnt(m_Capacity);
-            if ((m_Count + 1) >= k_RehashLUT[po2])
+            if (ShouldRehash())
             {
                 Rehash(m_Capacity << 1);
                 std::tie(exists, index) = FindForAdd(key, hash);
