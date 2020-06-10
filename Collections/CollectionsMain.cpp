@@ -41,7 +41,7 @@ using Hasher = std::hash<Payload>;
 //using Hasher = NamespaceName__::BrehmHash<Payload>;
 const auto Count_n = 10'000'000U;
 const auto Growth = 10;
-const auto NumLookups = 20'000'000U;
+const auto NumLookups = 40'000'000U;
 
 template <class HashSetType>
 void ProfileFind(uint32_t count)
@@ -54,8 +54,14 @@ void ProfileFind(uint32_t count)
 
     HashSetType::MaxProbeLength = 0;
 
-    for (auto i = 0U; i < count; i++)
+    for (auto i = 0U; i < set.Capacity(); i++)
     {
+        if (set.ShouldRehash())
+        {
+            count = i;
+            break;
+        }
+
         auto hash = Hasher()(i);
         hashes.Add(hash);
 
@@ -68,10 +74,9 @@ void ProfileFind(uint32_t count)
     auto nc = HashSetType::MaxProbeLength;
 
     assert(NumLookups > count);
-    assert(NumLookups % count == 0);
 
     auto finds = NumLookups;
-    auto repeat = NumLookups / (2 * count);
+    auto repeat = Max(1, NumLookups / (2 * count));
     auto start = HiresClock::now();
 
     for (auto r = 0U; r < repeat; r++)
@@ -89,10 +94,12 @@ void ProfileFind(uint32_t count)
     }
 
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
+    auto perQuery = elapsed / (repeat * (2 * count));
+    auto load = (float)set.Count() / set.Capacity();
 
     std::cout 
-        << elapsed / NumLookups << " ns, "
-        << "Load: " << (float)set.Count() / set.Capacity() << ", "
+        << perQuery << " ns, "
+        << "Load: " << load << ", "
         << "Probe: " << nc << ", "
         << count << ", "
         << finds << ", "
@@ -199,11 +206,11 @@ void Profiling()
     //    ProfileFind<MetaHashSet<Payload, Hasher>>(n);
     //std::cout << std::endl;
 
-    //n = Growth;
-    //std::cout << "SimdHashSet\n---" << std::endl;
-    //for (; n <= Count_n; n*=Growth)
-    //    ProfileFind<SimdHashSet<Payload, Hasher>>(n);
-    //std::cout << std::endl;
+    n = Growth;
+    std::cout << "SimdHashSet\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind<SimdHashSet<Payload, Hasher>>(n);
+    std::cout << std::endl;
 
     n = Growth;
     std::cout << "HoodHashSet\n---" << std::endl;
