@@ -7,8 +7,10 @@
 
 #define HashMetrics__
 #include "Collections.hpp"
-#include "MetaHashSet.hpp"
-#include "SimdHashSet.hpp"
+#include "ArrayList.hpp"
+#include "HashSet\MetaHashSet.hpp"
+#include "HashSet\SimdHashSet.hpp"
+// #include "ChunkHashSet.hpp"
 // #include "PrimeHashSet.hpp"
 
 #include <unordered_set>
@@ -32,10 +34,10 @@ using HiresDuration = HiresClock::duration;
 using NanoSeconds = std::chrono::nanoseconds;
 
 using Payload = uint64_t;
-//using Hasher = std::hash<Payload>;
+using Hasher = std::hash<Payload>;
 //using Hasher = NamespaceName__::SoHash<Payload>;
 //using Hasher = NamespaceName__::xxHash<Payload>;
-using Hasher = NamespaceName__::BrehmHash<Payload>;
+//using Hasher = NamespaceName__::BrehmHash<Payload>;
 const auto Count_n = 10'000'000U;
 const auto Growth = 10;
 const auto NumLookups = 20'000'000U;
@@ -45,7 +47,7 @@ void ProfileFind(uint32_t count)
 {
     using namespace NamespaceName__;
 
-    HashSetType set(count);
+    HashSetType set(2 * count);
 
     HashSetType::MaxProbeLength = 0;
     for (auto i = 0U; i < count; i++)
@@ -84,7 +86,7 @@ void ProfileFind_1(uint32_t count)
 {
     using namespace NamespaceName__;
 
-    HashSetType set(1.5f * count);
+    HashSetType set(count);
 
     for (auto i = 0U; i < count; i++)
         set.insert(i);
@@ -120,9 +122,13 @@ void Profiling();
 
 int main()
 {
+    const auto r1 = 0b1000'0000U & 0b1111'1110U;
+    const auto r2 = 0b1000'0000U & 0b0101'1100U;
+
     //HashDistribution();
     //TestingSandbox();
     Profiling();
+    //HashToFile();
     return 0;
 }
 
@@ -149,11 +155,11 @@ void Profiling()
 
     auto n = Growth;
     
-    n = Growth;
-    std::cout << "std::unordered_set\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<std::unordered_set<Payload, Hasher>>(n);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "std::unordered_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<std::unordered_set<Payload, Hasher>>(n);
+    //std::cout << std::endl;
 
     //n = Growth;
     //std::cout << "eastl::unordered_set\n---" << std::endl;
@@ -252,6 +258,37 @@ void HashDistribution()
 
 finish:
     return;
+}
+
+#include <fstream>
+#include <iomanip>
+
+void HashToFile()
+{
+    std::ofstream file("hash.txt");
+    uint32_t bn[64] = {};
+    
+    for (auto i = 0U; i < 5000; i++)
+    {
+        auto h = Hasher()(i);
+
+        file << std::setw( 4) << i << ", ";
+        file << std::setw(20) << h << ", ";
+
+        for (auto j = 0; j < 64; j++)
+        {
+            //if (j > 0 && j % 4 == 0) file << ' ';
+            file << (h >> (64 - j) & 1) ? '1' : '0';
+            file << ',';
+
+            if (h >> (64 - j) & 1)
+                bn[j]++;
+        }
+
+        file << std::endl;
+    }
+
+    file.close();
 }
 
 #endif

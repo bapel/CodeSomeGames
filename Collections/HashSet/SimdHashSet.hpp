@@ -1,35 +1,35 @@
 #pragma once
 
-#include "Allocator.hpp"
+#include "../Allocator.hpp"
 #include <functional> // std::hash
 #include <intrin.h> // __lzcnt
 
 namespace NamespaceName__
 {
     template <class K, class H = std::hash<K>>
-    class MetaHashSet
+    class SimdHashSet
     {
     public:
         using KeyType = K;
         using HashFunction = H;
 
-        MetaHashSet() = default;
-        MetaHashSet(IAllocator* allocator) : m_Allocator(allocator)  {}
-        
-        MetaHashSet(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
-            MetaHashSet(allocator)
+        SimdHashSet() = default;
+        SimdHashSet(IAllocator* allocator) : m_Allocator(allocator)  {}
+
+        SimdHashSet(CountType capacity, IAllocator* allocator = GetFallbackAllocator()) :
+            SimdHashSet(allocator)
         { EnsureCapacity(capacity); }
 
-        ~MetaHashSet()
+        ~SimdHashSet()
         { m_Allocator->Free(m_Control); }
 
-        __forceinline CountType Count() const { return m_Count; }
-        __forceinline CountType Capacity() const { return m_Capacity; }
+        CountType Count() const { return m_Count; }
+        CountType Capacity() const { return m_Capacity; }
 
         bool Add(ConstRefType<KeyType> key)
         {
             if (m_Capacity == 0)
-                Rehash(4);
+                Rehash(16);
 
             const auto hash = Hash(key);
             auto [exists, index] = FindForAdd(key, hash);
@@ -44,7 +44,7 @@ namespace NamespaceName__
                 std::tie(exists, index) = FindForAdd(key, hash);
             }
 
-            m_Control[index] = H2(hash);
+            SetControl(index, H2(hash));
             m_Slots[index] = key;
             m_Count++;
 
@@ -74,7 +74,7 @@ namespace NamespaceName__
 
             if (found)
             {
-                m_Control[index] = k_Deleted;
+                SetControl(index, k_Deleted);
                 m_Count--;
                 return true;
             }
@@ -82,7 +82,7 @@ namespace NamespaceName__
             return false;
         }
 
-        void Clear()
+        __forceinline void Clear()
         { memset(m_Control, k_Empty32, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
@@ -100,9 +100,13 @@ namespace NamespaceName__
         }
 
     private:
-        // Capacity is always a power of two.
+        // Capacity is always a power of two and a multiple of 16.
+        // Note that all powers of two > 16 are multiple of 16.
         __forceinline static CountType CalcCapacity(CountType n)
         {
+            if (n < 16)
+                return 16;
+
             n--;
             n |= n >> 1;
             n |= n >> 2;
@@ -118,6 +122,13 @@ namespace NamespaceName__
 
         __forceinline IndexType Index(uint64_t hash) const
         { return H1(hash) & (m_Capacity - 1); }
+
+        __forceinline void SetControl(IndexType index, uint8_t control) const
+        {
+            m_Control[index] = control;
+            if (index < 16)
+                m_Control[index + m_Capacity] = control;
+        }
 
         __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
@@ -156,6 +167,48 @@ namespace NamespaceName__
             auto pos = index;
             do
             {
+                const auto value = _mm_set1_epi8(h2);
+                const auto control = _mm_loadu_si128((__m128i*)(m_Control + pos));
+                auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, control));
+
+                auto i = 0;
+                while (result != 0)
+                {
+                    const auto offset = (pos + i) & (m_Capacity - 1);
+                    if ((result & 1) && (key == m_Slots[offset]))
+                        return { true, offset };
+
+                    auto s = __lzcnt(result);
+                    result >>= 1;
+                    i++;
+                }
+
+                const auto empty = _mm_set1_epi8(k_Empty);
+                result = _mm_movemask_epi8(_mm_cmpeq_epi8(empty, control));
+                if (result != 0)
+                    return { false, pos };
+
+                pos = (pos + 16) & (m_Capacity - 1);
+            }
+            // @Todo: Have a max probe length? instead of wrapping around the whole table.
+            while (pos != index);
+
+            return { false, -1 };
+        }
+
+        /*
+        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        {
+            const auto index = H1(hash) & (m_Capacity - 1);
+            const auto h2 = H2(hash);
+
+            auto pos = index;
+            do
+            {
+                // auto a = _mm_set1_epi8(h2);
+                // auto b = _mm_load_si128((__m128i*)(m_Control + pos));
+                // auto r = _mm_cmpeq_epi8(a, b);
+
                 if (k_Empty == m_Control[pos])
                     return { false, pos };
 
@@ -169,6 +222,7 @@ namespace NamespaceName__
 
             return { false, -1 };
         }
+        */
 
         void Rehash(CountType newCapacity)
         {
@@ -180,13 +234,16 @@ namespace NamespaceName__
             auto capacity = m_Capacity;
             auto count = m_Count;
 
-            auto size = newCapacity * (1 + sizeof(KeyType));
+            const auto sizeOfControl = newCapacity + 16;
+            const auto sizeOfSlots = newCapacity * sizeof(KeyType);
+            const auto size = sizeOfControl + sizeOfSlots;
+
             m_Control = (uint8_t*)m_Allocator->Malloc(size, 16);
-            m_Slots = (KeyType*)(m_Control + newCapacity);
+            m_Slots = (KeyType*)(m_Control + sizeOfControl);
             m_Capacity = newCapacity;
             m_Count = 0;
 
-            memset(m_Control, k_Empty32, m_Capacity);
+            memset(m_Control, k_Empty32, sizeOfControl);
 
             for (auto i = 0U; i < capacity; i++)
             {
