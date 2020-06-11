@@ -32,7 +32,7 @@ Namespace__
         // Close to 100% load can cause probe/displacement to grow very large.
         // So we keep the limit at 15/16 (=0.9375) of Capacity.
         __forceinline bool ShouldRehash() const
-        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 4)); }
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 3)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
@@ -43,7 +43,7 @@ Namespace__
                 Rehash(m_Capacity << 1);
 
             //const auto hash = Hash(key);
-            const auto index = Index(hash);
+            const auto index = Slot(hash);
             
             auto k = key;
             uint8_t h = H1(hash);
@@ -52,32 +52,32 @@ Namespace__
             auto pos = index;
             do
             {
-                if (k_Empty == m_Probes[pos])
+                if (k_Empty == m_Hashes[pos])
                 {
                     SetProbeAndHash(pos, p, h);
                     m_Slots[pos] = k;
                     m_Count++;
-
                     return true;
                 }
 
                 if (key == m_Slots[pos])
                     return false;
-                else if (m_Probes[pos] < p)
+                
+                if (m_Probes[pos] < p)
                     Swap(pos, &p, &h, &k);
 
                 p++;
                 pos = (pos + 1) & (m_Capacity - 1);
 
-                // Probe/displacement could hit 255. So we'd want to rehash the table.
-                // This however just reports a failure and leaves it up to the caller.
-                // Note that this only (almost-always?) happens with high load-factors.
-                if (p == k_Empty)
-                    return false;
-
             #ifdef HashMetrics__
                 MaxProbeLength = Max(p, MaxProbeLength);
             #endif
+
+                // Probe/displacement could hit 255. So we'd want to rehash the table.
+                // This however just reports a failure and leaves it up to the caller.
+                // Note that this only (almost-always?) happens with high load-factors.
+                if (p == 255)
+                    return false;
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
             while (pos != index);
@@ -102,6 +102,8 @@ Namespace__
             return found;
         }
 
+        // @Todo: This is not implemented.
+        // This should move following slots back on deletion.
         bool Remove(ConstRefType<KeyType> key)
         {
             assert(m_Capacity > 0);
@@ -111,7 +113,7 @@ Namespace__
 
             if (found)
             {
-                m_Probes[index] = k_Empty;
+                m_Hashes[index] = k_Empty;
                 m_Count--;
                 return true;
             }
@@ -120,19 +122,34 @@ Namespace__
         }
 
         __forceinline void Clear()
-        { memset(m_Probes, k_Empty32, m_Capacity); }
+        { memset(m_Hashes, k_Empty32, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
         { Rehash(CalcCapacity(minCapacity)); }
 
-        void GetKeys(KeyType* outKeys) const
+        void GetProbes(uint8_t* outProbes, CountType count) const
         {
+            auto j = 0U;
             for (auto i = 0U; i < m_Capacity; i++)
             {
-                if (k_Empty == m_Probes[i])
+                if (k_Empty == m_Hashes[i])
                     continue;
 
-                outKeys.Add(m_Slots[i]);
+                assert(j < count);
+                outProbes[j++] = m_Probes[i];
+            }
+        }
+
+        void GetSlots(KeyType* outSlots, CountType count) const
+        {
+            auto j = 0U;
+            for (auto i = 0U; i < m_Capacity; i++)
+            {
+                if (k_Empty == m_Hashes[i])
+                    continue;
+
+                assert(j < count);
+                outSlots[j++] = m_Slots[i];
             }
         }
 
@@ -150,8 +167,8 @@ Namespace__
         }
 
         __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
-        __forceinline static uint8_t H1(uint64_t hash) { return hash & 0b1111'1111; }
-        __forceinline IndexType Index(uint64_t hash) const { return hash & (m_Capacity - 1); }
+        __forceinline static uint8_t H1(uint64_t hash) { return hash & 0b0111'1111; }
+        __forceinline IndexType Slot(uint64_t hash) const { return hash & (m_Capacity - 1); }
 
         __forceinline void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
         {
@@ -181,10 +198,11 @@ Namespace__
 
         __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
-            const auto index = Index(hash);
+            const auto slot = Slot(hash);
             const auto h = H1(hash);
+            const auto mask = m_Capacity - 1;
 
-            auto pos = index;
+            auto pos = slot;
             do
             {
                 const auto value = _mm_set1_epi8(h);
@@ -194,24 +212,29 @@ Namespace__
                 auto i = 0;
                 while (result != 0)
                 {
-                    const auto offset = (pos + i) & (m_Capacity - 1);
-                    if ((result & 1) && (key == m_Slots[offset]))
-                        return { true, offset };
+                    if (result & 1)
+                    {
+                        const auto offset = (pos + i) & mask;
+                        if (key == m_Slots[offset])
+                            return { true, offset };
 
-                    result >>= 1;
-                    i++;
+                        result >>= 1;
+                        i++;
+                    }
+
+                    auto shift = _tzcnt_u32(result);
+                    result >>= shift;
+                    i += shift;
                 }
 
-                const auto empty = _mm_set1_epi8(k_Empty);
-                const auto probes = _mm_loadu_si128((__m128i*)(m_Probes + pos));
-                result = _mm_movemask_epi8(_mm_cmpeq_epi8(empty, probes));
+                result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
                 if (result != 0)
                     return { false, pos };
 
-                pos = (pos + 16) & (m_Capacity - 1);
+                pos = (pos + 16) & mask;
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
-            while (pos != index);
+            while (pos != slot);
 
             return { false, -1 };
         }
@@ -237,7 +260,7 @@ Namespace__
                 auto sizeOfProbes = newCapacity + 16;
                 auto sizeOfHashes = newCapacity + 16;
                 auto sizeOfSlots = newCapacity * sizeof(KeyType);
-                auto totalSize = (sizeOfProbes + sizeOfHashes) + sizeOfSlots;
+                auto totalSize = sizeOfSlots + (sizeOfProbes + sizeOfHashes);
 
                 m_Probes = (uint8_t*)m_Allocator->Malloc(totalSize, 16);
                 m_Hashes = (uint8_t*)(m_Probes + sizeOfProbes);
@@ -245,8 +268,8 @@ Namespace__
                 m_Capacity = newCapacity;
                 m_Count = 0;
 
-                memset(m_Probes, k_Empty32, sizeOfProbes);
-                memset(m_Hashes, 0, sizeOfHashes);
+                memset(m_Probes, 0, sizeOfProbes);
+                memset(m_Hashes, k_Empty32, sizeOfHashes);
             }
 
             //std::cout 
@@ -255,7 +278,7 @@ Namespace__
 
             for (auto i = 0U; i < capacity; i++)
             {
-                if (k_Empty != probes[i])
+                if (k_Empty != hashes[i])
                 {
                     bool success = false;
 
@@ -278,8 +301,9 @@ Namespace__
         }
     
     private:
-        const uint8_t k_Empty = 0b1111'1111; // 0xFF
-        const uint32_t k_Empty32 = 0xFFFFFFFF; // k_Empty x4
+        const static uint8_t k_Empty = 0b1000'0000; // 0x80
+        const static uint32_t k_Empty32 = 0x80808080; // k_Empty x4
+        const static inline auto k_Empty128i = _mm_set1_epi8(k_Empty);
 
         IAllocator* m_Allocator = GetFallbackAllocator();
         uint8_t* m_Probes = nullptr;

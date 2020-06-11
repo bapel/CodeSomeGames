@@ -170,66 +170,44 @@ namespace NamespaceName__
         {
             const auto index = Index(hash);
             const auto h2 = H2(hash);
+            const auto mask = m_Capacity - 1;
 
             auto pos = index;
             do
             {
                 const auto value = _mm_set1_epi8(h2);
-                const auto control = _mm_loadu_si128((__m128i*)(m_Control + pos));
-                auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, control));
+                const auto hashes = _mm_loadu_si128((__m128i*)(m_Control + pos));
+                auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, hashes));
 
                 auto i = 0;
                 while (result != 0)
                 {
-                    const auto offset = (pos + i) & (m_Capacity - 1);
-                    if ((result & 1) && (key == m_Slots[offset]))
-                        return { true, offset };
+                    if (result & 1)
+                    {
+                        const auto offset = (pos + i) & mask;
+                        if (key == m_Slots[offset])
+                            return { true, offset };
 
-                    auto s = __lzcnt(result);
-                    result >>= 1;
-                    i++;
+                        result >>= 1;
+                        i++;
+                    }
+
+                    auto shift = _tzcnt_u32(result);
+                    result >>= shift;
+                    i += shift;
                 }
 
-                const auto empty = _mm_set1_epi8(k_Empty);
-                result = _mm_movemask_epi8(_mm_cmpeq_epi8(empty, control));
+                result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
                 if (result != 0)
                     return { false, pos };
 
-                pos = (pos + 16) & (m_Capacity - 1);
+                pos = (pos + 16) & mask;
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
             while (pos != index);
 
             return { false, -1 };
         }
-
-        /*
-        inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
-        {
-            const auto index = H1(hash) & (m_Capacity - 1);
-            const auto h2 = H2(hash);
-
-            auto pos = index;
-            do
-            {
-                // auto a = _mm_set1_epi8(h2);
-                // auto b = _mm_load_si128((__m128i*)(m_Control + pos));
-                // auto r = _mm_cmpeq_epi8(a, b);
-
-                if (k_Empty == m_Control[pos])
-                    return { false, pos };
-
-                if (h2 == m_Control[pos] && key == m_Slots[pos])
-                    return { true, pos };
-
-                pos = (pos + 1) & (m_Capacity - 1);
-            }
-            // @Todo: Have a max probe length? instead of wrapping around the whole table.
-            while (pos != index);
-
-            return { false, -1 };
-        }
-        */
 
         void Rehash(CountType newCapacity)
         {
@@ -270,6 +248,7 @@ namespace NamespaceName__
         const static auto k_Deleted  = 0b1111'1110U;
         const static auto k_Sentinel = 0b1111'1111U;
         const static auto k_Empty32  = 0x80808080; // k_Empty x4
+        const static inline auto k_Empty128i = _mm_set1_epi8(k_Empty);
 
         // Max possible counts considering a load factor of 0.875.
         constexpr static CountType k_RehashLUT[] = 

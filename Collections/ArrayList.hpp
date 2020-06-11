@@ -186,6 +186,20 @@ Namespace__
             m_Count = newCount;
         }
 
+        void Resize(CountType newCount, const ValueType& fill)
+        {
+            if (newCount > m_Capacity)
+            {
+                auto oldCount = m_Count;
+                auto size = (newCount - oldCount) * sizeof(ValueType);
+
+                Grow(newCount);
+                memset(m_Items + oldCount, fill, size);
+            }
+
+            m_Count = newCount;
+        }
+
         void SetCapacity(CountType newCapacity)
         {
             if (newCapacity == m_Capacity)
