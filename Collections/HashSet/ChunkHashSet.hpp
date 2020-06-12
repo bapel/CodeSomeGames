@@ -27,11 +27,11 @@ namespace NamespaceName__
         CountType Capacity() const { return m_Capacity; }
 
     private:
+        template <class T>
         struct Chunk
         {
-            uint8_t Control[7];
-            uint8_t Count;
-            uint64_t Keys[7];
+            uint8_t control[64]; //
+            T keys[14];          // 
         };
     };
 }

@@ -32,7 +32,7 @@ Namespace__
         // Close to 100% load can cause probe/displacement to grow very large.
         // So we keep the limit at 15/16 (=0.9375) of Capacity.
         __forceinline bool ShouldRehash() const
-        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 3)); }
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {

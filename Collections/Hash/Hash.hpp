@@ -10,6 +10,20 @@ Namespace__
     template <class T>
     using Identity = eastl::hash<T>;
 
+    struct udb2Hash
+    {
+        __forceinline uint32_t operator()(uint32_t key) const
+        {
+            key += ~(key << 15);
+            key ^=  (key >> 10);
+            key +=  (key << 3);
+            key ^=  (key >> 6);
+            key += ~(key << 11);
+            key ^=  (key >> 16);
+            return key;
+        }
+    };
+
     // What integer hash function are good that accepts an integer hash key?
     // https://stackoverflow.com/questions/664014/what-integer-hash-function-are-good-that-accepts-an-integer-hash-key/
 

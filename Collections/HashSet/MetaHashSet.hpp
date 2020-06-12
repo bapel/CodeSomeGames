@@ -30,10 +30,7 @@ namespace NamespaceName__
         { return Add(key, Hash(key)); }
 
         __forceinline bool ShouldRehash() const
-        {
-            auto po2 = __lzcnt(m_Capacity);
-            return (m_Count + 1) >= k_RehashLUT[po2];
-        }
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
