@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 
+#include "Array\FixedArray.hpp"
+
 #define HashMetrics__
 #include "Collections.hpp"
 #include "ArrayList.hpp"
@@ -197,6 +199,12 @@ void Profiling();
 
 int main()
 {
+    pstl::FixedArray<int, 16> foo;
+    const auto desireSize = 16 * sizeof(int);
+    const auto actualSize = sizeof(foo);
+
+    foo[0] = 0;
+
     //HashDistribution();
     //TestingSandbox();
     Profiling();
@@ -318,7 +326,7 @@ void HashDistribution()
     {
         auto hash = hashFunction(i);
         auto bucket = hash % buckets.Count();
-        buckets[bucket]++;
+        buckets[(uint32_t)bucket]++;
 
         auto occupied = 0U;
         for (auto j = 0U; j < buckets.Count(); j++)

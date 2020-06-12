@@ -25,6 +25,10 @@
       - Test -> true/fale[] (True for all)
 */
 
+/*
+
+*/
+
 Namespace__
 {
     // Resizable growing array.

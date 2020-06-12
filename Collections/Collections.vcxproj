@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugInlined|Win32">
+      <Configuration>DebugInlined</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugInlined|x64">
+      <Configuration>DebugInlined</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -39,6 +47,12 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -53,6 +67,12 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -79,6 +99,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -86,6 +109,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'" Label="PropertySheets">
@@ -96,6 +122,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
@@ -111,6 +142,11 @@
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">
     <OutDir>$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(SolutionDir)ThirdParty\SDL_Image;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(SolutionDir)ThirdParty\DirectXTK\Inc;$(SolutionDir)ThirdParty\Catch2;$(SolutionDir)Common;$(IncludePath)</IncludePath>
@@ -138,6 +174,20 @@
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -160,6 +210,20 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -226,8 +290,6 @@
     <ClCompile Include="CollectionsMain.cpp" />
     <ClCompile Include="CollectionsTest.cpp" />
     <ClCompile Include="Hash\Hash.hpp" />
-    <ClCompile Include="Hash\xxHash\xxhash.c" />
-    <ClCompile Include="Hash\xxHash\xxhsum.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\EASTL\vcproj\EASTL.vcxproj">
@@ -236,14 +298,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allocator.hpp" />
+    <ClInclude Include="Array\internal\ArrayBase.hpp" />
+    <ClInclude Include="Array\FixedArray.hpp" />
     <ClInclude Include="BitSet.hpp" />
+    <ClInclude Include="Core\Enumerator.hpp" />
+    <ClInclude Include="Core\Range.hpp" />
     <ClInclude Include="HashSet\ChunkHashSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
     <ClInclude Include="HashSet\HoodHashSet.hpp" />
-    <ClInclude Include="Hash\xxHash64.hpp" />
-    <ClInclude Include="Hash\xxHash\xxh3.h" />
-    <ClInclude Include="Hash\xxHash\xxhash.h" />
     <ClInclude Include="HashSet\MetaHashSet.hpp" />
     <ClInclude Include="HashSet\PrimeHashSet.hpp" />
     <ClInclude Include="HashSet\SimdHashSet.hpp" />

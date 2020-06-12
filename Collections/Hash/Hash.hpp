@@ -1,8 +1,6 @@
 #pragma once
 
 #include "..\Collections.hpp"
-#include "xxHash\xxh3.h"
-#include "xxHash64.hpp"
 #include <EASTL\functional.h>
 
 Namespace__
@@ -12,7 +10,7 @@ Namespace__
 
     struct udb2Hash
     {
-        __forceinline uint32_t operator()(uint32_t key) const
+        __inline uint32_t operator()(uint32_t key) const
         {
             key += ~(key << 15);
             key ^=  (key >> 10);
@@ -35,7 +33,7 @@ Namespace__
     {
         #define xorshift(n__, i__) (n__ ^ (n__ >> i__))
 
-        __forceinline uint64_t operator()(const uint64_t& n) const
+        __inline uint64_t operator()(const uint64_t& n) const
         {
             const uint64_t p = 0x5555555555555555ull; // pattern of alternating 0 and 1
             const uint64_t c = 17316035218449499591ull; // random uneven integer constant; 
@@ -49,7 +47,7 @@ Namespace__
     template <>
     struct SoHash<uint64_t>
     {
-        __forceinline uint64_t operator()(uint64_t x) const
+        __inline uint64_t operator()(uint64_t x) const
         {
             x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
             x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
@@ -61,7 +59,7 @@ Namespace__
     template <>
     struct SoHash<uint32_t>
     {
-        __forceinline uint32_t operator()(uint32_t x) const
+        __inline uint32_t operator()(uint32_t x) const
         {
             x = ((x >> 16) ^ x) * 0x45d9f3b;
             x = ((x >> 16) ^ x) * 0x45d9f3b;

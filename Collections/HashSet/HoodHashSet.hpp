@@ -26,12 +26,12 @@ Namespace__
         CountType Count() const { return m_Count; }
         CountType Capacity() const { return m_Capacity; }
 
-        __forceinline bool Add(const KeyType& key)
+        __inline bool Add(const KeyType& key)
         { return Add(key, Hash(key)); }
 
         // Close to 100% load can cause probe/displacement to grow very large.
         // So we keep the limit at 15/16 (=0.9375) of Capacity.
-        __forceinline bool ShouldRehash() const
+        __inline bool ShouldRehash() const
         { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
 
         bool Add(const KeyType& key, uint64_t hash)
@@ -88,14 +88,14 @@ Namespace__
 
         #undef Write_Hash_and_Probe__
 
-        __forceinline bool Contains(ConstRefType<KeyType> key) const
+        __inline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, Hash(key));
             return found;
         }
 
-        __forceinline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
+        __inline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, hash);
@@ -121,7 +121,7 @@ Namespace__
             return false;
         }
 
-        __forceinline void Clear()
+        __inline void Clear()
         { memset(m_Hashes, k_Empty32, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
@@ -155,7 +155,7 @@ Namespace__
 
     private:
         // Capacity is always a power of two.
-        __forceinline static CountType CalcCapacity(CountType n)
+        __inline static CountType CalcCapacity(CountType n)
         {
             n--;
             n |= n >> 1;
@@ -166,11 +166,11 @@ Namespace__
             return n + 1;
         }
 
-        __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
-        __forceinline static uint8_t H1(uint64_t hash) { return hash & 0b0111'1111; }
-        __forceinline IndexType Slot(uint64_t hash) const { return hash & (m_Capacity - 1); }
+        __inline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        __inline static uint8_t H1(uint64_t hash) { return hash & 0b0111'1111; }
+        __inline IndexType Slot(uint64_t hash) const { return hash & (m_Capacity - 1); }
 
-        __forceinline void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
+        __inline void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
         {
             m_Probes[pos] = probe;
             m_Hashes[pos] = hash;
@@ -182,7 +182,7 @@ Namespace__
             }
         }
 
-        __forceinline void Swap(IndexType pos, uint8_t* p, uint8_t* h, KeyType* k)
+        __inline void Swap(IndexType pos, uint8_t* p, uint8_t* h, KeyType* k)
         {
             auto p_ = m_Probes[pos];
             auto h_ = m_Hashes[pos];
@@ -196,7 +196,7 @@ Namespace__
             *k = k_;
         }
 
-        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
             const auto slot = Slot(hash);
             const auto h = H1(hash);

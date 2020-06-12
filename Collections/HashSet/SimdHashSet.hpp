@@ -26,10 +26,10 @@ namespace NamespaceName__
         CountType Count() const { return m_Count; }
         CountType Capacity() const { return m_Capacity; }
 
-        __forceinline bool Add(const KeyType& key)
+        __inline bool Add(const KeyType& key)
         { return Add(key, Hash(key)); }
 
-        __forceinline bool ShouldRehash() const
+        __inline bool ShouldRehash() const
         { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
 
         bool Add(const KeyType& key, uint64_t hash)
@@ -55,14 +55,14 @@ namespace NamespaceName__
             return true;
         }
 
-        __forceinline bool Contains(ConstRefType<KeyType> key) const
+        __inline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, Hash(key));
             return found;
         }
 
-        __forceinline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
+        __inline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, hash);
@@ -86,7 +86,7 @@ namespace NamespaceName__
             return false;
         }
 
-        __forceinline void Clear()
+        __inline void Clear()
         { memset(m_Control, k_Empty32, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
@@ -106,7 +106,7 @@ namespace NamespaceName__
     private:
         // Capacity is always a power of two and a multiple of 16.
         // Note that all powers of two > 16 are multiple of 16.
-        __forceinline static CountType CalcCapacity(CountType n)
+        __inline static CountType CalcCapacity(CountType n)
         {
             if (n < 16)
                 return 16;
@@ -120,21 +120,21 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
-        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; }
-        __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
+        __inline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        __inline static uint64_t H1(uint64_t hash) { return hash >> 7; }
+        __inline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
-        __forceinline IndexType Index(uint64_t hash) const
+        __inline IndexType Index(uint64_t hash) const
         { return H1(hash) & (m_Capacity - 1); }
 
-        __forceinline void SetControl(IndexType index, uint8_t control) const
+        __inline void SetControl(IndexType index, uint8_t control) const
         {
             m_Control[index] = control;
             if (index < 16)
                 m_Control[index + m_Capacity] = control;
         }
 
-        __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
+        __inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
         #ifdef HashMetrics__
             auto probeLength = 0U;
@@ -163,7 +163,7 @@ namespace NamespaceName__
             return { false, -1 };
         }
 
-        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
             const auto index = Index(hash);
             const auto h2 = H2(hash);

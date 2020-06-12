@@ -23,13 +23,13 @@ namespace NamespaceName__
         ~MetaHashSet()
         { m_Allocator->Free(m_Control); }
 
-        __forceinline CountType Count() const { return m_Count; }
-        __forceinline CountType Capacity() const { return m_Capacity; }
+        __inline CountType Count() const { return m_Count; }
+        __inline CountType Capacity() const { return m_Capacity; }
 
-        __forceinline bool Add(const KeyType& key)
+        __inline bool Add(const KeyType& key)
         { return Add(key, Hash(key)); }
 
-        __forceinline bool ShouldRehash() const
+        __inline bool ShouldRehash() const
         { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
 
         bool Add(const KeyType& key, uint64_t hash)
@@ -55,14 +55,14 @@ namespace NamespaceName__
             return true;
         }
 
-        __forceinline bool Contains(ConstRefType<KeyType> key) const
+        __inline bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, Hash(key));
             return found;
         }
 
-        __forceinline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
+        __inline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, hash);
@@ -105,7 +105,7 @@ namespace NamespaceName__
 
     private:
         // Capacity is always a power of two.
-        __forceinline static CountType CalcCapacity(CountType n)
+        __inline static CountType CalcCapacity(CountType n)
         {
             n--;
             n |= n >> 1;
@@ -116,14 +116,14 @@ namespace NamespaceName__
             return n + 1;
         }
 
-        __forceinline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
-        __forceinline static uint64_t H1(uint64_t hash) { return hash >> 7; }
-        __forceinline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
+        __inline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        __inline static uint64_t H1(uint64_t hash) { return hash >> 7; }
+        __inline static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
-        __forceinline IndexType Index(uint64_t hash) const
+        __inline IndexType Index(uint64_t hash) const
         { return H1(hash) & (m_Capacity - 1); }
 
-        __forceinline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
+        __inline std::pair<bool, IndexType> FindForAdd(const KeyType& key, uint64_t hash) const
         {
         #ifdef HashMetrics__
             auto probeLength = 0U;
@@ -152,7 +152,7 @@ namespace NamespaceName__
             return { false, -1 };
         }
 
-        __forceinline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        __inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
             const auto index = Index(hash);
             const auto h2 = H2(hash);

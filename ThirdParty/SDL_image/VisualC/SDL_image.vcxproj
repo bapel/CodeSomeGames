@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugInlined|Win32">
+      <Configuration>DebugInlined</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugInlined|x64">
+      <Configuration>DebugInlined</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -41,6 +49,10 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
@@ -50,6 +62,10 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -68,6 +84,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
@@ -80,6 +100,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
@@ -88,28 +112,38 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).output\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir).interm\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" />
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" />
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Test|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" />
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Test|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Test|x64'" />
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
@@ -121,6 +155,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -130,6 +167,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">
+    <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -137,6 +177,40 @@
     <IncludePath>$(SolutionDir)ThirdParty\SDL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/SDL2_image.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>external\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="libpng16-16.dll";LOAD_PNM;LOAD_SVG;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake />
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
@@ -205,6 +279,40 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/SDL2_image.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>external\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;LOAD_BMP;LOAD_GIF;LOAD_JPG;LOAD_JPG_DYNAMIC="libjpeg-9.dll";LOAD_LBM;LOAD_PCX;LOAD_PNG;LOAD_PNG_DYNAMIC="libpng16-16.dll";LOAD_PNM;LOAD_SVG;LOAD_TGA;LOAD_TIF;LOAD_TIF_DYNAMIC="libtiff-5.dll";LOAD_WEBP;LOAD_WEBP_DYNAMIC="libwebp-7.dll";LOAD_XPM;LOAD_XV;PNG_USE_DLL;ZLIB_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake />
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libjpeg-9.dll" "$(OutDir)libjpeg-9.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\libpng16-16.dll" "$(OutDir)libpng16-16.dll"
+copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.dll" "$(OutDir)zlib1.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
@@ -337,12 +445,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
   <ItemGroup>
     <ClCompile Include="..\IMG.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -351,12 +463,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_bmp.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -365,12 +481,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_gif.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -379,12 +499,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_jpg.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -393,12 +517,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_lbm.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -407,12 +535,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_pcx.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -421,12 +553,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_png.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -435,12 +571,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_pnm.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -450,12 +590,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <ClCompile Include="..\IMG_svg.c" />
     <ClCompile Include="..\IMG_tga.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -464,12 +608,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_tif.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -480,12 +628,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <ClCompile Include="..\IMG_WIC.c" />
     <ClCompile Include="..\IMG_xcf.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -494,12 +646,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_xpm.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -508,12 +664,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_xv.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -522,12 +682,16 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </ClCompile>
     <ClCompile Include="..\IMG_xxx.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -538,8 +702,10 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
   <ItemGroup>
     <ResourceCompile Include="Version.rc">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Test|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -552,10 +718,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x64\libjpeg-9.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -564,10 +733,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x64\libpng16-16.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -576,10 +748,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x64\libtiff-5.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -588,10 +763,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x64\libwebp-7.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -599,10 +777,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x64\LICENSE.jpeg.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -610,10 +791,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x64\LICENSE.png.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -621,10 +805,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x64\LICENSE.tiff.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -632,10 +819,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x64\LICENSE.webp.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -643,10 +833,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x64\LICENSE.zlib.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -655,10 +848,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x64\zlib1.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(Filename)%(Extension)</Message>
@@ -667,10 +863,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x86\libjpeg-9.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -679,10 +878,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x86\libpng16-16.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -691,10 +893,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x86\libtiff-5.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -703,10 +908,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x86\libwebp-7.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -714,10 +922,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x86\LICENSE.jpeg.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -725,10 +936,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x86\LICENSE.png.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -736,10 +950,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x86\LICENSE.tiff.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -747,10 +964,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x86\LICENSE.webp.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -758,10 +978,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     </CustomBuild>
     <CustomBuild Include="external\lib\x86\LICENSE.zlib.txt">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>
@@ -770,10 +993,13 @@ copy "$(SolutionDir)ThirdParty\SDL_image\VisualC\external\lib\$(Platform)\zlib1.
     <CustomBuild Include="external\lib\x86\zlib1.dll">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename)%(Extension)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">Copying %(Filename)%(Extension)</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Copying %(Filename)%(Extension)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='DebugInlined|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\%(Filename)%(Extension)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) $(SolutionDir)\$(Platform)\$(Configuration)\</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename)%(Extension)</Message>

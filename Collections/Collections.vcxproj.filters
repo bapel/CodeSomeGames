@@ -24,12 +24,6 @@
     <ClCompile Include="CollectionsMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Hash\xxHash\xxhash.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Hash\xxHash\xxhsum.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hash\Hash.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -41,9 +35,6 @@
     <ClInclude Include="Allocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ArrayList.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tests\Allocator.inl">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -51,15 +42,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BitSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Hash\xxHash\xxh3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Hash\xxHash\xxhash.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Hash\xxHash64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HashSet\ChunkHashSet.hpp">
@@ -75,6 +57,14 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HashSet\HoodHashSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Enumerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
