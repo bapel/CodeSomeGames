@@ -30,8 +30,8 @@ Namespace__
     template <class T> using ConstRefType = const T &;
 
     // Static fixed array, like T x[N].
-    template <class T, int N>
-    using Array = std::array<T, N>;
+    //template <class T, int N>
+    //using Array = std::array<T, N>;
 
     // @Todo: Do we need "bit-twiddling" versions of Min/Max?
     // Are those actually faster?

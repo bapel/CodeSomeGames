@@ -169,6 +169,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -183,6 +184,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -197,6 +199,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>Test__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -210,6 +213,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -224,6 +228,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -238,6 +243,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>Test__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -254,8 +260,9 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -275,8 +282,9 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -298,11 +306,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allocator.hpp" />
-    <ClInclude Include="Array\internal\ArrayBase.hpp" />
-    <ClInclude Include="Array\FixedArray.hpp" />
+    <ClInclude Include="pstl\Array.hpp" />
     <ClInclude Include="BitSet.hpp" />
-    <ClInclude Include="Core\Enumerator.hpp" />
-    <ClInclude Include="Core\Range.hpp" />
+    <ClInclude Include="pstl\detail\ArrayBase.hpp" />
+    <ClInclude Include="pstl\detail\Common.hpp" />
+    <ClInclude Include="pstl\detail\Enumerator.hpp" />
+    <ClInclude Include="pstl\detail\Range.hpp" />
+    <ClInclude Include="Core\Tuple.hpp" />
     <ClInclude Include="HashSet\ChunkHashSet.hpp" />
     <ClInclude Include="Collections.hpp" />
     <ClInclude Include="ArrayList.hpp" />
@@ -310,6 +320,8 @@
     <ClInclude Include="HashSet\MetaHashSet.hpp" />
     <ClInclude Include="HashSet\PrimeHashSet.hpp" />
     <ClInclude Include="HashSet\SimdHashSet.hpp" />
+    <ClInclude Include="pstl\DynamicArray.hpp" />
+    <ClInclude Include="pstl\FixedArray.hpp" />
     <ClInclude Include="Tests\Allocator.inl" />
     <ClInclude Include="DynamicBuffer.hpp" />
   </ItemGroup>

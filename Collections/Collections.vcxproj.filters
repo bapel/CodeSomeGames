@@ -62,9 +62,28 @@
     <ClInclude Include="ArrayList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Enumerator.hpp">
+    <ClInclude Include="Core\Tuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pstl\Array.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\Enumerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\Range.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\Common.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\FixedArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\DynamicArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\ArrayBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

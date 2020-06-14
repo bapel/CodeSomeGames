@@ -5,7 +5,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "Array\FixedArray.hpp"
+#include "pstl\DynamicArray.hpp"
 
 #define HashMetrics__
 #include "Collections.hpp"
@@ -199,15 +199,11 @@ void Profiling();
 
 int main()
 {
-    pstl::FixedArray<int, 16> foo;
-    const auto desireSize = 16 * sizeof(int);
-    const auto actualSize = sizeof(foo);
-
-    foo[0] = 0;
+    pstl::DynamicArray<int> foo;
 
     //HashDistribution();
     //TestingSandbox();
-    Profiling();
+    //Profiling();
     //HashToFile();
     return 0;
 }
