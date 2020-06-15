@@ -32,14 +32,20 @@ namespace detail {
         using RangeBase::End;
         using RangeBase::Count;
 
-        struct Deref { __inline constexpr T& operator()(T* x) { return *x; } };
-        struct ConstDeref { __inline constexpr const T& operator()(const T* x) { return *x; } };
+        template <class R>
+        struct Deref 
+        {
+            __inline constexpr R operator()(T* x) { return *x; }
+        };
 
-        __inline Enumerator<T*, Deref> GetEnumerator()
-        { return { m_start, End() }; }
+        template <class U>
+        using PtrEnumerator = Enumerator<U*, Deref<U&>>;
 
-        __inline Enumerator<const T*, ConstDeref> GetEnumerator() const
-        { return { m_start, End() }; }
+        __inline PtrEnumerator<T> GetEnumerator()
+        { return PtrEnumerator<T>(m_start, End()); }
+
+        __inline PtrEnumerator<const T> GetEnumerator() const
+        { return PtrEnumerator<const T>(m_start, End()); }
 
         __inline T& operator[](uint32_t index) 
         { return At(index, m_start, Count()); }
