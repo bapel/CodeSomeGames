@@ -5,7 +5,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "pstl\DynamicArray.hpp"
+#include "pstl\Array.hpp"
 
 #define HashMetrics__
 #include "Collections.hpp"
@@ -199,11 +199,9 @@ void Profiling();
 
 int main()
 {
-    pstl::DynamicArray<int> foo;
-
     //HashDistribution();
     //TestingSandbox();
-    //Profiling();
+    Profiling();
     //HashToFile();
     return 0;
 }
@@ -211,6 +209,8 @@ int main()
 void TestingSandbox()
 {
     using namespace NamespaceName__;
+
+    using T = pstl::detail::ArrayRange<float, std::integral_constant<uint32_t, 32>>;
 
     //FlatHashSet<Payload, Hasher> set(8);
     //SimdHashSet<Payload, Hasher> set;

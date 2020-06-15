@@ -77,12 +77,6 @@
     <ClInclude Include="pstl\detail\Common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\FixedArray.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\DynamicArray.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pstl\detail\ArrayBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

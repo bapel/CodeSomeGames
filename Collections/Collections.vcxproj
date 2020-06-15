@@ -320,8 +320,6 @@
     <ClInclude Include="HashSet\MetaHashSet.hpp" />
     <ClInclude Include="HashSet\PrimeHashSet.hpp" />
     <ClInclude Include="HashSet\SimdHashSet.hpp" />
-    <ClInclude Include="pstl\DynamicArray.hpp" />
-    <ClInclude Include="pstl\FixedArray.hpp" />
     <ClInclude Include="Tests\Allocator.inl" />
     <ClInclude Include="DynamicBuffer.hpp" />
   </ItemGroup>

@@ -3,16 +3,12 @@
 namespace pstl
 {
     template <class T>
-    struct Enumerator
+    class Enumerator
     {
-        using Value = T;
-        using ConstRef = const T&;
+        using Crnt = std::remove_const_t<T>;
 
-        const Value m_start;
-        const Value m_end;
-        Value m_current;
-
-        Enumerator(ConstRef start, ConstRef end) :
+    public:
+        Enumerator(const T& start, const T& end) :
             m_start(start),
             m_end(end),
             m_current(m_start)
@@ -24,7 +20,12 @@ namespace pstl
         __inline bool MoveNext()
         { return m_end == m_current++; }
 
-        __inline Value Current() const
+        __inline T Current() const
         { return m_current; }
+
+    private:
+        const T m_start;
+        const T m_end;
+        Crnt m_current;
     };
 }
