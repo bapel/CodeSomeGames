@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <type_traits>
 
+#define pstl_is_debug__ _DEBUG
+#define pstl_inline__ __inline
+
 namespace pstl {
 
     template <typename T>
@@ -19,11 +22,11 @@ namespace pstl {
     }
 
     template <class T, class U>
-    constexpr T Min(const T& a, const U& b)
+    pstl_inline__ constexpr T Min(const T& a, const U& b)
     { return (a < b) ? a : b; }
 
     template <class T, class U>
-    constexpr T Max(const T& a, const U& b)
+    pstl_inline__ constexpr T Max(const T& a, const U& b)
     { return (a > b) ? a : b; }
 
 }
