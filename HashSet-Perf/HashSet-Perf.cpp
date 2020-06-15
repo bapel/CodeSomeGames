@@ -63,7 +63,7 @@ void PrintProbeStats(const pstl::HoodHashSet<Payload, Hasher>& set)
 {
     pstl::ArrayList<uint8_t> probes;
     pstl::ArrayList<uint32_t> distribution;
-    
+
     probes.Resize(set.Count());
     distribution.Resize(256, 0);
 
@@ -81,7 +81,7 @@ void PrintProbeStats(const pstl::HoodHashSet<Payload, Hasher>& set)
             continue;
 
         auto p = (100.0f * distribution[i]) / set.Count();
-        
+
         std::cout << i << ": " << p << "%, ";
         std::cout << distribution[i] << " in " << set.Count() << std::endl;
     }
@@ -94,7 +94,7 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
 
     HashSetType set(count);
     ArrayList<uint64_t> hashes(count);
-    
+
     HashSetType::MaxProbeLength = 0;
 
     auto i = 0UL;
@@ -128,7 +128,7 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
 
     elapsed = NanoSeconds(HiresClock::now() - start).count();
     auto perFail = elapsed / (repeat * count);
-    
+
     auto load = (float)set.Count() / set.Capacity();
 
     std::cout 
@@ -244,7 +244,7 @@ void Profiling()
     std::shuffle(payload.begin(), payload.end(), generator);
 
     auto n = Growth;
-    
+
     n = Growth;
     std::cout << "std::unordered_set\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
@@ -363,7 +363,7 @@ void HashToFile()
 {
     std::ofstream file("hash.txt");
     uint32_t bn[64] = {};
-    
+
     for (auto i = 0U; i < 5000; i++)
     {
         auto h = Hasher()(i);

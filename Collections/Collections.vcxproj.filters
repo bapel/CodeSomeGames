@@ -21,9 +21,6 @@
     <ClCompile Include="Allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CollectionsMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hash\Hash.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,21 +60,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Tuple.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\Array.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\detail\Enumerator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\detail\Range.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\detail\Common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pstl\detail\ArrayBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

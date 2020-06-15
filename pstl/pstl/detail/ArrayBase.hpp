@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.hpp"
-#include "Enumerator.hpp"
+#include "pstl\detail\Common.hpp"
+#include "pstl\detail\Enumerator.hpp"
 
 namespace pstl {
 namespace detail {
@@ -41,7 +41,7 @@ namespace detail {
         __inline const T& operator[](uint32_t index) const
         { return At(index, m_start, Count()); }
 
-    private:
+    protected:
         using AccessBase::At;
         using RangeBase::m_start;
     };

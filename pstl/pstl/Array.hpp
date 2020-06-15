@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pstl\detail\ArrayBase.hpp"
-#include "Allocator.hpp"
+#include "pstl\Allocator.hpp"
 
 namespace pstl {
 namespace detail {
