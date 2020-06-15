@@ -3,6 +3,9 @@
 #include "pstl\detail\Common.hpp"
 #include "pstl\detail\Enumerator.hpp"
 
+#include <utility>
+#include <initializer_list>
+
 namespace pstl {
 namespace detail {
 
@@ -29,10 +32,13 @@ namespace detail {
         using RangeBase::End;
         using RangeBase::Count;
 
-        __inline Enumerator<T*> GetEnumerator()
+        struct Deref { __inline constexpr T& operator()(T* x) { return *x; } };
+        struct ConstDeref { __inline constexpr const T& operator()(const T* x) { return *x; } };
+
+        __inline Enumerator<T*, Deref> GetEnumerator()
         { return { m_start, End() }; }
 
-        __inline Enumerator<const T*> GetEnumerator() const
+        __inline Enumerator<const T*, ConstDeref> GetEnumerator() const
         { return { m_start, End() }; }
 
         __inline T& operator[](uint32_t index) 
@@ -53,7 +59,17 @@ struct pstl::detail::ArrayRange<T, std::integral_constant<uint32_t, n>>
 {
     typedef T Value;
 
+    ArrayRange() = default;
+
+    template <class U>
+    __inline ArrayRange(std::initializer_list<U> list)
+    {
+        const auto count = list.size();
+        memcpy(m_start, list.begin(), sizeof(T) * count);
+    }
+
     __inline T* End() { return m_start + n; }
+    __inline const T* End() const { return m_start + n; }
     __inline uint32_t Count() const { return n; }
 
 protected:
@@ -71,6 +87,7 @@ struct pstl::detail::ArrayRange<T*, T*>
     { }
 
     __inline T* End() { return m_end; }
+    __inline const T* End() const { return m_end; }
     __inline uint32_t Count() const { return m_end - m_start; }
 
 protected:

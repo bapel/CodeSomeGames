@@ -36,7 +36,19 @@ namespace pstl {
         __inline DynamicArray(DynamicArray&& other) :
             Base(other.m_start, other.m_end),
             m_allocator(other.m_allocator)
-        { other.m_start = nullptr; }
+        { 
+            other.m_start = nullptr; 
+        }
+
+        template <class U>
+        __inline DynamicArray(
+            std::initializer_list<U> list, 
+            IAllocator* allocator = GetFallbackAllocator()) :
+            DynamicArray(list.size(), allocator)
+        {
+            const auto count = list.size();
+            memcpy(m_start, list.begin(), sizeof(T) * count);
+        }
 
         __inline ~DynamicArray()
         { m_allocator->Free(m_start); }

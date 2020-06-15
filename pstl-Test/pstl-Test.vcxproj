@@ -174,6 +174,10 @@
       <Project>{451b7064-2e18-4a24-935c-0bf0b109d38e}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests\AllocatorTests.hpp" />
+    <ClInclude Include="tests\ArrayTests.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

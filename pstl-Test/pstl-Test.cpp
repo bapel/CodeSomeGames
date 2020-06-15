@@ -8,8 +8,8 @@
 
 #include <catch.hpp>
 
-#include "tests\Allocator.hpp"
-#include "tests\Array.hpp"
+#include "tests\AllocatorTests.hpp"
+#include "tests\ArrayTests.hpp"
 
 #pragma warning(pop)
 
