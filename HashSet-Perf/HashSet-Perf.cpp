@@ -5,8 +5,6 @@
 #include <chrono>
 #include <iostream>
 
-#include "pstl\Array.hpp"
-
 #define HashMetrics__
 #include "Collections.hpp"
 #include "ArrayList.hpp"
@@ -53,7 +51,7 @@ using Hasher = std::hash<Payload>;
 //using Hasher = pstl::SoHash<Payload>;
 //using Hasher = pstl::BrehmHash<Payload>;
 const auto Count_n = pstl::Min(10'000'000U, std::numeric_limits<Payload>::max());
-const auto Growth = 10;
+const auto Growth = 1'000;
 const auto NumLookups = 10'000'000U;
 
 template <class HashSetType>
@@ -112,22 +110,30 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
     for (auto r = 0U; r < repeat; r++)
     {
         for (auto i = 0; i < count; i++)
-            assert(set.Contains(payload[i]));
+        {
+            volatile auto res = set.Contains(payload[i]);
+            assert(res == true);
+        }
     }
 
-    auto elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perSuccess = elapsed / (repeat * count);
+    auto success_e = NanoSeconds(HiresClock::now() - start).count();
+    auto success_n = (repeat * count);
+    auto perSuccess = success_e / success_n;
 
     start = HiresClock::now();
 
     for (auto r = 0U; r < repeat; r++)
     {
         for (auto i = count; i < 2UL * count; i++)
-            assert(!set.Contains(payload[i]));
+        {
+            volatile auto res = !set.Contains(payload[i]);
+            assert(res == false);
+        }
     }
 
-    elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perFail = elapsed / (repeat * count);
+    auto fail_e = NanoSeconds(HiresClock::now() - start).count();
+    auto fail_n = (repeat * count);
+    auto perFail = fail_e / fail_n;
 
     auto load = (float)set.Count() / set.Capacity();
 
@@ -136,7 +142,8 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
         << perFail << " ns, "
         << "Load: " << load << ", "
         << "Probe: " << nc << ", "
-        << count
+        << success_e << " / " << success_n << ", "
+        << fail_e << " / " << fail_n << ", "
         << std::endl;
 
     //std::cout << std::endl;
@@ -179,7 +186,10 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
     for (auto r = 0U; r < repeat; r++)
     {
         for (auto i = count; i < 2UL * count; i++)
-            assert(set.end() == set.find(payload[i]));
+        {
+            auto iter = set.find(payload[i]);
+            assert(set.end() == iter);
+        }
     }
 
     elapsed = NanoSeconds(HiresClock::now() - start).count();
@@ -209,8 +219,6 @@ int main()
 void TestingSandbox()
 {
     using namespace NamespaceName__;
-
-    using T = pstl::detail::ArrayRange<float, std::integral_constant<uint32_t, 32>>;
 
     //FlatHashSet<Payload, Hasher> set(8);
     //SimdHashSet<Payload, Hasher> set;
@@ -245,11 +253,11 @@ void Profiling()
 
     auto n = Growth;
 
-    n = Growth;
-    std::cout << "std::unordered_set\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "std::unordered_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
 
     //n = Growth;
     //std::cout << "eastl::unordered_set\n---" << std::endl;
@@ -263,17 +271,17 @@ void Profiling()
     //    ProfileFind_1<eastl::hash_set<Payload, Hasher>>(n);
     //std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "MetaHashSet\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind<MetaHashSet<Payload, Hasher>>(n, payload);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "MetaHashSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind<MetaHashSet<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "SimdHashSet\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind<SimdHashSet<Payload, Hasher>>(n, payload);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "SimdHashSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind<SimdHashSet<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
 
     n = Growth;
     std::cout << "HoodHashSet\n---" << std::endl;
