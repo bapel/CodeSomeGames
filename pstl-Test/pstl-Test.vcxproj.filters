@@ -20,10 +20,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tests\AllocatorTests.hpp">
+    <ClInclude Include="tests\allocator_tests.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\ArrayTests.hpp">
+    <ClInclude Include="tests\array_tests.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\array_list_tests.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -175,8 +175,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tests\AllocatorTests.hpp" />
-    <ClInclude Include="tests\ArrayTests.hpp" />
+    <ClInclude Include="tests\allocator_tests.hpp" />
+    <ClInclude Include="tests\array_list_tests.hpp" />
+    <ClInclude Include="tests\array_tests.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-    <Type Name="pstl::detail::ArrayBase&lt;*&gt;">
-        <DisplayString>{{ count="Count()" }}</DisplayString>
+    <Type Name="pstl::array&lt;*&gt;">
+        <DisplayString>{{ count="size()" }}</DisplayString>
         <Expand>
             <ArrayItems>
-                <Size>Count()</Size>
-                <ValuePointer>m_start</ValuePointer>
+                <Size>size()</Size>
+                <ValuePointer>data()</ValuePointer>
             </ArrayItems>
         </Expand>
     </Type>

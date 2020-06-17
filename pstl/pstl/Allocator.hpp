@@ -1,27 +1,27 @@
 #pragma once
 
-#include "pstl\detail\Common.hpp"
+#include "pstl\detail\common.hpp"
 
 namespace pstl
 {
-    class IAllocator
+    class allocator
     {
     public:
-        virtual ~IAllocator()
-        { assert(m_NumAllocations == 0); }
+        virtual ~allocator()
+        { assert(m_num_allocations == 0); }
 
         // @Todo: Debug variants?
-        virtual void* Malloc(size_t size, size_t alignment, size_t offset = 0) = 0;
-        virtual void Free(void* block) = 0;
+        virtual void* malloc(size_t size, size_t alignment, size_t offset = 0) = 0;
+        virtual void free(void* block) = 0;
 
         // Alignment is inferred from the type.
         template <class T>
-        T* Malloc_n(uint32_t count, size_t offset = 0)
-        { return static_cast<T*>(Malloc(count * sizeof(T), alignof(T), offset)); }
+        T* malloc_n(size_t count, size_t offset = 0)
+        { return static_cast<T*>(this->malloc(count * sizeof(T), alignof(T), offset)); }
 
     protected:
-        uint32_t m_NumAllocations = 0;
+        size_t m_num_allocations = 0;
     };
 
-    IAllocator* GetFallbackAllocator();
+    allocator* fallback_allocator();
 }

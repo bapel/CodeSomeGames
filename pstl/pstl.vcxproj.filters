@@ -24,18 +24,27 @@
     <ClInclude Include="pstl\detail\Range.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\Array.hpp">
+    <ClInclude Include="pstl\detail\common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\Allocator.hpp">
+    <ClInclude Include="pstl\allocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\Common.hpp">
+    <ClInclude Include="pstl\array.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\array_list.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\array_base.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pstl\detail\array_list_base.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pstl\Allocator.cpp">
+    <ClCompile Include="pstl\allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

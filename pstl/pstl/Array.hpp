@@ -1,87 +1,89 @@
 #pragma once
 
-#include "pstl\detail\ArrayBase.hpp"
-#include "pstl\Allocator.hpp"
-
-namespace pstl {
-namespace detail {
-
-    template <uint32_t n>
-    using ArrayCount = std::integral_constant<uint32_t, n>;
-
-}}
+#include "pstl\detail\array_base.hpp"
 
 namespace pstl {
 
-    template <class T, uint32_t n, bool AssertBounds = true>
-    using Array = detail::ArrayBase<T, detail::ArrayCount<n>, AssertBounds>;
-
-    template <class T, bool AssertBounds = true>
-    using FixedArray = detail::ArrayBase<T*, T*, AssertBounds>;
-
-    template <class T, bool AssertBounds = true>
-    class DynamicArray final : public FixedArray<T, AssertBounds>
+    template <class T, size_t n_, 
+    #ifdef pstl_is_debug__
+        bool assert_bounds_ = true
+    #else
+        bool assert_bounds_ = false
+    #endif
+    >
+    class array final : public detail::array_base<T, n_, assert_bounds_>
     {
-        using Base = FixedArray<T, AssertBounds>;
+        pstl_assert_trivial__(T);
+        using base = detail::array_base<T, n_, assert_bounds_>;
+
+    private:
+        using base::m_items;
+        static const auto m_count = n_;
 
     public:
-        __inline DynamicArray(IAllocator* allocator) : 
-            Base(), m_allocator(allocator)
-        { }
-
-        __inline DynamicArray(uint32_t n, IAllocator* allocator = GetFallbackAllocator()) : 
-            DynamicArray(allocator->Malloc_n<T>(n), n, allocator)
-        { }
-
-        __inline DynamicArray(DynamicArray&& other) :
-            Base(other.m_start, other.m_end),
-            m_allocator(other.m_allocator)
-        { 
-            other.m_start = nullptr; 
-        }
-
-        template <class U>
-        __inline DynamicArray(
-            std::initializer_list<U> list, 
-            IAllocator* allocator = GetFallbackAllocator()) :
-            DynamicArray(list.size(), allocator)
+        array() = default;
+        array(std::initializer_list<T> ilist)
         {
-            const auto count = list.size();
-            memcpy(m_start, list.begin(), sizeof(T) * count);
+            const auto size = sizeof(T) * ilist.size();
+            memcpy(m_items, ilist.begin(), min(size, sizeof(m_items)));
         }
 
-        __inline ~DynamicArray()
-        { m_allocator->Free(m_start); }
+        // Element access.
 
-        DynamicArray(const DynamicArray&) = delete;
-        DynamicArray& operator= (const DynamicArray&) = delete;
-
-        using Base::Count;
-
-        void Resize(uint32_t n, IAllocator* allocator = GetFallbackAllocator())
+        constexpr T& at(size_t index)
         {
-            auto start = allocator->Malloc_n<T>(n);
-            auto dstSize = sizeof(T) * n;
-            auto srcSize = sizeof(T) * Count();
+            assert(index < m_count);
+            return m_items[index];
+        };
 
-            memcpy(start, m_start, Min(dstSize, srcSize));
-            m_allocator->Free(m_start);
+        constexpr const T& at(size_t index) const 
+        {
+            assert(index < m_count);
+            return m_items[index];
+        };
 
-            m_start = start;
-            m_end = start + n;
-            m_allocator = allocator;
+        constexpr       T* data()        { return m_items; }
+        constexpr const T* data() const  { return m_items; }
+
+        constexpr       T& front()       { return m_items[0]; }
+        constexpr const T& front() const { return m_items[0]; }
+
+        constexpr       T& back()        { return m_items[m_count - 1]; }
+        constexpr const T& back() const  { return m_items[m_count - 1]; }
+
+        // Iterators.
+
+        constexpr       T* begin()        { return m_items; }
+        constexpr const T* begin() const  { return m_items; }
+        constexpr const T* cbegin() const { return m_items; }
+
+        constexpr       T* end()          { return m_items + m_count; }
+        constexpr const T* end() const    { return m_items + m_count; }
+        constexpr const T* cend() const   { return m_items + m_count; }
+
+        // Capacity.
+
+        constexpr bool empty() const      { return m_count == 0; }
+        constexpr size_t size() const     { return m_count; }
+        constexpr size_t max_size() const { return m_count; }
+
+        // Operations.
+
+        constexpr void fill(const T& value)
+        {
+            for (auto i = 0U; i < m_count; i++)
+                m_items = value;
         }
 
-    private:
-        __inline DynamicArray(T* start, uint32_t n, IAllocator* allocator) :
-            Base(start, start + n),
-            m_allocator(allocator)
-        { }
+        constexpr void swap(array& other)
+        {
+            T temp[m_count];
+            const auto size = sizeof(temp);
 
-    private:
-        using Base::m_start;
-        using Base::m_end;
-        IAllocator* m_allocator = GetFallbackAllocator();
+            memcpy(temp, other.m_items, size);
+            memcpy(other.m_items, m_items, size);
+            memcpy(m_items, temp, size);
+        }
     };
 
 }
