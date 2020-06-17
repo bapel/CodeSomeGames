@@ -16,8 +16,21 @@ TEST_CASE("Array list construction", "[array-list]")
 
     SECTION("Array list init with count should adequately allocate")
     {
-        const auto n = 200;
+        const auto n = 20;
         pstl::array_list<int> ints(n);
+
+        REQUIRE(ints.size() == n);
+        REQUIRE(ints.capacity() >= n);
+        REQUIRE(ints.data() != nullptr);
+    }
+
+    SECTION("Array list init with count and value")
+    {
+        const auto n = 10;
+        pstl::array_list<int> ints(n, 3);
+
+        for (const auto i : ints)
+            REQUIRE(i == 3);
 
         REQUIRE(ints.size() == n);
         REQUIRE(ints.capacity() >= n);
@@ -28,6 +41,24 @@ TEST_CASE("Array list construction", "[array-list]")
     {
         pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
 
+        REQUIRE(a.size() == 7);
+        REQUIRE(a.capacity() >= 7);
+
+        for (auto i = 0U; i < a.size(); i++)
+            REQUIRE(a[i] == i);
+    }
+
+    SECTION("Array list construction from move assignment")
+    {
+        pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
+        pstl::array_list<int> b = std::move(a);
+
+        REQUIRE(a.size() == 0);
+        REQUIRE(a.data() == nullptr);
+        
+        REQUIRE(b.size() == 7);
+        REQUIRE(b.data() != nullptr);
+
         for (auto i = 0U; i < a.size(); i++)
             REQUIRE(a[i] == i);
     }
@@ -36,6 +67,26 @@ TEST_CASE("Array list construction", "[array-list]")
     {
         pstl::array_list<int> a;
         a = { 0, 1, 2, 3, 4, 5, 6 };
+
+        REQUIRE(a.size() == 7);
+        REQUIRE(a.capacity() >= 7);
+
+        for (auto i = 0U; i < a.size(); i++)
+            REQUIRE(a[i] == i);
+    }
+
+    SECTION("Array list construction from move assignment")
+    {
+        pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
+        pstl::array_list<int> b;
+        
+        b = std::move(a);
+
+        REQUIRE(a.size() == 0);
+        REQUIRE(a.data() == nullptr);
+
+        REQUIRE(b.size() == 7);
+        REQUIRE(b.data() != nullptr);
 
         for (auto i = 0U; i < a.size(); i++)
             REQUIRE(a[i] == i);
@@ -172,7 +223,7 @@ TEST_CASE("Array list insert", "[array-list]")
     }
 }
 
-TEST_CASE("Array list removal", "[array-list]")
+TEST_CASE("Array list erase", "[array-list]")
 {
     SECTION("Removal from the middle")
     {
@@ -200,6 +251,39 @@ TEST_CASE("Array list removal", "[array-list]")
         pstl::array_list<int> b = { 0, 1, 2, 3, 4, 5 };
 
         REQUIRE(a.erase(a.end() - 1) == a.end());
+        REQUIRE(b == a);
+    }
+
+    SECTION("Range removal from the middle")
+    {
+        pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
+        pstl::array_list<int> b = { 0, 1,          5, 6 };
+
+        auto start = a.begin() + 2;
+        auto last = start + 3;
+        REQUIRE(a.erase(start, last) == last);
+        REQUIRE(b == a);
+    }
+
+    SECTION("Range removal from the start")
+    {
+        pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
+        pstl::array_list<int> b = {             4, 5, 6 };
+
+        auto start = a.begin();
+        auto last = start + 4;
+        REQUIRE(a.erase(start, last) == last);
+        REQUIRE(b == a);
+    }
+
+    SECTION("Range removal from the end")
+    {
+        pstl::array_list<int> a = { 0, 1, 2, 3, 4, 5, 6 };
+        pstl::array_list<int> b = { 0, 1, 2, 3, };
+
+        auto start = a.begin() + 4;
+        auto last = a.end();
+        REQUIRE(a.erase(start, last) == a.end());
         REQUIRE(b == a);
     }
 

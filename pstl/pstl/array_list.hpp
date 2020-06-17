@@ -49,8 +49,7 @@ namespace pstl {
         array_list(const array_list&) = delete;
 
         pstl_inline__ array_list(array_list&& other) :
-            m_begin(other.m_begin),
-            m_end(other.m_end),
+            base(other.m_begin, other.m_end),
             m_capacity(other.m_capacity),
             m_allocator(other.m_allocator)
         {
@@ -69,13 +68,40 @@ namespace pstl {
             memcpy(m_begin, ilist.begin(), size);
         }
 
-        pstl_inline__ ~array_list()
-        { m_allocator->free(m_begin); }
+        pstl_inline__ ~array_list() { destroy(); }
 
         // Assignment.
-        // @Todo: implement?
 
-        // array_list& operator= (array_list&& other)
+        pstl_inline__ array_list& operator= (array_list&& other)
+        {
+            if (m_allocator == other.m_allocator)
+            {
+                if (m_begin != nullptr)
+                    m_allocator->free(m_begin);
+
+                m_begin = other.m_begin;
+                m_end = other.m_end;
+                m_capacity = other.m_capacity;
+
+                other.m_begin = nullptr;
+                other.m_end = nullptr;
+                other.m_capacity = nullptr;
+
+                return *this;
+            }
+
+            const size_t cap = m_capacity - m_begin;
+            if (cap < other.size())
+                set_capacity(other.size());
+
+            const auto size = sizeof(T) * other.size();
+            memcpy(m_begin, other.begin(), size);
+            m_end = m_begin + other.size();
+
+            other.clear();
+
+            return *this;
+        }
         
         pstl_inline__ array_list& operator= (std::initializer_list<T> ilist)
         {
@@ -85,7 +111,7 @@ namespace pstl {
 
             const auto size = sizeof(T) * ilist.size();
             memcpy(m_begin, ilist.begin(), size);
-            m_end = m_begin + cap;
+            m_end = m_begin + ilist.size();
 
             return *this;
         }
@@ -211,15 +237,22 @@ namespace pstl {
         T* erase(const T* first, const T* last)
         {
             assert(first >= m_begin);
-            assert(last < m_end);
+            assert(last <= m_end);
+
+            if (last == m_end)
+            {
+                m_end -= (last - first);
+                return m_end;
+            }
 
             const auto range = last - first;
             const auto size = m_end - last;
+            auto dst = const_cast<T*>(first);
 
-            memmove(first, first + range, sizeof(T) * size);
+            memmove(dst, first + range, sizeof(T) * size);
             m_end -= (last - first);
 
-            return last;
+            return const_cast<T*>(last);
         }
 
         void push_back(const T& value)
