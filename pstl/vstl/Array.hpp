@@ -1,46 +1,42 @@
 #pragma once
 
-#include "pstl\detail\array_base.hpp"
+#include "..\vx\common.hpp"
 
-namespace pstl {
+namespace vstl {
 
-    template <class T, size_t n_, 
-    #ifdef pstl_is_debug__
-        bool assert_bounds_ = true
-    #else
-        bool assert_bounds_ = false
-    #endif
-    >
-    class array final : public detail::array_base<T, n_, assert_bounds_>
+    template <class T, size_t n_>
+    class Array final
     {
-        pstl_assert_trivial__(T);
-        using base = detail::array_base<T, n_, assert_bounds_>;
+        vx_assert_trivial__(T);
 
     private:
-        using base::m_items;
+        T m_items[n_];
         static const auto m_count = n_;
 
     public:
-        array() = default;
-        array(std::initializer_list<T> ilist)
+        Array() = default;
+        Array(std::initializer_list<T> ilist)
         {
-            const auto size = sizeof(T) * ilist.size();
-            memcpy(m_items, ilist.begin(), min(size, sizeof(m_items)));
+            const auto size = sizeof(T) * vx::min(n_, ilist.size());
+            memcpy(m_items, ilist.begin(), size);
         }
 
         // Element access.
 
-        constexpr T& at(size_t index)
+        constexpr T& at(size_t pos)
         {
-            assert(index < m_count);
-            return m_items[index];
+            assert(pos < m_count);
+            return m_items[pos];
         };
 
-        constexpr const T& at(size_t index) const 
+        constexpr const T& at(size_t pos) const 
         {
-            assert(index < m_count);
-            return m_items[index];
+            assert(pos < m_count);
+            return m_items[pos];
         };
+
+        constexpr       T& operator[](size_t pos)       { return m_items[pos]; }
+        constexpr const T& operator[](size_t pos) const { return m_items[pos]; }
 
         constexpr       T* data()        { return m_items; }
         constexpr const T* data() const  { return m_items; }
@@ -75,7 +71,7 @@ namespace pstl {
                 m_items = value;
         }
 
-        constexpr void swap(array& other)
+        constexpr void swap(Array& other)
         {
             T temp[m_count];
             const auto size = sizeof(temp);

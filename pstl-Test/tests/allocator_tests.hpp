@@ -1,9 +1,9 @@
 #pragma once
 
-#include "pstl\allocator.hpp"
+#include "vx\allocator.hpp"
 #include <catch.hpp>
 
-void align_test(pstl::allocator* allocator, size_t offset = 0)
+void align_test(vx::IAllocator* allocator, size_t offset = 0)
 {
     auto ptr_0 = allocator->malloc(128,  8, offset);
     auto ptr_1 = allocator->malloc(128, 16, offset);
@@ -21,7 +21,7 @@ void align_test(pstl::allocator* allocator, size_t offset = 0)
     allocator->free(ptr_3);
 }
 
-void struct_align_test(pstl::allocator* allocator, size_t offset = 0)
+void struct_align_test(vx::IAllocator* allocator, size_t offset = 0)
 {
     __declspec(align(8))  struct Aligned__8 { double v[16]; };
     __declspec(align(16)) struct Aligned_16 { double v[16]; };
@@ -46,9 +46,9 @@ void struct_align_test(pstl::allocator* allocator, size_t offset = 0)
 
 TEST_CASE("Allocator implementations", "[allocators]", )
 {
-    using namespace pstl;
+    using namespace vx;
 
-    allocator* allocators[] = 
+    IAllocator* allocators[] = 
     {
         fallback_allocator()
         // @Todo: Add other allocators here.
@@ -59,7 +59,7 @@ TEST_CASE("Allocator implementations", "[allocators]", )
         "fallback_allocator"
     };
 
-    for (auto i = 0; i < sizeof(allocators) / sizeof(allocator*); i++)
+    for (auto i = 0; i < sizeof(allocators) / sizeof(IAllocator*); i++)
     {
         SECTION(names[i])
         {

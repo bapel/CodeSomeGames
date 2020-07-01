@@ -1,13 +1,13 @@
 #pragma once
 
-#include "pstl\detail\common.hpp"
+#include "common.hpp"
 
-namespace pstl
+namespace vx
 {
-    class allocator
+    class IAllocator
     {
     public:
-        virtual ~allocator()
+        virtual ~IAllocator()
         { assert(m_num_allocations == 0); }
 
         // @Todo: Debug variants?
@@ -23,5 +23,5 @@ namespace pstl
         size_t m_num_allocations = 0;
     };
 
-    allocator* fallback_allocator();
+    IAllocator* fallback_allocator();
 }

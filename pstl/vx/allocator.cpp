@@ -1,9 +1,9 @@
-#include "pstl\allocator.hpp"
+#include "allocator.hpp"
 #include <malloc.h>
 
 namespace detail
 {
-    struct malloc_allocator final : pstl::allocator
+    class Mallocator final : public vx::IAllocator
     {
         void* malloc(size_t size, size_t alignment, size_t offset) override final
         {
@@ -31,7 +31,7 @@ namespace detail
     };
 }
 
-detail::malloc_allocator fallback_allocator_;
+detail::Mallocator fallback_allocator_;
 
-pstl::allocator* pstl::fallback_allocator()
+vx::IAllocator* vx::fallback_allocator()
 { return &fallback_allocator_; }

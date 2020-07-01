@@ -24,31 +24,31 @@
     <ClInclude Include="pstl\detail\Range.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\common.hpp">
+    <ClInclude Include="vx\common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\allocator.hpp">
+    <ClInclude Include="vx\allocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\array.hpp">
+    <ClInclude Include="vstl\detail\array_base.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\array_list.hpp">
+    <ClInclude Include="vstl\detail\common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\array_base.hpp">
+    <ClInclude Include="vstl\array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\array_list_base.hpp">
+    <ClInclude Include="vstl\array_list.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pstl\allocator.cpp">
+    <ClCompile Include="vx\allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="pstl\pstl.natvis" />
+    <Natvis Include="vstl\vstl.natvis" />
   </ItemGroup>
 </Project>

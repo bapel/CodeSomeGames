@@ -171,21 +171,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="pstl\allocator.hpp" />
-    <ClInclude Include="pstl\array.hpp" />
-    <ClInclude Include="pstl\array_list.hpp" />
+    <ClInclude Include="vx\allocator.hpp" />
+    <ClInclude Include="vstl\array.hpp" />
+    <ClInclude Include="vstl\array_list.hpp" />
     <ClInclude Include="pstl\detail\ArrayBase.hpp" />
-    <ClInclude Include="pstl\detail\array_base.hpp" />
-    <ClInclude Include="pstl\detail\array_list_base.hpp" />
-    <ClInclude Include="pstl\detail\common.hpp" />
+    <ClInclude Include="vstl\detail\array_base.hpp" />
+    <ClInclude Include="vstl\detail\common.hpp" />
     <ClInclude Include="pstl\detail\Enumerator.hpp" />
     <ClInclude Include="pstl\detail\Range.hpp" />
+    <ClInclude Include="vx\common.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pstl\allocator.cpp" />
+    <ClCompile Include="vx\allocator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="pstl\pstl.natvis" />
+    <Natvis Include="vstl\vstl.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
