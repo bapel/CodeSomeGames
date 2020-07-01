@@ -5,15 +5,13 @@
 namespace vstl {
 
     template <class T, size_t n_>
-    class Array final
+    struct Array final
     {
         vx_assert_trivial__(T);
 
-    private:
         T m_items[n_];
         static const auto m_count = n_;
 
-    public:
         Array() = default;
         Array(std::initializer_list<T> ilist)
         {

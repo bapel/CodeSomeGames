@@ -5,6 +5,11 @@
 
 TEST_CASE("Array list construction", "[array-list]")
 {
+    SECTION("Array list PoD is trivial")
+    {
+        REQUIRE(std::is_pod_v<vstl::ArrayList<int>::PoD>);
+    }
+
     SECTION("Array list must be initially empty and unallocated")
     {
         vstl::ArrayList<int> ints;

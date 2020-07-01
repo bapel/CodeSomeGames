@@ -5,6 +5,11 @@
 
 TEST_CASE("Static Array", "[array]")
 {
+    SECTION("Array is trivial")
+    {
+        REQUIRE(std::is_pod_v<vstl::Array<int, 16>>);
+    }
+
     SECTION("Fill and read values (random-access)")
     {
         vstl::Array<int, 8> arr;

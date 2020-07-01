@@ -18,6 +18,28 @@ namespace vstl {
         vx::IAllocator* m_allocator;
 
     public:
+        struct PoD
+        {
+            T* buf;
+            T* end;
+            T* cap;
+            vx::IAllocator* allocator;
+        };
+
+        vx_inline__ ArrayList(PoD& pod) :
+            m_buf(pod.buf),
+            m_end(pod.end),
+            m_cap(pod.cap),
+            m_allocator(pod.allocator)
+        { }
+
+        vx_inline__ PoD to_pod()
+        {
+            PoD pod = { m_buf, m_end, m_cap, m_allocator };
+            m_buf = m_end = m_cap = nullptr;
+            return pod;
+        }
+
         // Construction.
 
         vx_inline__ ArrayList() : 
