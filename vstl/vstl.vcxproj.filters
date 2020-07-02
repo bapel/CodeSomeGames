@@ -15,40 +15,29 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pstl\detail\ArrayBase.hpp">
+    <ClInclude Include="vx\Common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\Enumerator.hpp">
+    <ClInclude Include="vx\Allocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pstl\detail\Range.hpp">
+    <ClInclude Include="vstl\Array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vx\common.hpp">
+    <ClInclude Include="vstl\ArrayList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vx\allocator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vstl\detail\array_base.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vstl\detail\common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vstl\array.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vstl\array_list.hpp">
+    <ClInclude Include="vstl\UnorderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vx\allocator.cpp">
+    <ClCompile Include="vx\Allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="pstl\pstl.natvis" />
     <Natvis Include="vstl\vstl.natvis" />
   </ItemGroup>
 </Project>

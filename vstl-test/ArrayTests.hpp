@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vstl\array.hpp"
+#include "vstl\Array.hpp"
 #include <catch.hpp>
 
 TEST_CASE("Static Array", "[array]")

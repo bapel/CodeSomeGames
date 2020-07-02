@@ -44,7 +44,7 @@ void struct_align_test(vx::IAllocator* allocator, size_t offset = 0)
     allocator->free(ptr_3);
 }
 
-TEST_CASE("Allocator implementations", "[allocators]", )
+TEST_CASE("Allocator implementations", "[allocators]")
 {
     using namespace vx;
 

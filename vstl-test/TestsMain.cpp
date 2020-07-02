@@ -8,9 +8,10 @@
 
 #include <catch.hpp>
 
-#include "tests\allocator_tests.hpp"
-#include "tests\array_tests.hpp"
-#include "tests\array_list_tests.hpp"
+#include "AllocatorTests.hpp"
+#include "ArrayTests.hpp"
+#include "ArrayListTests.hpp"
+#include "UnorderedSetTests.hpp"
 
 #pragma warning(pop)
 

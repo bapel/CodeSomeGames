@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vstl\array_list.hpp>
+#include <vstl\ArrayList.hpp>
 #include <catch.hpp>
 
 TEST_CASE("Array list construction", "[array-list]")
