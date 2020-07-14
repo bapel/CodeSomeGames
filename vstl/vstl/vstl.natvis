@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-    <Type Name="vstl::array&lt;*&gt;">
+    
+    <Type Name="vstl::array&lt;*,*&gt;">
         <DisplayString>{{ count="size()" }}</DisplayString>
         <Expand>
             <ArrayItems>
@@ -9,4 +10,23 @@
             </ArrayItems>
         </Expand>
     </Type>
+
+    <Type Name="vstl::UnorderedSet&lt;*,*&gt;">
+        <DisplayString>
+            {{ count="{ m_count,d }" | buckets="{ m_buckets_end - m_buckets } x 14 = { (m_buckets_end - m_buckets) * 14 }" }}
+        </DisplayString>
+        <Expand>
+            <ArrayItems>
+                <Size>m_buckets_end - m_buckets</Size>
+                <ValuePointer>m_buckets</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="vstl::UnorderedSet&lt;*,*&gt;::Bucket">
+        <DisplayString>
+            {{ count="{ (size_t)header.count,d }", displace="{ (size_t)header.displace,d }" { header.control,14na } }}
+        </DisplayString>
+    </Type>
+
 </AutoVisualizer>

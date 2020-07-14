@@ -26,13 +26,13 @@ Namespace__
         CountType Count() const { return m_Count; }
         CountType Capacity() const { return m_Capacity; }
 
-        __inline bool Add(const KeyType& key)
+        bool Add(const KeyType& key)
         { return Add(key, Hash(key)); }
 
         // Close to 100% load can cause probe/displacement to grow very large.
         // So we keep the limit at 15/16 (=0.9375) of Capacity.
-        __inline bool ShouldRehash() const
-        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
+        bool ShouldRehash() const
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 3)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
@@ -43,10 +43,10 @@ Namespace__
                 Rehash(m_Capacity << 1);
 
             //const auto hash = Hash(key);
-            const auto index = Slot(hash);
+            const auto index = Index(hash);
             
             auto k = key;
-            uint8_t h = H1(hash);
+            uint8_t h = H2(hash);
             uint8_t p = 0;
 
             auto pos = index;
@@ -88,14 +88,14 @@ Namespace__
 
         #undef Write_Hash_and_Probe__
 
-        __inline bool Contains(ConstRefType<KeyType> key) const
+        bool Contains(ConstRefType<KeyType> key) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, Hash(key));
             return found;
         }
 
-        __inline bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
+        bool Contains(ConstRefType<KeyType> key, uint64_t hash) const
         {
             assert(m_Capacity > 0);
             auto [found, index] = Find(key, hash);
@@ -121,7 +121,7 @@ Namespace__
             return false;
         }
 
-        __inline void Clear()
+        void Clear()
         { memset(m_Hashes, k_Empty32, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
@@ -155,7 +155,7 @@ Namespace__
 
     private:
         // Capacity is always a power of two.
-        __inline static CountType CalcCapacity(CountType n)
+        static CountType CalcCapacity(CountType n)
         {
             n--;
             n |= n >> 1;
@@ -166,11 +166,14 @@ Namespace__
             return n + 1;
         }
 
-        __inline static uint64_t Hash(KeyType x) { return HashFunction()(x); }
-        __inline static uint8_t H1(uint64_t hash) { return hash & 0b0111'1111; }
-        __inline IndexType Slot(uint64_t hash) const { return hash & (m_Capacity - 1); }
+        static uint64_t Hash(KeyType x) { return HashFunction()(x); }
+        static uint64_t H1(uint64_t hash) { return hash >> 7; }
+        static uint8_t  H2(uint64_t hash) { return hash & 0b0111'1111U; }
 
-        __inline void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
+        IndexType Index(uint64_t hash) const
+        { return H1(hash) & (m_Capacity - 1); }
+
+        void SetProbeAndHash(IndexType pos, uint8_t probe, uint8_t hash)
         {
             m_Probes[pos] = probe;
             m_Hashes[pos] = hash;
@@ -182,7 +185,7 @@ Namespace__
             }
         }
 
-        __inline void Swap(IndexType pos, uint8_t* p, uint8_t* h, KeyType* k)
+        void Swap(IndexType pos, uint8_t* p, uint8_t* h, KeyType* k)
         {
             auto p_ = m_Probes[pos];
             auto h_ = m_Hashes[pos];
@@ -196,48 +199,70 @@ Namespace__
             *k = k_;
         }
 
-        __inline std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
         {
-            const auto slot = Slot(hash);
-            const auto h = H1(hash);
-            const auto mask = m_Capacity - 1;
+            const auto index = Index(hash);
+            const auto h2 = H2(hash);
 
-            auto pos = slot;
+            auto pos = index;
             do
             {
-                const auto value = _mm_set1_epi8(h);
-                const auto hashes = _mm_loadu_si128((__m128i*)(m_Hashes + pos));
-                auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, hashes));
-
-                auto i = 0;
-                while (result != 0)
-                {
-                    if (result & 1)
-                    {
-                        const auto offset = (pos + i) & mask;
-                        if (key == m_Slots[offset])
-                            return { true, offset };
-
-                        result >>= 1;
-                        i++;
-                    }
-
-                    auto shift = _tzcnt_u32(result);
-                    result >>= shift;
-                    i += shift;
-                }
-
-                result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
-                if (result != 0)
+                if (k_Empty == m_Hashes[pos])
                     return { false, pos };
 
-                pos = (pos + 16) & mask;
+                if (h2 == m_Hashes[pos] && key == m_Slots[pos])
+                    return { true, pos };
+
+                pos = (pos + 1) & (m_Capacity - 1);
             }
             // @Todo: Have a max probe length? instead of wrapping around the whole table.
-            while (pos != slot);
+            while (pos != index);
 
             return { false, -1 };
         }
+
+        //std::pair<bool, IndexType> Find(const KeyType& key, uint64_t hash) const
+        //{
+        //    const auto slot = Slot(hash);
+        //    const auto h = H1(hash);
+        //    const auto mask = m_Capacity - 1;
+
+        //    auto pos = slot;
+        //    do
+        //    {
+        //        const auto value = _mm_set1_epi8(h);
+        //        const auto hashes = _mm_loadu_si128((__m128i*)(m_Hashes + pos));
+        //        auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, hashes));
+
+        //        auto i = 0;
+        //        while (result != 0)
+        //        {
+        //            if (result & 1)
+        //            {
+        //                const auto offset = (pos + i) & mask;
+        //                if (key == m_Slots[offset])
+        //                    return { true, offset };
+
+        //                result >>= 1;
+        //                i++;
+        //            }
+
+        //            auto shift = _tzcnt_u32(result);
+        //            result >>= shift;
+        //            i += shift;
+        //        }
+
+        //        result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
+        //        if (result != 0)
+        //            return { false, pos };
+
+        //        pos = (pos + 16) & mask;
+        //    }
+        //    // @Todo: Have a max probe length? instead of wrapping around the whole table.
+        //    while (pos != slot);
+
+        //    return { false, -1 };
+        //}
 
         void Rehash(CountType newCapacity)
         {

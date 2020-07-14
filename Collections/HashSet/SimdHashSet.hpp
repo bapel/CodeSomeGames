@@ -4,6 +4,138 @@
 #include <functional> // std::hash
 #include <intrin.h> // __lzcnt
 
+const __m128i set1s[] = 
+{
+    _mm_set1_epi8(0),
+    _mm_set1_epi8(1),
+    _mm_set1_epi8(2),
+    _mm_set1_epi8(3),
+    _mm_set1_epi8(4),
+    _mm_set1_epi8(5),
+    _mm_set1_epi8(6),
+    _mm_set1_epi8(7),
+    _mm_set1_epi8(8),
+    _mm_set1_epi8(9),
+    _mm_set1_epi8(10),
+    _mm_set1_epi8(11),
+    _mm_set1_epi8(12),
+    _mm_set1_epi8(13),
+    _mm_set1_epi8(14),
+    _mm_set1_epi8(15),
+    _mm_set1_epi8(16),
+    _mm_set1_epi8(17),
+    _mm_set1_epi8(18),
+    _mm_set1_epi8(19),
+    _mm_set1_epi8(20),
+    _mm_set1_epi8(21),
+    _mm_set1_epi8(22),
+    _mm_set1_epi8(23),
+    _mm_set1_epi8(24),
+    _mm_set1_epi8(25),
+    _mm_set1_epi8(26),
+    _mm_set1_epi8(27),
+    _mm_set1_epi8(28),
+    _mm_set1_epi8(29),
+    _mm_set1_epi8(30),
+    _mm_set1_epi8(31),
+    _mm_set1_epi8(32),
+    _mm_set1_epi8(33),
+    _mm_set1_epi8(34),
+    _mm_set1_epi8(35),
+    _mm_set1_epi8(36),
+    _mm_set1_epi8(37),
+    _mm_set1_epi8(38),
+    _mm_set1_epi8(39),
+    _mm_set1_epi8(40),
+    _mm_set1_epi8(41),
+    _mm_set1_epi8(42),
+    _mm_set1_epi8(43),
+    _mm_set1_epi8(44),
+    _mm_set1_epi8(45),
+    _mm_set1_epi8(46),
+    _mm_set1_epi8(47),
+    _mm_set1_epi8(48),
+    _mm_set1_epi8(49),
+    _mm_set1_epi8(50),
+    _mm_set1_epi8(51),
+    _mm_set1_epi8(52),
+    _mm_set1_epi8(53),
+    _mm_set1_epi8(54),
+    _mm_set1_epi8(55),
+    _mm_set1_epi8(56),
+    _mm_set1_epi8(57),
+    _mm_set1_epi8(58),
+    _mm_set1_epi8(59),
+    _mm_set1_epi8(60),
+    _mm_set1_epi8(61),
+    _mm_set1_epi8(62),
+    _mm_set1_epi8(63),
+    _mm_set1_epi8(64),
+    _mm_set1_epi8(65),
+    _mm_set1_epi8(66),
+    _mm_set1_epi8(67),
+    _mm_set1_epi8(68),
+    _mm_set1_epi8(69),
+    _mm_set1_epi8(70),
+    _mm_set1_epi8(71),
+    _mm_set1_epi8(72),
+    _mm_set1_epi8(73),
+    _mm_set1_epi8(74),
+    _mm_set1_epi8(75),
+    _mm_set1_epi8(76),
+    _mm_set1_epi8(77),
+    _mm_set1_epi8(78),
+    _mm_set1_epi8(79),
+    _mm_set1_epi8(80),
+    _mm_set1_epi8(81),
+    _mm_set1_epi8(82),
+    _mm_set1_epi8(83),
+    _mm_set1_epi8(84),
+    _mm_set1_epi8(85),
+    _mm_set1_epi8(86),
+    _mm_set1_epi8(87),
+    _mm_set1_epi8(88),
+    _mm_set1_epi8(89),
+    _mm_set1_epi8(90),
+    _mm_set1_epi8(91),
+    _mm_set1_epi8(92),
+    _mm_set1_epi8(93),
+    _mm_set1_epi8(94),
+    _mm_set1_epi8(95),
+    _mm_set1_epi8(96),
+    _mm_set1_epi8(97),
+    _mm_set1_epi8(98),
+    _mm_set1_epi8(99),
+    _mm_set1_epi8(100),
+    _mm_set1_epi8(101),
+    _mm_set1_epi8(102),
+    _mm_set1_epi8(103),
+    _mm_set1_epi8(104),
+    _mm_set1_epi8(105),
+    _mm_set1_epi8(106),
+    _mm_set1_epi8(107),
+    _mm_set1_epi8(108),
+    _mm_set1_epi8(109),
+    _mm_set1_epi8(110),
+    _mm_set1_epi8(111),
+    _mm_set1_epi8(112),
+    _mm_set1_epi8(113),
+    _mm_set1_epi8(114),
+    _mm_set1_epi8(115),
+    _mm_set1_epi8(116),
+    _mm_set1_epi8(117),
+    _mm_set1_epi8(118),
+    _mm_set1_epi8(119),
+    _mm_set1_epi8(120),
+    _mm_set1_epi8(121),
+    _mm_set1_epi8(122),
+    _mm_set1_epi8(123),
+    _mm_set1_epi8(124),
+    _mm_set1_epi8(125),
+    _mm_set1_epi8(126),
+    _mm_set1_epi8(127)
+};
+
 namespace NamespaceName__
 {
     template <class K, class H = std::hash<K>>
@@ -30,7 +162,7 @@ namespace NamespaceName__
         { return Add(key, Hash(key)); }
 
         __inline bool ShouldRehash() const
-        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 1)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
@@ -168,12 +300,12 @@ namespace NamespaceName__
             const auto index = Index(hash);
             const auto h2 = H2(hash);
             const auto mask = m_Capacity - 1;
+            const auto value = set1s[h2];//_mm_set1_epi8(h2);
 
             auto pos = index;
             do
             {
-                const auto value = _mm_set1_epi8(h2);
-                const auto hashes = _mm_loadu_si128((__m128i*)(m_Control + pos));
+                const auto hashes = *reinterpret_cast<__m128i*>(m_Control + pos);
                 auto result = _mm_movemask_epi8(_mm_cmpeq_epi8(value, hashes));
 
                 auto i = 0;
@@ -189,10 +321,39 @@ namespace NamespaceName__
                         i++;
                     }
 
-                    auto shift = _tzcnt_u32(result);
+                    unsigned long shift;
+                    _BitScanForward64(&shift, result);
                     result >>= shift;
                     i += shift;
                 }
+
+                //unsigned long i;
+                //while (_BitScanForward64(&i, result))
+                //{
+                //    const auto offset = (pos + i) & mask;
+                //    if (key == m_Slots[offset])
+                //        return { true, offset };
+
+                //    result &= ~(1UL << i);
+                //}
+
+                //auto i = 0;
+                //while (result != 0)
+                //{
+                //    if (result & 1)
+                //    {
+                //        const auto offset = (pos + i) & mask;
+                //        if (key == m_Slots[offset])
+                //            return { true, offset };
+
+                //        result >>= 1;
+                //        i++;
+                //    }
+
+                //    auto shift = _tzcnt_u32(result);
+                //    result >>= shift;
+                //    i += shift;
+                //}
 
                 result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
                 if (result != 0)

@@ -13,21 +13,29 @@
 #include "HashSet\HoodHashSet.hpp"
 // #include "ChunkHashSet.hpp"
 // #include "PrimeHashSet.hpp"
+#include <vstl\UnorderedSet.hpp>
 
 #include <unordered_set>
 #include <EASTL\unordered_set.h>
 
+#include <tsl\robin_set.h>
+#include <tsl\sparse_set.h>
+#include <tsl\hopscotch_set.h>
+
 #include "Hash\Hash.hpp"
 
-void* __cdecl operator new[](size_t size, const char* name, int flags, unsigned debugFlags, const char* file, int line)
-{
-    return new uint8_t[size];
-}
+#undef NDEBUG
+#include <assert.h>
 
-void* __cdecl operator new[](size_t size, size_t align, size_t offset, const char* name, int flags, unsigned debugFlags, const char* file, int line)
-{
-    return new uint8_t[size];
-}
+//void* __cdecl operator new[](size_t size, const char* name, int flags, unsigned debugFlags, const char* file, int line)
+//{
+//    return new uint8_t[size];
+//}
+//
+//void* __cdecl operator new[](size_t size, size_t align, size_t offset, const char* name, int flags, unsigned debugFlags, const char* file, int line)
+//{
+//    return new uint8_t[size];
+//}
 
 // Global variables.
 const size_t bigger_than_cachesize = 10 * 1024 * 1024;
@@ -45,14 +53,15 @@ using HiresTime = HiresClock::time_point;
 using HiresDuration = HiresClock::duration;
 using NanoSeconds = std::chrono::nanoseconds;
 
-using Payload = uint32_t;
-using Hasher = std::hash<Payload>;
+using Payload = uint64_t;
+//using Hasher = pstl::Identity<Payload>;
+//using Hasher = std::hash<Payload>;
 //using Hasher = pstl::udb2Hash;
 //using Hasher = pstl::SoHash<Payload>;
-//using Hasher = pstl::BrehmHash<Payload>;
-const auto Count_n = pstl::Min(10'000'000U, std::numeric_limits<Payload>::max());
-const auto Growth = 1'000;
-const auto NumLookups = 10'000'000U;
+using Hasher = pstl::BrehmHash<Payload>;
+const auto Count_n = pstl::Min(50'000'000U, std::numeric_limits<Payload>::max());
+const auto Growth = 5;
+const auto NumLookups = 5'000'000U;
 
 template <class HashSetType>
 void PrintProbeStats(const HashSetType&) { }
@@ -73,6 +82,8 @@ void PrintProbeStats(const pstl::HoodHashSet<Payload, Hasher>& set)
         distribution[length]++;
     }
 
+    std::cout << std::endl;
+
     for (auto i = 0U; i < distribution.Count(); i++)
     {
         if (distribution[i] == 0)
@@ -83,6 +94,8 @@ void PrintProbeStats(const pstl::HoodHashSet<Payload, Hasher>& set)
         std::cout << i << ": " << p << "%, ";
         std::cout << distribution[i] << " in " << set.Count() << std::endl;
     }
+
+    std::cout << std::endl;
 }
 
 template <class HashSetType>
@@ -100,8 +113,6 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
         set.Add(payload[i++]);
     count = i;
 
-    FlushCache__();
-
     auto nc = HashSetType::MaxProbeLength;
 
     auto repeat = Max(1UL, NumLookups / count);
@@ -111,7 +122,7 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
     {
         for (auto i = 0; i < count; i++)
         {
-            volatile auto res = set.Contains(payload[i]);
+            auto res = set.Contains(payload[i]);
             assert(res == true);
         }
     }
@@ -126,7 +137,7 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
     {
         for (auto i = count; i < 2UL * count; i++)
         {
-            volatile auto res = !set.Contains(payload[i]);
+            auto res = set.Contains(payload[i]);
             assert(res == false);
         }
     }
@@ -141,14 +152,13 @@ void ProfileFind(uint64_t count, const std::vector<Payload>& payload)
         << perSuccess << " ns, "
         << perFail << " ns, "
         << "Load: " << load << ", "
+        << count << ", "
         << "Probe: " << nc << ", "
         << success_e << " / " << success_n << ", "
         << fail_e << " / " << fail_n << ", "
         << std::endl;
 
-    //std::cout << std::endl;
     //PrintProbeStats(set);
-    //std::cout << std::endl;
 }
 
 template <class HashSetType>
@@ -157,14 +167,20 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
     using namespace NamespaceName__;
 
     HashSetType set(count);
-    set.max_load_factor(0.9375f);
+    // set.max_load_factor(0.9375f);
 
     auto i = 0;
-    while (set.load_factor() < 0.9375f)
-        set.insert(payload[i++]);
+    // while (set.load_factor() < (13.0f / 14.0f))
+    // while (set.load_factor() < 0.75f)
+    while (set.load_factor() < 0.5f)
+    {
+        auto r = set.insert(payload[i]);
+        assert(*r.first == payload[i]);
+        if (!r.second)
+            break;
+        i++;
+    }
     count = i;
-
-    FlushCache__();
 
     auto repeat = Max(1UL, NumLookups / count);
     auto start = HiresClock::now();
@@ -175,6 +191,7 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
         {
             auto iter = set.find(payload[i]);
             assert(set.end() != iter);
+            assert(payload[i] == *iter);
         }
     }
 
@@ -207,11 +224,138 @@ void HashDistribution();
 void TestingSandbox();
 void Profiling();
 
+vx_inline__ uint64_t mersenne_mod_classic(uint64_t n, uint64_t s)
+{ return n % ((1ULL << s) - 1ULL); }
+
+vx_inline__ uint64_t mersenne_mod_fast(uint64_t n, uint64_t s)
+{
+    uint64_t m;                            // n % d goes here.
+    const uint64_t d = (1ULL << s) - 1ULL; // so d is either 1, 3, 7, 15, 31, ...).
+
+    for (m = n; n > d; n = m)
+        for (m = 0ULL; n; n >>= s)
+            m += n & d;
+
+    // Now m is a value from 0 to d, but since with modulus division
+    // we want m to be 0 when it is d.
+    m = m == d ? 0ULL : m;
+    return m;
+}
+
+vx_inline__ uint64_t mersenne_mod_faster(uint64_t n, uint64_t s)
+{
+    static const unsigned int M[] = 
+    {
+        0x00000000, 0x55555555, 0x33333333, 0xc71c71c7,  
+        0x0f0f0f0f, 0xc1f07c1f, 0x3f03f03f, 0xf01fc07f, 
+        0x00ff00ff, 0x07fc01ff, 0x3ff003ff, 0xffc007ff,
+        0xff000fff, 0xfc001fff, 0xf0003fff, 0xc0007fff,
+        0x0000ffff, 0x0001ffff, 0x0003ffff, 0x0007ffff, 
+        0x000fffff, 0x001fffff, 0x003fffff, 0x007fffff,
+        0x00ffffff, 0x01ffffff, 0x03ffffff, 0x07ffffff,
+        0x0fffffff, 0x1fffffff, 0x3fffffff, 0x7fffffff
+    };
+
+    static const unsigned int Q[][6] = 
+    {
+        { 0,  0,  0,  0,  0,  0}, {16,  8,  4,  2,  1,  1}, {16,  8,  4,  2,  2,  2},
+        {15,  6,  3,  3,  3,  3}, {16,  8,  4,  4,  4,  4}, {15,  5,  5,  5,  5,  5},
+        {12,  6,  6,  6 , 6,  6}, {14,  7,  7,  7,  7,  7}, {16,  8,  8,  8,  8,  8},
+        { 9,  9,  9,  9,  9,  9}, {10, 10, 10, 10, 10, 10}, {11, 11, 11, 11, 11, 11},
+        {12, 12, 12, 12, 12, 12}, {13, 13, 13, 13, 13, 13}, {14, 14, 14, 14, 14, 14},
+        {15, 15, 15, 15, 15, 15}, {16, 16, 16, 16, 16, 16}, {17, 17, 17, 17, 17, 17},
+        {18, 18, 18, 18, 18, 18}, {19, 19, 19, 19, 19, 19}, {20, 20, 20, 20, 20, 20},
+        {21, 21, 21, 21, 21, 21}, {22, 22, 22, 22, 22, 22}, {23, 23, 23, 23, 23, 23},
+        {24, 24, 24, 24, 24, 24}, {25, 25, 25, 25, 25, 25}, {26, 26, 26, 26, 26, 26},
+        {27, 27, 27, 27, 27, 27}, {28, 28, 28, 28, 28, 28}, {29, 29, 29, 29, 29, 29},
+        {30, 30, 30, 30, 30, 30}, {31, 31, 31, 31, 31, 31}
+    };
+
+    static const unsigned int R[][6] = 
+    {
+        {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
+        {0x0000ffff, 0x000000ff, 0x0000000f, 0x00000003, 0x00000001, 0x00000001},
+        {0x0000ffff, 0x000000ff, 0x0000000f, 0x00000003, 0x00000003, 0x00000003},
+        {0x00007fff, 0x0000003f, 0x00000007, 0x00000007, 0x00000007, 0x00000007},
+        {0x0000ffff, 0x000000ff, 0x0000000f, 0x0000000f, 0x0000000f, 0x0000000f},
+        {0x00007fff, 0x0000001f, 0x0000001f, 0x0000001f, 0x0000001f, 0x0000001f},
+        {0x00000fff, 0x0000003f, 0x0000003f, 0x0000003f, 0x0000003f, 0x0000003f},
+        {0x00003fff, 0x0000007f, 0x0000007f, 0x0000007f, 0x0000007f, 0x0000007f},
+        {0x0000ffff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff},
+        {0x000001ff, 0x000001ff, 0x000001ff, 0x000001ff, 0x000001ff, 0x000001ff}, 
+        {0x000003ff, 0x000003ff, 0x000003ff, 0x000003ff, 0x000003ff, 0x000003ff}, 
+        {0x000007ff, 0x000007ff, 0x000007ff, 0x000007ff, 0x000007ff, 0x000007ff}, 
+        {0x00000fff, 0x00000fff, 0x00000fff, 0x00000fff, 0x00000fff, 0x00000fff}, 
+        {0x00001fff, 0x00001fff, 0x00001fff, 0x00001fff, 0x00001fff, 0x00001fff}, 
+        {0x00003fff, 0x00003fff, 0x00003fff, 0x00003fff, 0x00003fff, 0x00003fff}, 
+        {0x00007fff, 0x00007fff, 0x00007fff, 0x00007fff, 0x00007fff, 0x00007fff}, 
+        {0x0000ffff, 0x0000ffff, 0x0000ffff, 0x0000ffff, 0x0000ffff, 0x0000ffff}, 
+        {0x0001ffff, 0x0001ffff, 0x0001ffff, 0x0001ffff, 0x0001ffff, 0x0001ffff}, 
+        {0x0003ffff, 0x0003ffff, 0x0003ffff, 0x0003ffff, 0x0003ffff, 0x0003ffff}, 
+        {0x0007ffff, 0x0007ffff, 0x0007ffff, 0x0007ffff, 0x0007ffff, 0x0007ffff},
+        {0x000fffff, 0x000fffff, 0x000fffff, 0x000fffff, 0x000fffff, 0x000fffff}, 
+        {0x001fffff, 0x001fffff, 0x001fffff, 0x001fffff, 0x001fffff, 0x001fffff}, 
+        {0x003fffff, 0x003fffff, 0x003fffff, 0x003fffff, 0x003fffff, 0x003fffff}, 
+        {0x007fffff, 0x007fffff, 0x007fffff, 0x007fffff, 0x007fffff, 0x007fffff}, 
+        {0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00ffffff},
+        {0x01ffffff, 0x01ffffff, 0x01ffffff, 0x01ffffff, 0x01ffffff, 0x01ffffff}, 
+        {0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff, 0x03ffffff}, 
+        {0x07ffffff, 0x07ffffff, 0x07ffffff, 0x07ffffff, 0x07ffffff, 0x07ffffff},
+        {0x0fffffff, 0x0fffffff, 0x0fffffff, 0x0fffffff, 0x0fffffff, 0x0fffffff},
+        {0x1fffffff, 0x1fffffff, 0x1fffffff, 0x1fffffff, 0x1fffffff, 0x1fffffff}, 
+        {0x3fffffff, 0x3fffffff, 0x3fffffff, 0x3fffffff, 0x3fffffff, 0x3fffffff}, 
+        {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff}
+    };
+
+    uint64_t m = 0;                        // n % d goes here.
+    const uint64_t d = (1ULL << s) - 1ULL; // so d is either 1, 3, 7, 15, 31, ...).
+
+    m = (n & M[s]) + ((n >> s) & M[s]);
+
+    for (const unsigned int * q = &Q[s][0], * r = &R[s][0]; m > d; q++, r++)
+        m = (m >> *q) + (m & *r);
+
+    m = m == d ? 0 : m; // OR, less portably: m = m & -((signed)(m - d) >> s);
+
+    return m;
+}
+
+vx_inline__ uint64_t pow2_mod_fast(uint64_t n, uint64_t s)
+{ return n & ((1ULL << s) - 1ULL); }
+
+uint64_t profile_function(const char* spaces, const char* name, uint64_t (*fn)(uint64_t, uint64_t))
+{
+    uint64_t accum = 0ULL;
+    const auto n = 10'000'000ULL;
+
+    auto start = HiresClock::now();
+
+    for (auto i = 0ULL; i < n; i++)
+        accum += fn(i, 7);
+
+    auto elapsed = NanoSeconds(HiresClock::now() - start).count();;
+    auto dt = elapsed / n;
+
+    std::cout << spaces << name << ": " << dt << ", " << accum << std::endl;
+
+    return accum;
+}
+
+#define profile_function__(Spaces__, Func__) profile_function(Spaces__, #Func__, Func__)
+
 int main()
 {
+    {
+        profile_function__("", mersenne_mod_classic);
+        profile_function__("   ", mersenne_mod_fast);
+        profile_function__(" ", mersenne_mod_faster);
+        profile_function__("       ", pow2_mod_fast);
+        std::cout << std::endl;
+    }
+
     //HashDistribution();
     //TestingSandbox();
-    Profiling();
+    //Profiling();
     //HashToFile();
     return 0;
 }
@@ -248,15 +392,39 @@ void Profiling()
     std::generate_n(payload.data(), payload.size(), [&i]() { return i++; });
 
     // std::random_device device;
-    std::mt19937 generator(0);
-    std::shuffle(payload.begin(), payload.end(), generator);
+    //std::mt19937 generator(0);
+    //std::shuffle(payload.begin(), payload.end(), generator);
 
     auto n = Growth;
 
+    n = Growth;
+    std::cout << "std::unordered_set\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
+    std::cout << std::endl;
+
     //n = Growth;
-    //std::cout << "std::unordered_set\n---" << std::endl;
+    //std::cout << "tsl::robin_set\n---" << std::endl;
     //for (; n <= Count_n; n*=Growth)
-    //    ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
+    //    ProfileFind_1<tsl::robin_set<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
+
+    //n = Growth;
+    //std::cout << "tsl::sparse_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<tsl::sparse_set<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
+
+    //n = Growth;
+    //std::cout << "tsl::hopscotch_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<tsl::hopscotch_set<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
+
+    //n = Growth;
+    //std::cout << "vstl::UnorderedSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<vstl::UnorderedSet<Payload, Hasher>>(n, payload);
     //std::cout << std::endl;
 
     //n = Growth;
@@ -277,17 +445,17 @@ void Profiling()
     //    ProfileFind<MetaHashSet<Payload, Hasher>>(n, payload);
     //std::cout << std::endl;
 
-    //n = Growth;
-    //std::cout << "SimdHashSet\n---" << std::endl;
-    //for (; n <= Count_n; n*=Growth)
-    //    ProfileFind<SimdHashSet<Payload, Hasher>>(n, payload);
-    //std::cout << std::endl;
-
     n = Growth;
-    std::cout << "HoodHashSet\n---" << std::endl;
+    std::cout << "SimdHashSet\n---" << std::endl;
     for (; n <= Count_n; n*=Growth)
-        ProfileFind<HoodHashSet<Payload, Hasher>>(n, payload);
+        ProfileFind<SimdHashSet<Payload, Hasher>>(n, payload);
     std::cout << std::endl;
+
+    //n = Growth;
+    //std::cout << "HoodHashSet\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind<HoodHashSet<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
 }
 
 #include "ArrayList.hpp"

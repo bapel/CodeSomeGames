@@ -5,6 +5,8 @@
 #pragma warning(disable : 26444)
 #pragma warning(disable : 26451)
 #pragma warning(disable : 26495)
+#pragma warning(disable : 26812)
+#pragma warning(disable : 6237)
 
 #include <catch.hpp>
 

@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vstl;$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\hopscotch-map\include;$(SolutionDir)ThirdParty\sparse-map\include;$(SolutionDir)ThirdParty\robin-map\include;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vstl;$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\hopscotch-map\include;$(SolutionDir)ThirdParty\sparse-map\include;$(SolutionDir)ThirdParty\robin-map\include;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vstl;$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\hopscotch-map\include;$(SolutionDir)ThirdParty\sparse-map\include;$(SolutionDir)ThirdParty\robin-map\include;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)vstl;$(SolutionDir)Collections;$(SolutionDir)ThirdParty\EABase\include\Common;$(SolutionDir)ThirdParty\hopscotch-map\include;$(SolutionDir)ThirdParty\sparse-map\include;$(SolutionDir)ThirdParty\robin-map\include;$(SolutionDir)ThirdParty\EASTL\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -98,6 +98,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,6 +117,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,6 +134,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,6 +153,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,8 +169,8 @@
     <ProjectReference Include="..\Collections\Collections.vcxproj">
       <Project>{b09488e4-7a25-4664-adcb-9b59416a7f66}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ThirdParty\EASTL\vcproj\EASTL.vcxproj">
-      <Project>{8b989dd1-455a-493c-8e07-52b9cb71329f}</Project>
+    <ProjectReference Include="..\vstl\vstl.vcxproj">
+      <Project>{451b7064-2e18-4a24-935c-0bf0b109d38e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

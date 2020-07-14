@@ -30,6 +30,15 @@
     <ClInclude Include="vstl\UnorderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vstl\FlatSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vstl\RobinHoodSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vstl\FlagList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vx\Allocator.cpp">

@@ -30,7 +30,7 @@ namespace NamespaceName__
         { return Add(key, Hash(key)); }
 
         __inline bool ShouldRehash() const
-        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 2)); }
+        { return (m_Count + 1) >= (m_Capacity - (m_Capacity >> 1)); }
 
         bool Add(const KeyType& key, uint64_t hash)
         {
