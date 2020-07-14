@@ -434,6 +434,12 @@ void Profiling()
         ProfileFind_1<vstl::RobinHoodSet<Payload, Hasher>>(n, payload);
     std::cout << std::endl;
 
+    n = Growth;
+    std::cout << "vstl::RobinHoodSet_Mersenne\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<vstl::RobinHoodSet<Payload, Hasher, vstl::detail::MersennePolicy>>(n, payload);
+    std::cout << std::endl;
+
     //n = Growth;
     //std::cout << "eastl::unordered_set\n---" << std::endl;
     //for (; n <= Count_n; n*=Growth)

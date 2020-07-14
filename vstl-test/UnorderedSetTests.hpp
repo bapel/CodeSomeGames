@@ -1,21 +1,57 @@
 #pragma once
 
+#include <catch.hpp>
 //#include <vstl\UnorderedSet.hpp>
 #include <vstl\RobinHoodSet.hpp>
 #include <vstl\Array.hpp>
 
-template <class T>
-void print_stats(const vstl::RobinHoodSet<T>& set)
+template <class T, class H, class B>
+void print_stats(const vstl::RobinHoodSet<T, H, B>& set)
 {
-    vstl::Array<uint8_t, vstl::RobinHoodSet<T>::max_probe()> probe_dis;
+    vstl::Array<uint8_t, vstl::RobinHoodSet<T, H, B>::max_probe()> probe_dis;
     set.probe_distribution(probe_dis.data(), probe_dis.size());
     std::cout << "@TODO: probes ..." << std::endl;
 }
 
-TEST_CASE("Unordered set construction", "[set]")
+TEST_CASE("Mersenne policy", "[array-list]")
+{
+    using mp = vstl::detail::MersennePolicy;
+
+    auto i = mp::init_capacity();
+
+    do
+    {
+        std::cout 
+            << i << ", " 
+            << mp::translate_capacity(i) << ", " 
+            << mp::max_size(i) << ", "
+            << (float)mp::max_size(i) / mp::translate_capacity(i) << ", "
+            << std::endl;
+        
+        for (auto j = 0ULL; j < 1'000; j++)
+        {
+            auto h = std::hash<uint64_t>()(j);
+            auto a = mp::mod(h, i);
+            auto b = h % mp::translate_capacity(i);
+            REQUIRE(a == b);
+            assert(a == b);
+        }
+
+        i = mp::next_capacity(i);
+    }
+    while (mp::translate_capacity(i) < 1'000'000);
+
+    std::cout << std::endl;
+}
+
+TEMPLATE_TEST_CASE("Set construction", "[set]", 
+    vstl::detail::PowerOfTwoPolicy, 
+    vstl::detail::MersennePolicy)
 {
     auto n = 50ULL;
-    vstl::RobinHoodSet<uint64_t> set(n);
+    vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set(n);
+
+    REQUIRE(set.capacity() > n);
 
     for (auto i = 0ULL; i < n; i++)
     {
@@ -54,10 +90,12 @@ TEST_CASE("Unordered set construction", "[set]")
     }
 }
 
-TEST_CASE("Unordered set growth", "[set]")
+TEMPLATE_TEST_CASE("Set growth", "[set]", 
+    vstl::detail::PowerOfTwoPolicy, 
+    vstl::detail::MersennePolicy)
 {
     auto n = 50ULL;
-    vstl::RobinHoodSet<uint64_t> set;
+    vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set;
 
     for (auto i = 0ULL; i < n; i++)
     {
@@ -96,10 +134,12 @@ TEST_CASE("Unordered set growth", "[set]")
     }
 }
 
-TEST_CASE("Unordered fill many", "[set]")
+TEMPLATE_TEST_CASE("Set fill many", "[set]",
+    vstl::detail::PowerOfTwoPolicy, 
+    vstl::detail::MersennePolicy)
 {
     auto n = 5000ULL;
-    vstl::RobinHoodSet<uint64_t> set(n);
+    vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set(n);
 
     for (auto i = 0ULL; i < n; i++)
     {

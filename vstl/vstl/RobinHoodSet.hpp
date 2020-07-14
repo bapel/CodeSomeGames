@@ -1,20 +1,99 @@
 #pragma once
 
 #include "..\vx\Allocator.hpp"
+#include <intrin.h>
+
+namespace vstl {
+namespace detail {
+
+    struct PowerOfTwoPolicy
+    {
+        static constexpr size_t translate_capacity(size_t cap) { return cap; }
+        static constexpr size_t init_capacity()                { return 8; }
+        static constexpr size_t next_capacity(size_t cap)      { return cap << 1; }
+        static constexpr size_t calc_capacity(size_t cap)
+        {
+            cap--;
+            cap |= cap >> 1;
+            cap |= cap >> 2;
+            cap |= cap >> 4;
+            cap |= cap >> 8;
+            cap |= cap >> 16;
+            cap |= cap >> 32;
+            return cap + 1;
+        }
+
+        static constexpr size_t max_size(size_t cap) 
+        { return (cap - (cap >> 3)); }
+
+        static constexpr size_t mod(uint64_t hash, size_t cap)
+        { return hash & (cap - 1); }
+    };
+
+    struct MersennePolicy
+    {
+        static constexpr size_t translate_capacity(size_t s) { return (1ULL << s) - 1; }
+        static constexpr size_t init_capacity()              { return 3; }
+        static constexpr size_t next_capacity(size_t s)      { return s + 1; }
+        static constexpr size_t calc_capacity(size_t cap)
+        {
+            uint64_t v = cap;
+            uint64_t r = 0;
+            uint64_t shift = 0;
+
+            r =     static_cast<uint64_t>(v > 0xFFFFFFFF) << 8ULL; v >>= r;
+            shift = static_cast<uint64_t>(v > 0xFFFF    ) << 4ULL; v >>= shift; r |= shift;
+            shift = static_cast<uint64_t>(v > 0xFF      ) << 3ULL; v >>= shift; r |= shift;
+            shift = static_cast<uint64_t>(v > 0xF       ) << 2ULL; v >>= shift; r |= shift;
+            shift = static_cast<uint64_t>(v > 0x3       ) << 1ULL; v >>= shift; r |= shift;
+            r |= (v >> 1);
+
+            return r + 1; // round up.
+        }
+
+        static constexpr size_t max_size(size_t s)
+        {
+            auto cap = translate_capacity(s);
+            return (cap - (cap >> 3)) - 1;
+        }
+
+        static constexpr size_t mod(uint64_t n, size_t s)
+        {
+            uint64_t m = 0;                        // n % d goes here.
+            const uint64_t d = (1ULL << s) - 1ULL; // so d is either 1, 3, 7, 15, 31, ...).
+
+            for (m = n; n > d; n = m)
+                for (m = 0ULL; n; n >>= s)
+                    m += n & d;
+
+            // Now m is a value from 0 to d, but since with modulus division
+            // we want m to be 0 when it is d.
+            m = m == d ? 0ULL : m;
+            return m;
+        }
+    };
+
+}}
 
 namespace vstl {
 
-    template <class T, class H = std::hash<T>>
+    template 
+    <
+        class T, 
+        class H = std::hash<T>,
+        class B = detail::PowerOfTwoPolicy
+    >
     class RobinHoodSet
     {
     public:
         using value_type = T;
+        using bucket_policy = B;
         
     private:
         vx::IAllocator* m_alloc;
 
-        size_t m_capacity;
         size_t m_count;
+        size_t m_capacity;
         uint8_t* m_probes;
         value_type* m_values;
 
@@ -44,7 +123,7 @@ namespace vstl {
             Iterator& operator ++ ()
             {
                 const auto dst = m_set->m_probes;
-                const auto cap = m_set->m_capacity;
+                const auto cap = m_set->capacity();
 
                 assert(m_pos < cap);
 
@@ -75,17 +154,18 @@ namespace vstl {
     public:
         RobinHoodSet() : 
             m_alloc(vx::fallback_allocator()),
+            m_capacity(0),
+            m_count(0),
             m_probes(nullptr), 
-            m_values(nullptr), 
-            m_count(0), 
-            m_capacity(0) {}
+            m_values(nullptr)
+        {}
         
         RobinHoodSet(size_t cap) : 
             m_alloc(vx::fallback_allocator()),
-            m_count(0),
-            m_capacity(calc_capacity(cap))
+            m_capacity(bucket_policy::calc_capacity(cap)),
+            m_count(0)
         {
-            alloc(m_capacity);
+            allocate(bucket_policy::translate_capacity(m_capacity));
         }
 
         ~RobinHoodSet()
@@ -94,36 +174,30 @@ namespace vstl {
             m_alloc->free(m_values);
         }
 
-        vx_inline__ size_t size() const            { return m_count; }
-        vx_inline__ size_t capacity() const        { return m_capacity; }
-        vx_inline__ float  load_factor() const     { return (float)m_count / m_capacity; }
+        vx_inline__ size_t size() const           { return m_count; }
+        vx_inline__ size_t capacity() const
+        { return bucket_policy::translate_capacity(m_capacity); }
 
-        static constexpr uint8_t max_probe()       { return k_empty; }
-        static constexpr float   max_load_factor() { return (float)max_current_size(8) / 8.0f; }
-        
-        static constexpr size_t max_current_size(size_t cap) 
-        { return (cap - (cap >> 3)); }
-
-        static constexpr bool requires_rehash(size_t size, size_t cap) 
-        { return size >= max_current_size(cap); }
+        vx_inline__ float  load_factor() const    { return (float)m_count / capacity(); }
+        static constexpr uint8_t max_probe()      { return k_empty; }
 
         vx_inline__       iterator begin()        { return { this }; }
         vx_inline__ const_iterator begin()  const { return { this }; }
         vx_inline__ const_iterator cbegin() const { return { this }; }
 
-        vx_inline__       iterator end()          { return       iterator(this, m_capacity); }
-        vx_inline__ const_iterator end()    const { return const_iterator(this, m_capacity); }
-        vx_inline__ const_iterator cend()   const { return const_iterator(this, m_capacity); }
+        vx_inline__       iterator end()          { return       iterator(this, capacity()); }
+        vx_inline__ const_iterator end()    const { return const_iterator(this, capacity()); }
+        vx_inline__ const_iterator cend()   const { return const_iterator(this, capacity()); }
 
         std::pair<iterator, bool> insert(const value_type& value_to_insert)
         {
             if (m_values == nullptr)
             {
-                m_capacity = 8;
-                alloc(m_capacity);
+                m_capacity = bucket_policy::init_capacity();
+                allocate(bucket_policy::translate_capacity(m_capacity));
             }
-            else if (requires_rehash(m_count + 1, m_capacity))
-                rehash(m_capacity << 1);
+            else if ((m_count + 1) >= bucket_policy::max_size(m_capacity))
+                rehash(bucket_policy::next_capacity(m_capacity));
 
             return insert_impl(value_to_insert);
         }
@@ -131,8 +205,7 @@ namespace vstl {
         iterator find(const value_type& value)
         {
             const auto hash = H()(value);
-            const auto cap_mod = (m_capacity - 1);
-            const auto pos = hash & cap_mod;
+            const auto pos = bucket_policy::mod(hash, m_capacity);
 
             auto p = pos;
             auto d = 0;
@@ -146,11 +219,11 @@ namespace vstl {
                     break;
 
                 d++;
-                p = (p + 1) & cap_mod; // wrap-around.
+                p = bucket_policy::mod(p + 1, m_capacity);
             }
             while (d < k_empty && p != pos);
 
-            return { this, m_capacity };
+            return { this, capacity() };
         }
 
         void probe_distribution(uint8_t* buf, size_t size) const
@@ -158,7 +231,7 @@ namespace vstl {
             auto max = 0U;
             memset(buf, 0, size);
 
-            for (auto i = 0ULL; i < m_capacity; i++)
+            for (auto i = 0ULL; i < capacity(); i++)
             {
                 auto p = m_probes[i];
                 if (p == k_empty)
@@ -172,37 +245,31 @@ namespace vstl {
         }
 
     private:
-        // Power of two capacity.
-        static constexpr vx_inline__ size_t calc_capacity(size_t n)
+        vx_inline__ void allocate(size_t cap)
         {
-            n--;
-            n |= n >> 1;
-            n |= n >> 2;
-            n |= n >> 4;
-            n |= n >> 8;
-            n |= n >> 16;
+            assert(cap > 0);
 
-            return n + 1;
-        }
-
-        vx_inline__ void alloc(size_t cap)
-        {
             m_probes = m_alloc->malloc_n<uint8_t>(cap);
             m_values = m_alloc->malloc_n<T>(cap);
+
             memset(m_probes, k_empty_x4, cap);
         }
 
         void rehash(size_t new_cap)
         {
+            // @Todo: Support shrinkage?
+            assert(new_cap > m_capacity);
+
             auto probes = m_probes;
             auto values = m_values;
             auto cap = m_capacity;
 
-            alloc(new_cap);
             m_count = 0;
             m_capacity = new_cap;
 
-            for (auto i = 0ULL; i < cap; i++)
+            allocate(bucket_policy::translate_capacity(new_cap));
+
+            for (auto i = 0ULL; i < bucket_policy::translate_capacity(cap); i++)
             {
                 auto p = probes[i];
                 if (p == k_empty)
@@ -218,8 +285,7 @@ namespace vstl {
         std::pair<iterator, bool> insert_impl(const value_type& value_to_insert)
         {
             const auto hash = H()(value_to_insert);
-            const auto cap_mod = (m_capacity - 1);
-            const auto ideal_pos = hash & cap_mod;
+            const auto ideal_pos = bucket_policy::mod(hash, m_capacity);
 
             auto pos = ideal_pos;
             uint8_t probe = 0U;
@@ -248,7 +314,7 @@ namespace vstl {
                 }
 
                 probe++;
-                pos = (pos + 1) & cap_mod; // wrap-around.
+                pos = bucket_policy::mod(pos + 1, m_capacity);
 
                 if (value == value_to_insert)
                     pos_to_return = pos;
