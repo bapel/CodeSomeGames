@@ -14,6 +14,7 @@
 // #include "ChunkHashSet.hpp"
 // #include "PrimeHashSet.hpp"
 #include <vstl\UnorderedSet.hpp>
+#include <vstl\RobinHoodSet.hpp>
 
 #include <unordered_set>
 #include <EASTL\unordered_set.h>
@@ -55,10 +56,10 @@ using NanoSeconds = std::chrono::nanoseconds;
 
 using Payload = uint64_t;
 //using Hasher = pstl::Identity<Payload>;
-//using Hasher = std::hash<Payload>;
+using Hasher = std::hash<Payload>;
 //using Hasher = pstl::udb2Hash;
 //using Hasher = pstl::SoHash<Payload>;
-using Hasher = pstl::BrehmHash<Payload>;
+//using Hasher = pstl::BrehmHash<Payload>;
 const auto Count_n = pstl::Min(50'000'000U, std::numeric_limits<Payload>::max());
 const auto Growth = 5;
 const auto NumLookups = 5'000'000U;
@@ -355,7 +356,7 @@ int main()
 
     //HashDistribution();
     //TestingSandbox();
-    //Profiling();
+    Profiling();
     //HashToFile();
     return 0;
 }
@@ -403,11 +404,11 @@ void Profiling()
         ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
     std::cout << std::endl;
 
-    //n = Growth;
-    //std::cout << "tsl::robin_set\n---" << std::endl;
-    //for (; n <= Count_n; n*=Growth)
-    //    ProfileFind_1<tsl::robin_set<Payload, Hasher>>(n, payload);
-    //std::cout << std::endl;
+    n = Growth;
+    std::cout << "tsl::robin_set\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<tsl::robin_set<Payload, Hasher>>(n, payload);
+    std::cout << std::endl;
 
     //n = Growth;
     //std::cout << "tsl::sparse_set\n---" << std::endl;
@@ -426,6 +427,12 @@ void Profiling()
     //for (; n <= Count_n; n*=Growth)
     //    ProfileFind_1<vstl::UnorderedSet<Payload, Hasher>>(n, payload);
     //std::cout << std::endl;
+
+    n = Growth;
+    std::cout << "vstl::RobinHoodSet\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind_1<vstl::RobinHoodSet<Payload, Hasher>>(n, payload);
+    std::cout << std::endl;
 
     //n = Growth;
     //std::cout << "eastl::unordered_set\n---" << std::endl;
