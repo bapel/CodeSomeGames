@@ -219,7 +219,7 @@ namespace NamespaceName__
         }
 
         __inline void Clear()
-        { memset(m_Control, k_Empty32, m_Capacity); }
+        { memset(m_Control, k_Empty_x4, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
         { Rehash(CalcCapacity(minCapacity)); }
@@ -319,6 +319,7 @@ namespace NamespaceName__
 
                         result >>= 1;
                         i++;
+                        continue;
                     }
 
                     unsigned long shift;
@@ -327,35 +328,7 @@ namespace NamespaceName__
                     i += shift;
                 }
 
-                //unsigned long i;
-                //while (_BitScanForward64(&i, result))
-                //{
-                //    const auto offset = (pos + i) & mask;
-                //    if (key == m_Slots[offset])
-                //        return { true, offset };
-
-                //    result &= ~(1UL << i);
-                //}
-
-                //auto i = 0;
-                //while (result != 0)
-                //{
-                //    if (result & 1)
-                //    {
-                //        const auto offset = (pos + i) & mask;
-                //        if (key == m_Slots[offset])
-                //            return { true, offset };
-
-                //        result >>= 1;
-                //        i++;
-                //    }
-
-                //    auto shift = _tzcnt_u32(result);
-                //    result >>= shift;
-                //    i += shift;
-                //}
-
-                result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty128i, hashes));
+                result = _mm_movemask_epi8(_mm_cmpeq_epi8(k_Empty_x16, hashes));
                 if (result != 0)
                     return { false, pos };
 
@@ -386,7 +359,7 @@ namespace NamespaceName__
             m_Capacity = newCapacity;
             m_Count = 0;
 
-            memset(m_Control, k_Empty32, sizeOfControl);
+            memset(m_Control, k_Empty_x4, sizeOfControl);
 
             for (auto i = 0U; i < capacity; i++)
             {
@@ -405,43 +378,8 @@ namespace NamespaceName__
         const static auto k_Empty    = 0b1000'0000U; // 0x80
         const static auto k_Deleted  = 0b1111'1110U;
         const static auto k_Sentinel = 0b1111'1111U;
-        const static auto k_Empty32  = 0x80808080; // k_Empty x4
-        const static inline auto k_Empty128i = _mm_set1_epi8(k_Empty);
-
-        // Max possible counts considering a load factor of 0.875.
-        constexpr static CountType k_RehashLUT[] = 
-        { 0, 0, 0,
-                        7,
-                       14,
-                       28,
-                       56,
-                      112,
-                      224,
-                      448,
-                      896,
-                    1'792,
-                    3'584,
-                    7'168,
-                   14'336,
-                   28'672,
-                   57'344,
-                  114'688,
-                  229'376,
-                  458'752,
-                  917'504,
-                1'835'008,
-                3'670'016,
-                7'340'032,
-               14'680'064,
-               29'360'128,
-               58'720'256,
-              117'440'512,
-              234'881'024,
-              469'762'048,
-              939'524'096,
-            1'879'048'192,
-            3'758'096'384
-        };
+        const static auto k_Empty_x4 = 0x80808080; // k_Empty x4
+        const static inline auto k_Empty_x16 = _mm_set1_epi8(k_Empty);
 
         uint8_t* m_Control = nullptr;
         KeyType* m_Slots = nullptr;

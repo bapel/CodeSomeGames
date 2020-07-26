@@ -13,86 +13,63 @@ void print_stats(const vstl::RobinHoodSet<T, H, B>& set)
     std::cout << "@TODO: probes ..." << std::endl;
 }
 
-TEST_CASE("Mersenne policy", "[array-list]")
-{
-    using mp = vstl::detail::MersennePolicy;
-
-    auto i = mp::init_capacity();
-
-    do
-    {
-        std::cout 
-            << i << ", " 
-            << mp::translate_capacity(i) << ", " 
-            << mp::max_size(i) << ", "
-            << (float)mp::max_size(i) / mp::translate_capacity(i) << ", "
-            << std::endl;
-        
-        for (auto j = 0ULL; j < 1'000; j++)
-        {
-            auto h = std::hash<uint64_t>()(j);
-            auto a = mp::mod(h, i);
-            auto b = h % mp::translate_capacity(i);
-            REQUIRE(a == b);
-            assert(a == b);
-        }
-
-        i = mp::next_capacity(i);
-    }
-    while (mp::translate_capacity(i) < 1'000'000);
-
-    std::cout << std::endl;
-}
-
 TEMPLATE_TEST_CASE("Set construction", "[set]", 
-    vstl::detail::PowerOfTwoPolicy, 
-    vstl::detail::MersennePolicy)
+    vstl::detail::PowerOfTwoPolicy)
 {
-    auto n = 50ULL;
+    auto n = 16ULL;
     vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set(n);
 
-    REQUIRE(set.capacity() > n);
+    REQUIRE(set.bucket_count() >= n);
 
-    for (auto i = 0ULL; i < n; i++)
+    SECTION("Can successfully insert unique values?")
     {
-        auto r = set.insert(i);
-        assert(r.second);
-        REQUIRE(r.second);
+        for (auto i = 0ULL; i < n; i++)
+        {
+            // @Todo: could hash produce non-unique values?
+            // Since input and output type are the same-size, probably not?
+
+            auto x = std::hash<uint64_t>()(i);
+            auto r = set.insert(x);
+
+            REQUIRE(r.second);
+        }
+
+        REQUIRE(set.size() == n);
     }
 
-    REQUIRE(set.size() == n);
-
-    for (auto i = 0ULL; i < n; i++)
+    SECTION("All inserted values can be retrieved?")
     {
-        auto iter = set.find(i);
-        auto value = *iter;
-        REQUIRE(iter != set.end());
-        REQUIRE(i == value);
+        for (auto i = 0ULL; i < n; i++)
+        {
+            auto x = std::hash<uint64_t>()(i);
+            auto iter = set.find(x);
+
+            REQUIRE(iter != set.end());
+            REQUIRE(x == *iter);
+        }
     }
 
-    // iterators work?
-    auto i = 0;
-    for (auto iter = set.cbegin(); iter < set.cend(); ++iter)
+    SECTION("For loop with iterators matches count?")
     {
-        const auto x = *iter;
-        REQUIRE(x >= 0);
-        assert(x < n);
-        REQUIRE(x < n);
-        i++;
+        auto count = 0ULL;
+        for (auto iter = set.cbegin(); iter < set.cend(); ++iter)
+            count++;
+
+        REQUIRE(count == n);
     }
 
-    // ranged for works/compiles?
-    for (auto& x : set)
+    SECTION("Range for loop matches count?")
     {
-        REQUIRE(x >= 0);
-        assert(x < n);
-        REQUIRE(x < n);
+        auto count = 0ULL;
+        for (auto& x : set)
+            count++;
+
+        REQUIRE(count == n);
     }
 }
 
 TEMPLATE_TEST_CASE("Set growth", "[set]", 
-    vstl::detail::PowerOfTwoPolicy, 
-    vstl::detail::MersennePolicy)
+    vstl::detail::PowerOfTwoPolicy)
 {
     auto n = 50ULL;
     vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set;
@@ -135,10 +112,9 @@ TEMPLATE_TEST_CASE("Set growth", "[set]",
 }
 
 TEMPLATE_TEST_CASE("Set fill many", "[set]",
-    vstl::detail::PowerOfTwoPolicy, 
-    vstl::detail::MersennePolicy)
+    vstl::detail::PowerOfTwoPolicy)
 {
-    auto n = 5000ULL;
+    auto n = 4096;
     vstl::RobinHoodSet<uint64_t, std::hash<uint64_t>, TestType> set(n);
 
     for (auto i = 0ULL; i < n; i++)

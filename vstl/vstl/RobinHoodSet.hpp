@@ -8,11 +8,19 @@ namespace detail {
 
     struct PowerOfTwoPolicy
     {
-        static constexpr size_t translate_capacity(size_t cap) { return cap; }
-        static constexpr size_t init_capacity()                { return 8; }
-        static constexpr size_t next_capacity(size_t cap)      { return cap << 1; }
-        static constexpr size_t calc_capacity(size_t cap)
+        struct Data
+        { size_t count; };
+
+        static constexpr size_t bucket_count(Data data)    { return data.count; }
+
+        static constexpr   Data zero_buckets()             { return { 0 }; }
+        static constexpr   Data init_buckets()             { return { 8 }; }
+        static constexpr   Data next_buckets(Data data)    { return { data.count << 1 }; }
+        static constexpr   Data calc_buckets(size_t count)
         {
+            auto cap = count;
+
+            // round-up power of two.
             cap--;
             cap |= cap >> 1;
             cap |= cap >> 2;
@@ -20,57 +28,21 @@ namespace detail {
             cap |= cap >> 8;
             cap |= cap >> 16;
             cap |= cap >> 32;
-            return cap + 1;
+            cap = cap + 1;
+
+            // adequate for 0.5 load-factor?
+            if (cap >= count << 1)
+                return { cap };
+
+            return { cap << 1 };
         }
 
-        static constexpr size_t max_size(size_t cap) 
-        { return (cap - (cap >> 3)); }
+        // load-factor = 0.5
+        static constexpr size_t max_size(Data data) 
+        { return data.count >> 1; }
 
-        static constexpr size_t mod(uint64_t hash, size_t cap)
-        { return hash & (cap - 1); }
-    };
-
-    struct MersennePolicy
-    {
-        static constexpr size_t translate_capacity(size_t s) { return (1ULL << s) - 1; }
-        static constexpr size_t init_capacity()              { return 3; }
-        static constexpr size_t next_capacity(size_t s)      { return s + 1; }
-        static constexpr size_t calc_capacity(size_t cap)
-        {
-            uint64_t v = cap;
-            uint64_t r = 0;
-            uint64_t shift = 0;
-
-            r =     static_cast<uint64_t>(v > 0xFFFFFFFF) << 8ULL; v >>= r;
-            shift = static_cast<uint64_t>(v > 0xFFFF    ) << 4ULL; v >>= shift; r |= shift;
-            shift = static_cast<uint64_t>(v > 0xFF      ) << 3ULL; v >>= shift; r |= shift;
-            shift = static_cast<uint64_t>(v > 0xF       ) << 2ULL; v >>= shift; r |= shift;
-            shift = static_cast<uint64_t>(v > 0x3       ) << 1ULL; v >>= shift; r |= shift;
-            r |= (v >> 1);
-
-            return r + 1; // round up.
-        }
-
-        static constexpr size_t max_size(size_t s)
-        {
-            auto cap = translate_capacity(s);
-            return (cap - (cap >> 3)) - 1;
-        }
-
-        static constexpr size_t mod(uint64_t n, size_t s)
-        {
-            uint64_t m = 0;                        // n % d goes here.
-            const uint64_t d = (1ULL << s) - 1ULL; // so d is either 1, 3, 7, 15, 31, ...).
-
-            for (m = n; n > d; n = m)
-                for (m = 0ULL; n; n >>= s)
-                    m += n & d;
-
-            // Now m is a value from 0 to d, but since with modulus division
-            // we want m to be 0 when it is d.
-            m = m == d ? 0ULL : m;
-            return m;
-        }
+        static constexpr size_t bucket(uint64_t hash, Data data)
+        { return (hash) & (data.count - 1); }
     };
 
 }}
@@ -86,49 +58,37 @@ namespace vstl {
     class RobinHoodSet
     {
     public:
-        using value_type = T;
-        using bucket_policy = B;
-        
-    private:
-        vx::IAllocator* m_alloc;
-
-        size_t m_count;
-        size_t m_capacity;
-        uint8_t* m_probes;
-        value_type* m_values;
-
-        static const uint8_t  k_empty    = 0b1000'0000; // 0x80
-        static const uint32_t k_empty_x4 = 0x80'80'80'80;
-
-    public:
         template <bool is_const_>
         struct Iterator
         {
         private:
-            using Set_t = std::conditional_t<is_const_, const RobinHoodSet, RobinHoodSet>;
-            using Value_t = std::conditional_t<is_const_, const T, T>;
+            using set_type = std::conditional_t<is_const_, const RobinHoodSet, RobinHoodSet>;
+            using value_type = std::conditional_t<is_const_, const T, T>;
 
-            Set_t* m_set;
+            set_type* m_set;
             size_t m_pos;
 
         public:
             Iterator() = default;
 
-            Iterator(Set_t* set)             : m_set(set), m_pos(0)   { }
-            Iterator(Set_t* set, size_t pos) : m_set(set), m_pos(pos) { }
+            vx_inline__ Iterator(set_type* set, size_t pos) : m_set(set), m_pos(pos) { }
 
-            vx_inline__ T& operator *  () { return m_set->m_values[m_pos]; }
-            vx_inline__ T& operator -> () { return m_set->m_values[m_pos]; }
+            vx_inline__ Iterator(const Iterator&) = default;
+            vx_inline__ Iterator(Iterator&&) = default;
+            vx_inline__ Iterator& operator = (const Iterator&) = default;
+            vx_inline__ Iterator& operator = (Iterator&&) = default;
 
-            Iterator& operator ++ ()
+            vx_inline__ T& operator *  () { return m_set->m_buckets[m_pos]; }
+            vx_inline__ T& operator -> () { return m_set->m_buckets[m_pos]; }
+
+            vx_inline__ Iterator& operator ++ ()
             {
                 const auto dst = m_set->m_probes;
-                const auto cap = m_set->capacity();
+                const auto cap = m_set->bucket_count();
 
                 assert(m_pos < cap);
 
-                do { m_pos++; } 
-                while (dst[m_pos] == k_empty && m_pos < cap);
+                do { m_pos++; } while (dst[m_pos] == k_empty && m_pos < cap);
 
                 return *this;
             }
@@ -147,57 +107,70 @@ namespace vstl {
             #undef compare_op__
         };
 
-    public:
+        using value_type = T;
         using iterator = Iterator<false>;
         using const_iterator = Iterator<true>;
 
+        using bucket_policy = B;
+        using buckets_data = typename B::Data;
+
+    private:
+        size_t m_count;
+        uint8_t* m_probes;
+        value_type* m_buckets;
+        buckets_data m_buckets_data;
+        vx::IAllocator* m_allocator;
+
+        static const uint8_t  k_empty    = 0b1000'0000; // 0x80
+        static const uint32_t k_empty_x4 = 0x80'80'80'80;
+
     public:
         RobinHoodSet() : 
-            m_alloc(vx::fallback_allocator()),
-            m_capacity(0),
             m_count(0),
             m_probes(nullptr), 
-            m_values(nullptr)
+            m_buckets(nullptr),
+            m_buckets_data(bucket_policy::zero_buckets()),
+            m_allocator(vx::fallback_allocator())
         {}
         
         RobinHoodSet(size_t cap) : 
-            m_alloc(vx::fallback_allocator()),
-            m_capacity(bucket_policy::calc_capacity(cap)),
-            m_count(0)
+            m_count(0),
+            m_buckets_data(bucket_policy::calc_buckets(cap)),
+            m_allocator(vx::fallback_allocator())
         {
-            allocate(bucket_policy::translate_capacity(m_capacity));
+            allocate(bucket_count());
         }
 
         ~RobinHoodSet()
         { 
-            m_alloc->free(m_probes);
-            m_alloc->free(m_values);
+            m_allocator->free(m_probes);
+            m_allocator->free(m_buckets);
         }
 
         vx_inline__ size_t size() const           { return m_count; }
-        vx_inline__ size_t capacity() const
-        { return bucket_policy::translate_capacity(m_capacity); }
+        vx_inline__ size_t bucket_count() const
+        { return bucket_policy::bucket_count(m_buckets_data); }
 
-        vx_inline__ float  load_factor() const    { return (float)m_count / capacity(); }
+        vx_inline__ float  load_factor() const    { return (float)m_count / bucket_count(); }
         static constexpr uint8_t max_probe()      { return k_empty; }
 
-        vx_inline__       iterator begin()        { return { this }; }
-        vx_inline__ const_iterator begin()  const { return { this }; }
-        vx_inline__ const_iterator cbegin() const { return { this }; }
+        vx_inline__       iterator begin()        { return { this, begin_pos() }; }
+        vx_inline__ const_iterator begin()  const { return { this, begin_pos() }; }
+        vx_inline__ const_iterator cbegin() const { return const_iterator(this, begin_pos()); }
 
-        vx_inline__       iterator end()          { return       iterator(this, capacity()); }
-        vx_inline__ const_iterator end()    const { return const_iterator(this, capacity()); }
-        vx_inline__ const_iterator cend()   const { return const_iterator(this, capacity()); }
+        vx_inline__       iterator end()          { return { this, bucket_count() }; }
+        vx_inline__ const_iterator end()    const { return { this, bucket_count() }; }
+        vx_inline__ const_iterator cend()   const { return { this, bucket_count() }; }
 
         std::pair<iterator, bool> insert(const value_type& value_to_insert)
         {
-            if (m_values == nullptr)
+            if (m_buckets == nullptr)
             {
-                m_capacity = bucket_policy::init_capacity();
-                allocate(bucket_policy::translate_capacity(m_capacity));
+                m_buckets_data = bucket_policy::init_buckets();
+                allocate(bucket_count());
             }
-            else if ((m_count + 1) >= bucket_policy::max_size(m_capacity))
-                rehash(bucket_policy::next_capacity(m_capacity));
+            else if ((m_count + 1) > bucket_policy::max_size(m_buckets_data))
+                rehash(bucket_policy::next_buckets(m_buckets_data));
 
             return insert_impl(value_to_insert);
         }
@@ -205,33 +178,36 @@ namespace vstl {
         iterator find(const value_type& value)
         {
             const auto hash = H()(value);
-            const auto pos = bucket_policy::mod(hash, m_capacity);
+            const auto start_pos = bucket_policy::bucket(hash, m_buckets_data);
 
-            auto p = pos;
-            auto d = 0;
+            auto pos = start_pos;
 
             do
             {
-                if (value == m_values[p])
-                    return { this, p };
+                // not found.
+                if (k_empty == m_probes[pos])
+                    return { this, bucket_count() };
 
-                if (k_empty == m_probes[p])
-                    break;
+                // found.
+                if (value == m_buckets[pos])
+                    return { this, pos };
 
-                d++;
-                p = bucket_policy::mod(p + 1, m_capacity);
+                if (++pos >= bucket_count())
+                    pos = 0;
             }
-            while (d < k_empty && p != pos);
+            while (pos != start_pos);
 
-            return { this, capacity() };
+            return { this, bucket_count() };
         }
+
+        // @Todo: erase method.
 
         void probe_distribution(uint8_t* buf, size_t size) const
         {
             auto max = 0U;
             memset(buf, 0, size);
 
-            for (auto i = 0ULL; i < capacity(); i++)
+            for (auto i = 0ULL; i < bucket_count(); i++)
             {
                 auto p = m_probes[i];
                 if (p == k_empty)
@@ -249,43 +225,60 @@ namespace vstl {
         {
             assert(cap > 0);
 
-            m_probes = m_alloc->malloc_n<uint8_t>(cap);
-            m_values = m_alloc->malloc_n<T>(cap);
+            m_probes = m_allocator->malloc_n<uint8_t>(cap);
+            m_buckets = m_allocator->malloc_n<T>(cap);
 
             memset(m_probes, k_empty_x4, cap);
         }
 
-        void rehash(size_t new_cap)
+        size_t begin_pos() const
         {
-            // @Todo: Support shrinkage?
-            assert(new_cap > m_capacity);
+            if (m_count == 0)
+                return 0;
 
+            // Skip to first non-empty element.
+            auto pos = 0ULL;
+
+            while (pos < bucket_count())
+            {
+                if (m_probes[pos] != k_empty)
+                    return pos;
+
+                pos++;
+            }
+
+            return pos;
+        }
+
+        void rehash(buckets_data new_buckets_data)
+        {
             auto probes = m_probes;
-            auto values = m_values;
-            auto cap = m_capacity;
+            auto buckets = m_buckets;
+            auto buckets_data = m_buckets_data;
 
             m_count = 0;
-            m_capacity = new_cap;
+            m_buckets_data = new_buckets_data;
 
-            allocate(bucket_policy::translate_capacity(new_cap));
+            allocate(bucket_policy::bucket_count(new_buckets_data));
 
-            for (auto i = 0ULL; i < bucket_policy::translate_capacity(cap); i++)
+            for (auto i = 0ULL; i < bucket_policy::bucket_count(buckets_data); i++)
             {
                 auto p = probes[i];
                 if (p == k_empty)
                     continue;
 
-                insert(values[i]);
+                insert_impl(buckets[i]);
             }
 
-            m_alloc->free(probes);
-            m_alloc->free(values);
+            m_allocator->free(probes);
+            m_allocator->free(buckets);
         }
 
         std::pair<iterator, bool> insert_impl(const value_type& value_to_insert)
         {
             const auto hash = H()(value_to_insert);
-            const auto ideal_pos = bucket_policy::mod(hash, m_capacity);
+            const auto ideal_pos = bucket_policy::bucket(hash, m_buckets_data);
+            const auto capacity = bucket_policy::bucket_count(m_buckets_data);
 
             auto pos = ideal_pos;
             uint8_t probe = 0U;
@@ -297,24 +290,26 @@ namespace vstl {
                 if (k_empty == m_probes[pos])
                 {
                     m_probes[pos] = probe;
-                    m_values[pos] = value;
+                    m_buckets[pos] = value;
                     m_count++;
 
                     // Return the requested insertion's position.
                     return { { this, pos_to_return }, true };
                 }
 
-                if (value_to_insert == m_values[pos])
+                if (value_to_insert == m_buckets[pos])
                     return { { this, pos_to_return }, false };
 
                 if (m_probes[pos] < probe)
                 {
                     std::swap(probe, m_probes[pos]);
-                    std::swap(value, m_values[pos]);
+                    std::swap(value, m_buckets[pos]);
                 }
 
                 probe++;
-                pos = bucket_policy::mod(pos + 1, m_capacity);
+                // pos = bucket_policy::mod(pos + 1, m_capacity);
+                if (++pos >= capacity)
+                    pos = 0;
 
                 if (value == value_to_insert)
                     pos_to_return = pos;
@@ -326,7 +321,7 @@ namespace vstl {
             while (pos != ideal_pos);
 
             // We should ideally never reach this.
-            return { { this, m_capacity }, false };
+            return { { this, bucket_count() }, false };
         }
     };
 

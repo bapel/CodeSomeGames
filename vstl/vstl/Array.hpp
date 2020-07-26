@@ -9,14 +9,14 @@ namespace vstl {
     {
         vx_assert_trivial__(T);
 
-        T m_values[n_];
+        T m_buckets[n_];
         static const auto m_count = n_;
 
         Array() = default;
         Array(std::initializer_list<T> ilist)
         {
             const auto size = sizeof(T) * vx::min(n_, ilist.size());
-            memcpy(m_values, ilist.begin(), size);
+            memcpy(m_buckets, ilist.begin(), size);
         }
 
         // Element access.
@@ -24,36 +24,36 @@ namespace vstl {
         constexpr T& at(size_t pos)
         {
             assert(pos < m_count);
-            return m_values[pos];
+            return m_buckets[pos];
         };
 
         constexpr const T& at(size_t pos) const 
         {
             assert(pos < m_count);
-            return m_values[pos];
+            return m_buckets[pos];
         };
 
-        constexpr       T& operator[](size_t pos)       { return m_values[pos]; }
-        constexpr const T& operator[](size_t pos) const { return m_values[pos]; }
+        constexpr       T& operator[](size_t pos)       { return m_buckets[pos]; }
+        constexpr const T& operator[](size_t pos) const { return m_buckets[pos]; }
 
-        constexpr       T* data()        { return m_values; }
-        constexpr const T* data() const  { return m_values; }
+        constexpr       T* data()        { return m_buckets; }
+        constexpr const T* data() const  { return m_buckets; }
 
-        constexpr       T& front()       { return m_values[0]; }
-        constexpr const T& front() const { return m_values[0]; }
+        constexpr       T& front()       { return m_buckets[0]; }
+        constexpr const T& front() const { return m_buckets[0]; }
 
-        constexpr       T& back()        { return m_values[m_count - 1]; }
-        constexpr const T& back() const  { return m_values[m_count - 1]; }
+        constexpr       T& back()        { return m_buckets[m_count - 1]; }
+        constexpr const T& back() const  { return m_buckets[m_count - 1]; }
 
         // Iterators.
 
-        constexpr       T* begin()        { return m_values; }
-        constexpr const T* begin() const  { return m_values; }
-        constexpr const T* cbegin() const { return m_values; }
+        constexpr       T* begin()        { return m_buckets; }
+        constexpr const T* begin() const  { return m_buckets; }
+        constexpr const T* cbegin() const { return m_buckets; }
 
-        constexpr       T* end()          { return m_values + m_count; }
-        constexpr const T* end() const    { return m_values + m_count; }
-        constexpr const T* cend() const   { return m_values + m_count; }
+        constexpr       T* end()          { return m_buckets + m_count; }
+        constexpr const T* end() const    { return m_buckets + m_count; }
+        constexpr const T* cend() const   { return m_buckets + m_count; }
 
         // Capacity.
 
@@ -67,7 +67,7 @@ namespace vstl {
         constexpr void fill(const T& value)
         {
             for (auto i = 0U; i < m_count; i++)
-                m_values = value;
+                m_buckets = value;
         }
 
         constexpr void swap(Array& other)
@@ -75,9 +75,9 @@ namespace vstl {
             T temp[m_count];
             const auto size = sizeof(temp);
 
-            memcpy(temp, other.m_values, size);
-            memcpy(other.m_values, m_values, size);
-            memcpy(m_values, temp, size);
+            memcpy(temp, other.m_buckets, size);
+            memcpy(other.m_buckets, m_buckets, size);
+            memcpy(m_buckets, temp, size);
         }
     };
 

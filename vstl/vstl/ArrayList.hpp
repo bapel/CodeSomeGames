@@ -5,6 +5,44 @@
 #define vstl_assert_bounds__(Pos__) assert(Pos__ < (m_end - m_buf))
 
 namespace vstl {
+namespace detail {
+namespace buffer {
+
+    //template <class T> 
+    //using trivial = typename std::enable_if_t<std::is_trivial<T>, void>;
+
+    //template <class T> 
+    //vx_inline__ void construct(T* ptr)
+    //{ 
+    //    new(ptr)T; 
+    //}
+
+    //template <class T> 
+    //vx_inline__ void construct(T* buf, size_t size) 
+    //{ 
+    //    for (auto p = buf; p < buf + size; p++) 
+    //        new(p)T; 
+    //}
+
+    //template <class T> 
+    //vx_inline__ void construct(T* buf, T* end)      
+    //{ 
+    //    for (auto p = buf; p < end; p++) 
+    //        new(p)T;
+    //}
+
+    // Trivial variants of construct do nothing.
+    // Use an explicit set to zero memory.
+
+    //template <class T> vx_inline__ trivial<T> construct(T* buf) {}
+    //template <class T> vx_inline__ trivial<T> construct(T* buf, size_t size) {}
+    //template <class T> vx_inline__ trivial<T> construct(T* buf, T* end) {}
+
+    // 
+
+}}}
+
+namespace vstl {
 
     template <class T>
     class ArrayList final
@@ -18,27 +56,27 @@ namespace vstl {
         vx::IAllocator* m_allocator;
 
     public:
-        struct PoD
-        {
-            T* buf;
-            T* end;
-            T* cap;
-            vx::IAllocator* allocator;
-        };
+        //struct PoD
+        //{
+        //    T* buf;
+        //    T* end;
+        //    T* cap;
+        //    vx::IAllocator* allocator;
+        //};
 
-        vx_inline__ ArrayList(PoD& pod) :
-            m_buf(pod.buf),
-            m_end(pod.end),
-            m_cap(pod.cap),
-            m_allocator(pod.allocator)
-        { }
+        //vx_inline__ ArrayList(PoD& pod) :
+        //    m_buf(pod.buf),
+        //    m_end(pod.end),
+        //    m_cap(pod.cap),
+        //    m_allocator(pod.allocator)
+        //{ }
 
-        vx_inline__ PoD to_pod()
-        {
-            PoD pod = { m_buf, m_end, m_cap, m_allocator };
-            m_buf = m_end = m_cap = nullptr;
-            return pod;
-        }
+        //vx_inline__ PoD to_pod()
+        //{
+        //    PoD pod = { m_buf, m_end, m_cap, m_allocator };
+        //    m_buf = m_end = m_cap = nullptr;
+        //    return pod;
+        //}
 
         // Construction.
 
@@ -63,6 +101,8 @@ namespace vstl {
             m_buf = m_allocator->malloc_n<T>(count);
             m_end = m_buf + count;
             m_cap = m_end;
+
+            // detail::buffer::construct<T>(m_buf, m_end - m_buf);
         }
 
         // @Todo: specialize for int types?

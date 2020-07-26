@@ -87,7 +87,7 @@ namespace NamespaceName__
         }
 
         void Clear()
-        { memset(m_Control, k_Empty32, m_Capacity); }
+        { memset(m_Control, k_Empty_x4, m_Capacity); }
 
         void EnsureCapacity(CountType minCapacity)
         { Rehash(CalcCapacity(minCapacity)); }
@@ -190,7 +190,7 @@ namespace NamespaceName__
             m_Capacity = newCapacity;
             m_Count = 0;
 
-            memset(m_Control, k_Empty32, m_Capacity);
+            memset(m_Control, k_Empty_x4, m_Capacity);
 
             for (auto i = 0U; i < capacity; i++)
             {
@@ -209,7 +209,7 @@ namespace NamespaceName__
         const static auto k_Empty    = 0b1000'0000U; // 0x80
         const static auto k_Deleted  = 0b1111'1110U;
         const static auto k_Sentinel = 0b1111'1111U;
-        const static auto k_Empty32  = 0x80808080; // k_Empty x4
+        const static auto k_Empty_x4  = 0x80808080; // k_Empty x4
 
         // Max possible counts considering a load factor of 0.875.
         constexpr static CountType k_RehashLUT[] = 

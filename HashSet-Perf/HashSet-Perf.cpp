@@ -56,12 +56,14 @@ using NanoSeconds = std::chrono::nanoseconds;
 
 using Payload = uint64_t;
 //using Hasher = pstl::Identity<Payload>;
-using Hasher = std::hash<Payload>;
+//using Hasher = std::hash<Payload>;
 //using Hasher = pstl::udb2Hash;
 //using Hasher = pstl::SoHash<Payload>;
-//using Hasher = pstl::BrehmHash<Payload>;
-const auto Count_n = pstl::Min(50'000'000U, std::numeric_limits<Payload>::max());
-const auto Growth = 5;
+using Hasher = pstl::BrehmHash<Payload>;
+
+// const auto Count_n = pstl::Min(50'000'000U, std::numeric_limits<Payload>::max());
+const auto Count_n = pstl::Min(20'000'000U, std::numeric_limits<Payload>::max());
+const auto Growth = 4;
 const auto NumLookups = 5'000'000U;
 
 template <class HashSetType>
@@ -173,7 +175,8 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
     auto i = 0;
     // while (set.load_factor() < (13.0f / 14.0f))
     // while (set.load_factor() < 0.75f)
-    while (set.load_factor() < 0.5f)
+    // while (set.load_factor() < 0.5f)
+    while ((i < count) && (set.load_factor() < 0.5f))
     {
         auto r = set.insert(payload[i]);
         assert(*r.first == payload[i]);
@@ -183,6 +186,7 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
     }
     count = i;
 
+    auto n = 0;
     auto repeat = Max(1UL, NumLookups / count);
     auto start = HiresClock::now();
 
@@ -193,11 +197,12 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
             auto iter = set.find(payload[i]);
             assert(set.end() != iter);
             assert(payload[i] == *iter);
+            n++;
         }
     }
 
     auto elapsed = NanoSeconds(HiresClock::now() - start).count();
-    auto perSuccess = elapsed / (repeat * count);
+    auto perSuccess = elapsed / n;
 
     start = HiresClock::now();
 
@@ -217,7 +222,8 @@ void ProfileFind_1(uint64_t count, const std::vector<Payload>& payload)
         << perSuccess << " ns, "
         << perFail << " ns, "
         << "Load: " << set.load_factor() << ", "
-        << count
+        << count << ", "
+        << set.bucket_count()
         << std::endl;
 }
 
@@ -392,17 +398,17 @@ void Profiling()
     payload.resize(4UL * Count_n);
     std::generate_n(payload.data(), payload.size(), [&i]() { return i++; });
 
-    // std::random_device device;
-    //std::mt19937 generator(0);
-    //std::shuffle(payload.begin(), payload.end(), generator);
+    std::random_device device;
+    std::mt19937 generator(0);
+    std::shuffle(payload.begin(), payload.end(), generator);
 
     auto n = Growth;
 
-    n = Growth;
-    std::cout << "std::unordered_set\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
-    std::cout << std::endl;
+    //n = Growth;
+    //std::cout << "std::unordered_set\n---" << std::endl;
+    //for (; n <= Count_n; n*=Growth)
+    //    ProfileFind_1<std::unordered_set<Payload, Hasher>>(n, payload);
+    //std::cout << std::endl;
 
     n = Growth;
     std::cout << "tsl::robin_set\n---" << std::endl;
@@ -434,12 +440,6 @@ void Profiling()
         ProfileFind_1<vstl::RobinHoodSet<Payload, Hasher>>(n, payload);
     std::cout << std::endl;
 
-    n = Growth;
-    std::cout << "vstl::RobinHoodSet_Mersenne\n---" << std::endl;
-    for (; n <= Count_n; n*=Growth)
-        ProfileFind_1<vstl::RobinHoodSet<Payload, Hasher, vstl::detail::MersennePolicy>>(n, payload);
-    std::cout << std::endl;
-
     //n = Growth;
     //std::cout << "eastl::unordered_set\n---" << std::endl;
     //for (; n <= Count_n; n*=Growth)
@@ -464,11 +464,11 @@ void Profiling()
         ProfileFind<SimdHashSet<Payload, Hasher>>(n, payload);
     std::cout << std::endl;
 
-    //n = Growth;
-    //std::cout << "HoodHashSet\n---" << std::endl;
-    //for (; n <= Count_n; n*=Growth)
-    //    ProfileFind<HoodHashSet<Payload, Hasher>>(n, payload);
-    //std::cout << std::endl;
+    n = Growth;
+    std::cout << "HoodHashSet\n---" << std::endl;
+    for (; n <= Count_n; n*=Growth)
+        ProfileFind<HoodHashSet<Payload, Hasher>>(n, payload);
+    std::cout << std::endl;
 }
 
 #include "ArrayList.hpp"

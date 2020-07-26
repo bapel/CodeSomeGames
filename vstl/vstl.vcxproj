@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -179,13 +179,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="vstl\BuddyHashSet.hpp" />
     <ClInclude Include="vstl\Array.hpp" />
     <ClInclude Include="vstl\ArrayList.hpp" />
     <ClInclude Include="vstl\FlagList.hpp" />
     <ClInclude Include="vstl\FlatSet.hpp" />
     <ClInclude Include="vstl\RobinHoodSet.hpp" />
     <ClInclude Include="vstl\UnorderedSet.hpp" />
+    <ClInclude Include="vstl\UnorderedSet1.hpp" />
     <ClInclude Include="vx\Allocator.hpp" />
+    <ClInclude Include="vx\BuddyAllocator.hpp" />
     <ClInclude Include="vx\Common.hpp" />
   </ItemGroup>
   <ItemGroup>

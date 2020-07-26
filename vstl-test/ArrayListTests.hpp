@@ -3,12 +3,47 @@
 #include <catch.hpp>
 #include <vstl\ArrayList.hpp>
 
+enum class ConstructionKind
+{
+    Default = 0,
+    Copy,
+    Move
+};
+
+enum class DestructionKind
+{
+    None = 0,
+    Default,
+    Move
+};
+
+class TestClass
+{
+public:
+    ConstructionKind construction = ConstructionKind::Default;
+    DestructionKind destruction = DestructionKind::None;
+
+    TestClass() = default;
+
+    TestClass(const TestClass& other) : 
+        construction(ConstructionKind::Copy) 
+    { }
+    
+    TestClass(TestClass&& other) noexcept : 
+        construction(ConstructionKind::Move)
+    { other.destruction = DestructionKind::Move; }
+
+    ~TestClass()
+    {
+        if (destruction != DestructionKind::Default)
+            destruction = DestructionKind::Default;
+    }
+};
+
 TEST_CASE("Array list construction", "[array-list]")
 {
-    SECTION("Array list PoD is trivial")
-    {
-        REQUIRE(std::is_pod_v<vstl::ArrayList<int>::PoD>);
-    }
+    int* i = new int;
+    delete i;
 
     SECTION("Array list must be initially empty and unallocated")
     {
