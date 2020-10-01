@@ -40,7 +40,6 @@ enum EaseType
     OutBounce
 };
 
-// Order of members is to make it convenient to debug.
 inline float EaseInBack(float x) 
 {
     const auto c1 = 1.70158f;
@@ -64,6 +63,7 @@ inline float EaseOutBounce(float x)
     }
 }
 
+// @Todo: SoA split here?
 struct Tween
 {
     float ElapsedMs;
@@ -106,7 +106,7 @@ private:
     // Board data.
     // @Todo: Everything might benefit from this being column-major
     // We hardly iterate over a row, except when matching. But we iterate over columns a lot, 
-    // like when generating falls. So having the column be in a cache-line would be great.
+    // like when generating falls. So having the column be sequential would be better?
     using Board = m3::Board<m3::GemId, BoardRows, BoardCols>;
 
     Board m_Board;
@@ -122,7 +122,7 @@ private:
 
     // Tweens. 
     // Double-buffered to eliminate cost of erase for completed tweens.
-    // We simply move incomplete tweens to the other vector and clear-swap.
+    // We simply move incomplete tweens to the other vector and clear and swap.
     // @Todo: Begging to be abstracted to it's own class.
     eastl::vector<m3::GemId> m_DespawnGemIds;
     eastl::vector<uint32_t> m_DespawnDstIndices;
@@ -209,16 +209,6 @@ private:
         //DespawnGem(3, 2);
     }
 
-    m3::GemColor GetColor(m3::Row r, m3::Col c)
-    {
-        auto id = m_Board(r, c);
-        if (id == m3::InvalidGemId)
-            return m3::InvalidColor;
-
-        auto index = m_IdToIndex.at(id);
-        return m_GemColors[index];
-    }
-
     // @Todo: float instead of double is okay?
     void OnUpdate(double dtSeconds) override final
     {
@@ -281,6 +271,16 @@ private:
         const auto cr = (float)BoardRows - 1;
         const auto origin = -0.5f * spriteSize * cr;
         return origin + spriteSize * ny;
+    }
+
+    m3::GemColor GetColor(m3::Row r, m3::Col c)
+    {
+        auto id = m_Board(r, c);
+        if (id == m3::InvalidGemId)
+            return m3::InvalidColor;
+
+        auto index = m_IdToIndex.at(id);
+        return m_GemColors[index];
     }
 
     void FindAndClearFromWholeBoard()

@@ -85,7 +85,6 @@ int SDLGame::Run(int argc, char** argv)
         int w, h;
         SDL_GetWindowSize(m_Window, &w, &h);
         OnRender(w, h);
-
     }
 
     OnDestroy();

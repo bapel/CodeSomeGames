@@ -9,7 +9,7 @@ namespace m3
     class GemPool
     {
     private:
-        // @Todo: Could be more performant.
+        // @Todo: Use a freelist instead?
         eastl::queue<GemId> m_GemPool;
         GemId m_MaxGemId = 0;
 

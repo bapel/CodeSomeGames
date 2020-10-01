@@ -151,7 +151,7 @@ ComPtr<ID3D11VertexShader> Common::Direct3D11::CreateVertexShaderFromFile(const 
     
     if (bytes == 0)
     {
-        SDL_Log("Failed to load Vertex Shader: path");
+        SDL_Log("Failed to load Vertex Shader: %s", path);
         return nullptr;
     }
 

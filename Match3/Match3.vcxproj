@@ -221,7 +221,7 @@
       <Project>{e0b52ae7-e160-4d32-bf3f-910b785e5a8e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\EASTL\vcproj\EASTL.vcxproj">
-      <Project>{8b989dd1-455a-493c-8e07-52b9cb71329f}</Project>
+      <Project>{7e115f75-926e-4b94-861c-d368142ef242}</Project>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SDL\VisualC\SDLmain\SDLmain.vcxproj">
       <Project>{da956fd3-e142-46f2-9dd5-c78bebb56b7a}</Project>
